@@ -5,8 +5,8 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, { useEffect } from 'react';
+import type { PropsWithChildren } from 'react';
 import {
   ScrollView,
   StatusBar,
@@ -14,8 +14,12 @@ import {
   Text,
   useColorScheme,
   View,
+  Alert,
 } from 'react-native';
-
+import {API_URL} from '@env';
+import {AuthProvider} from './context/AuthContext';
+import {enableScreens} from 'react-native-screens';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {
   Colors,
   DebugInstructions,
@@ -23,109 +27,83 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import messaging from '@react-native-firebase/messaging';
+import PushNotification from 'react-native-push-notification';
+import AppNavigator from './AppNavigator';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+const App = () => {
+  async function requestUserPermission() {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
+    if (enabled) {
+      console.log('Authorization status:', authStatus);
+      getToken();
+    }
+  }
+  const getToken = async () => {
+    const token = await messaging().getToken();
+    console.log('FCM Token:', token);
+  }
+  useEffect(() => {
+    PushNotification.createChannel(
+      {
+        channelId: "default-channel-id",
+        channelName: "default Channel",
+        channelDescription: "A default channel",
+        soundName: "default",
+        importance: 4,
+        vibrate: true
+      },
+      (created) => console.log(`Channel created: ${created}`)
+    )
+  }, [])
+
+  // Foreground Notification Handling
+  useEffect(() => {
+    requestUserPermission();
+
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+      console.log('Notification received in foreground:', remoteMessage);
+
+      PushNotification.localNotification({
+        channelId: 'default-channel-id',
+        title: remoteMessage.notification?.title || 'Notification',
+        message: remoteMessage.notification?.body || 'New message',
+        playSound: true, // Play default sound
+        soundName: 'default', // Ensure sound is set
+        importance: 'high',
+        vibrate: true,
+      });
+    });
+
+    return unsubscribe;
+  }, [])
+
   const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    flex: 1,
   };
+  
+  enableScreens();
+  const queryClient = new QueryClient();
 
-  /*
-   * To keep the template simple and small we're adding padding to prevent view
-   * from rendering under the System UI.
-   * For bigger apps the recommendation is to use `react-native-safe-area-context`:
-   * https://github.com/AppAndFlow/react-native-safe-area-context
-   *
-   * You can read more about it here:
-   * https://github.com/react-native-community/discussions-and-proposals/discussions/827
-   */
-  const safePadding = '5%';
 
   return (
-    <View style={backgroundStyle}>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
       <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        style={backgroundStyle}>
-        <View style={{paddingRight: safePadding}}>
-          <Header/>
-        </View>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </View>
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={backgroundStyle.backgroundColor}
+        />
+        <Text>{API_URL}</Text>
+        <AppNavigator />
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
