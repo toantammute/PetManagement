@@ -4,12 +4,15 @@ import { COLORS } from '../theme/color';
 import Avatar from './avabtn';
 import Feather from 'react-native-vector-icons/Feather';
 import { Appointment } from '../models/models';
+import { usePetById } from '../hook/usePets';
 
 interface AppointmentCardProps {
     appointment: Appointment;
 }
 
 const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
+    const { data: pet, isLoading: isPetLoading } = usePetById(appointment.pet.pet_id);
+
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -52,11 +55,26 @@ const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
                     </View>
                     <View style={styles.petContainer}>
                         <View style={styles.avaBtnContainer}>
-                            <Avatar
-                                variant='noava'
-                                onPress={() => { }}
-                                size={30}
-                            />
+                            {isPetLoading ? (
+                                <Avatar
+                                    variant="noava"
+                                    onPress={() => {}}
+                                    size={30}
+                                />
+                            ) : pet?.data_image ? (
+                                <Avatar
+                                    variant="default"
+                                    onPress={() => {}}
+                                    size={30}
+                                    imageUrl={`data:image/jpeg;base64,${pet.data_image}`}
+                                />
+                            ) : (
+                                <Avatar
+                                    variant="noava"
+                                    onPress={() => {}}
+                                    size={30}
+                                />
+                            )}
                         </View>
 
                         <Text style={styles.petName}>{appointment.pet.pet_name}</Text>

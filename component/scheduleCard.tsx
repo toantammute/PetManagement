@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 
 interface ScheduleCardProps {
     schedule: Schedule;
-    onToggle: (id: string, isActive: boolean) => void;
+    onToggle: (id: number, isActive: boolean) => void;
     petAvatar?: string;
 }
 
@@ -20,6 +20,12 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onToggle, petAvat
             schedule: schedule,
             isUpdate: true 
         });
+    };
+
+    const handleToggle = (value: boolean) => {
+        if (schedule.id) {
+            onToggle(parseInt(schedule.id), value);
+        }
     };
 
     const formatTime = (dateString: string) => {
@@ -63,7 +69,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onToggle, petAvat
                 </View>
                 <Switch
                     value={schedule.is_active}
-                    onValueChange={(value) => onToggle(schedule.id || '', value)}
+                    onValueChange={handleToggle}
                     trackColor={{ false: COLORS.border.input, true: COLORS.button.choose }}
                     thumbColor={COLORS.background.white}
                 />

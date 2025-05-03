@@ -13,46 +13,58 @@ interface TabBarProps {
     onTabChange: (tab: string) => void;
     pets?: Pet[];
     isLoading?: boolean;
+    selectedAvatars?: string[];
+    onAvatarChange?: (avatars: string[]) => void;
 }
 
-const TabBar: React.FC<TabBarProps> = ({ type, initialTab = 'PROFILE', onTabChange, pets, isLoading }) => {
+const TabBar: React.FC<TabBarProps> = ({ 
+    type, 
+    initialTab = 'PROFILE', 
+    onTabChange, 
+    pets, 
+    isLoading,
+    selectedAvatars = ['all'],
+    onAvatarChange
+}) => {
     const [chosenTab, setChosenTab] = useState<string>(initialTab);
-    const [selectedAvatars, setSelectedAvatars] = useState<string[]>(['all']); // Initially 'all' is selected
 
     const handleTabPress = (tabName: string) => {
         setChosenTab(tabName);
-        onTabChange(tabName); // Call the parent's handler
+        onTabChange(tabName);
     };
 
     const handleAvatarPress = (avatarId: string) => {
-        setSelectedAvatars(prev => {
-            let newSelection = [...prev];
-            
-            // If clicking 'all'
-            if (avatarId === 'all') {
-                // Only allow deselecting 'all' if other avatars are selected
-                if (prev.includes('all') && prev.length === 1) {
-                    return ['all']; // Keep 'all' selected if it's the only one
-                }
-                return ['all']; // Select only 'all'
+        if (!onAvatarChange) return;
+        
+        let newSelection = [...(selectedAvatars || [])];
+        
+        // If clicking 'all'
+        if (avatarId === 'all') {
+            // Only allow deselecting 'all' if other avatars are selected
+            if (selectedAvatars?.includes('all') && selectedAvatars.length === 1) {
+                onAvatarChange(['all']); // Keep 'all' selected if it's the only one
+                return;
             }
-            
-            // If clicking other avatars
-            if (prev.includes(avatarId)) {
-                // Remove the clicked avatar
-                newSelection = newSelection.filter(id => id !== avatarId);
-                // If no avatars left selected, select 'all'
-                if (newSelection.length === 0) {
-                    return ['all'];
-                }
-                return newSelection;
-            } else {
-                // Add new selection and remove 'all'
-                newSelection = newSelection.filter(id => id !== 'all');
-                newSelection.push(avatarId);
-                return newSelection;
+            onAvatarChange(['all']); // Select only 'all'
+            return;
+        }
+        
+        // If clicking other avatars
+        if (selectedAvatars?.includes(avatarId)) {
+            // Remove the clicked avatar
+            newSelection = newSelection.filter(id => id !== avatarId);
+            // If no avatars left selected, select 'all'
+            if (newSelection.length === 0) {
+                onAvatarChange(['all']);
+                return;
             }
-        });
+            onAvatarChange(newSelection);
+        } else {
+            // Add new selection and remove 'all'
+            newSelection = newSelection.filter(id => id !== 'all');
+            newSelection.push(avatarId);
+            onAvatarChange(newSelection);
+        }
     };
 
     const getButtonVariant = (buttonId: string) => {
@@ -113,7 +125,7 @@ const TabBar: React.FC<TabBarProps> = ({ type, initialTab = 'PROFILE', onTabChan
                 contentContainerStyle={styles.avaContainer}>
                 <AvaBtn 
                     variant="all" 
-                    isChosen={selectedAvatars.includes('all')}
+                    isChosen={selectedAvatars?.includes('all')}
                     onPress={() => handleAvatarPress('all')} 
                 />
                 {isLoading ? (
@@ -124,13 +136,12 @@ const TabBar: React.FC<TabBarProps> = ({ type, initialTab = 'PROFILE', onTabChan
                             key={pet.petid}
                             variant="default"
                             petName={pet.name}
-                            imageUrl={pet.data_image ? `data:image/jpeg;base64,${pet.data_image}` : undefined}
-                            isChosen={selectedAvatars.includes(pet.petid)}
-                            onPress={() => handleAvatarPress(pet.petid)}
+                            imageUrl={pet.data_image ? `data:image/jpeg;base64,${pet.data_image}` : ''}
+                            isChosen={selectedAvatars?.includes(pet.petid || '')}
+                            onPress={() => handleAvatarPress(pet.petid || '')}
                         />
                     ))
                 ) : null}
-                
             </ScrollView>
             <View style={styles.tabContainer}>
                 {type === 'pets' ? renderPetsTabs() : renderAppointmentTabs()}
