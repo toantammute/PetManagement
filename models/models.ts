@@ -156,3 +156,18 @@ export interface Service {
     description: string;
 }
 
+
+export interface ChatResponse {
+    message: string;
+    data?: any;
+    chartData?: any;
+    chartType?: string;
+    chartTitle?: string;
+    sourceDetails?: string;
+  }
+  
+  export interface ErrorResponse {
+    error: string;
+    details?: string;
+  }
+  

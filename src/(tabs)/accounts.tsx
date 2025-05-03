@@ -55,9 +55,9 @@ const Account = () => {
             onPress: () => navigation.navigate('Settings')
         },
         {
-            icon: 'help',
-            label: 'Trợ giúp',
-            onPress: () => navigation.navigate('Help')
+            icon: 'bot',
+            label: 'Chatbot',
+            onPress: () => navigation.navigate('Chatbot')
         },
         {
             icon: 'info',

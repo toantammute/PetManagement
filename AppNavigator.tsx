@@ -16,6 +16,8 @@ import CartScreen from './src/cart';
 import AddLog from './src/addLog';
 import AddSchedule from './src/addSchedule';
 import AddAppointment from './src/addAppointment';
+import ChatbotScreen from './src/screens/ChatbotScreen';
+import BreedDetectionScreen from './src/screens/BreedDetectionScreen';
 // import PetDetail from './src/(tabs)/pets';
 // import AddPet from './src/addPet';
 
@@ -40,6 +42,8 @@ const AppNavigator = () => {
                         <Stack.Screen name="AddLog" component={AddLog} />
                         <Stack.Screen name="AddSchedule" component={AddSchedule} />
                         <Stack.Screen name="AddAppointment" component={AddAppointment} />
+                        <Stack.Screen name="Chatbot" component={ChatbotScreen} />
+                        <Stack.Screen name="BreedDetection" component={BreedDetectionScreen} />
                     </>
                 ) : (
                     <>

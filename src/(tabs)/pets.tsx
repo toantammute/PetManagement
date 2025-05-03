@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, View, TextInput, ActivityIndicator, RefreshControl, ScrollView } from 'react-native';
+import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, View, TextInput, ActivityIndicator, RefreshControl, ScrollView, TouchableOpacity } from 'react-native';
 import TabBar from '../../component/tabbar';
 import { COLORS } from '../../theme/color';
 import PetCard from '../../component/petCard';
@@ -10,8 +10,20 @@ import { useDiarybyUser } from '../../hook/useDiary';
 import { useSchedulebyUser } from '../../hook/useSchedule';
 import ScheduleCard from '../../component/scheduleCard';
 import { useUpdateSchedule } from '../../hook/useSchedule';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
+// Define the type for the navigation stack
+type RootStackParamList = {
+  BreedDetection: undefined;
+  [key: string]: undefined | object;
+};
+
+type PetsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const Pets = () => {
+    const navigation = useNavigation<PetsScreenNavigationProp>();
     const { data: pets, isLoading: isPetsLoading, isError: isPetsError, error: petsError } = usePets();
     const { data: allDiaries, isLoading: isDiaryLoading, isError: isDiaryError, error: diaryError } = useDiarybyUser();
     const { data: allSchedules, isLoading: isScheduleLoading, isError: isScheduleError, error: scheduleError } = useSchedulebyUser();
@@ -23,6 +35,10 @@ const Pets = () => {
 
     const handleToggleSchedule = (scheduleId: string, isActive: boolean) => {
         // updateSchedule({ id: scheduleId, is_active: isActive });
+    };
+
+    const navigateToBreedDetection = () => {
+        navigation.navigate('BreedDetection');
     };
 
     const renderContent = () => {
@@ -136,7 +152,15 @@ const Pets = () => {
                 <View style={styles.content}>
                     {renderContent()}
                 </View>
-                {/* <Menu initialTab="paw-outline" /> */}
+                
+                {/* Floating Action Button for Breed Detection */}
+                <TouchableOpacity 
+                    style={styles.breedDetectionButton} 
+                    onPress={navigateToBreedDetection}
+                >
+                    <Icon name="paw" size={24} color="#fff" />
+                    <Text style={styles.breedDetectionButtonText}>Detect Breed</Text>
+                </TouchableOpacity>
             </SafeAreaView>
         </>
     )
@@ -202,6 +226,27 @@ const styles = StyleSheet.create({
     scrollContent: {
         // paddingBottom: 20,
         gap: 15,
+    },
+    breedDetectionButton: {
+        position: 'absolute',
+        bottom: 20,
+        right: 20,
+        backgroundColor: COLORS.background.mint,
+        borderRadius: 25,
+        padding: 15,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    breedDetectionButtonText: {
+        color: '#fff',
+        marginLeft: 8,
+        fontWeight: 'bold',
     },
 })
 export default Pets;

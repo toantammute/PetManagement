@@ -35,7 +35,6 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
 
     const login = async (username: string, password: string): Promise<void> => {
         const deviceToken = await messaging().getToken();
-        console.log("Device Token:", deviceToken);
         try {
             setIsLoading(true);
             console.log("Attempting login with API URL:", API);
@@ -43,12 +42,9 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
             const response = await axios.post(`${API}/user/login`, {
                 username,
                 password,
-                token: Math.random().toString(36).substring(2, 15),
+                token: deviceToken.toString(),
             });
 
-            // console.log("Login response status:", response.status);
-            console.log("Login response data:", response.data);
-            
 
             if (response.status === 200 && response.data.data) {
                 const userData = response.data.data.user;
