@@ -239,15 +239,16 @@ const ProductList = () => {
                     <Text style={styles.emptySubText}>Thử tìm kiếm với từ khóa khác</Text>
                 </View>
             ) : (
-                <FlatList
-                    data={filteredProducts}
-                    renderItem={renderProductItem}
-                    keyExtractor={item => item.product_id}
-                    numColumns={2}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.productList}
-                    style={styles.productListContainer}
-                />
+                <View style={styles.productListContainer}>
+                    <FlatList
+                        data={filteredProducts}
+                        renderItem={renderProductItem}
+                        keyExtractor={item => item.product_id}
+                        numColumns={2}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={styles.productList}
+                    />
+                </View>
             )}
         </View>
     );
@@ -264,6 +265,7 @@ const styles = StyleSheet.create({
     },
     productListContainer: {
         flex: 1,
+        // paddingHorizontal: 15,
     },
     loaderContainer: {
         flex: 1,
@@ -405,24 +407,21 @@ const styles = StyleSheet.create({
         color: '#424242',
     },
     productList: {
-        // paddingHorizontal: 15,
-        // justifyContent: 'space-between',
         paddingTop: 10,
-        flexDirection: 'column',
-        flex: 1,
-        // flexWrap: 'wrap',
-        gap: 10,
         paddingBottom: 20,
+        gap: 10,
     },
     productCard: {
-        width: productWidth,
+        flex: 1,
         backgroundColor: '#FFFFFF',
         borderRadius: 8,
-        // marginBottom: 15,
-        marginRight: 15,
+        marginBottom: 10,
+        marginRight: 5,
+        marginLeft: 5,
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: '#EEEEEE',
+        maxWidth: productWidth,
     },
     imageContainer: {
         width: '100%',

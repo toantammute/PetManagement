@@ -10,6 +10,7 @@ import { useDiarybyUser } from '../../hook/useDiary';
 import { useSchedulebyUser } from '../../hook/useSchedule';
 import ScheduleCard from '../../component/scheduleCard';
 import { useUpdateSchedule } from '../../hook/useSchedule';
+import { useAppointments } from '../../hook/useAppointment';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -28,13 +29,57 @@ const Pets = () => {
     const { data: allDiaries, isLoading: isDiaryLoading, isError: isDiaryError, error: diaryError } = useDiarybyUser();
     const { data: allSchedules, isLoading: isScheduleLoading, isError: isScheduleError, error: scheduleError } = useSchedulebyUser();
     const { mutate: updateSchedule } = useUpdateSchedule();
-
+    const { data: appointments, isLoading: isAppointmentsLoading, isError: isAppointmentsError, error: appointmentsError } = useAppointments();
     const [activeTab, setActiveTab] = useState('PROFILE');
-    const [text, onChangeText] = useState('Useless Text');
-    const [number, onChangeNumber] = React.useState('');
+    const [selectedAvatars, setSelectedAvatars] = useState<string[]>(['all']);
 
-    const handleToggleSchedule = (scheduleId: string, isActive: boolean) => {
-        // updateSchedule({ id: scheduleId, is_active: isActive });
+    // Lọc dữ liệu dựa trên pet được chọn
+    const getFilteredData = () => {
+        const isAllSelected = selectedAvatars.includes('all');
+        
+        const filteredPets = isAllSelected ? pets : pets?.filter(pet => 
+            selectedAvatars.includes(pet.petid || '')
+        );
+
+        const filteredDiaries = isAllSelected ? allDiaries : allDiaries?.filter(diary => 
+            selectedAvatars.includes(diary.pet_id)
+        );
+
+        const filteredSchedules = isAllSelected ? allSchedules : allSchedules?.filter(schedule => {
+            // Chuyển pet_id từ number sang string để so sánh
+            return selectedAvatars.some(avatarId => schedule.pet_id === parseInt(avatarId));
+        });
+
+        // Lọc và sắp xếp appointments
+        const sortedAppointments = appointments?.slice()?.sort((a, b) => {
+            const dateA = new Date(a.date).getTime();
+            const dateB = new Date(b.date).getTime();
+            return dateB - dateA; // Sắp xếp giảm dần
+        });
+
+        const filteredAppointments = isAllSelected ? sortedAppointments : sortedAppointments?.filter(appointment => 
+            selectedAvatars.includes(appointment.pet.pet_id)
+        );
+
+        return {
+            pets: filteredPets,
+            diaries: filteredDiaries,
+            schedules: filteredSchedules,
+            appointments: filteredAppointments
+        };
+    };
+
+    const { pets: filteredPets, diaries: filteredDiaries, schedules: filteredSchedules, appointments: filteredAppointments } = getFilteredData();
+
+    const handleToggleSchedule = (scheduleId: number, isActive: boolean) => {
+        const scheduleToUpdate = allSchedules?.find(s => s.id === scheduleId.toString());
+        if (scheduleToUpdate && scheduleToUpdate.id) {
+            updateSchedule({
+                ...scheduleToUpdate,
+                id: scheduleToUpdate.id,
+                is_active: isActive
+            });
+        }
     };
 
     const navigateToBreedDetection = () => {
@@ -50,15 +95,15 @@ const Pets = () => {
                             <ActivityIndicator size="large" color={COLORS.background.mint} />
                         ) : isPetsError ? (
                             <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>Error: {petsError.message}</Text>
+                                <Text style={styles.errorText}>Lỗi: {petsError.message}</Text>
                             </View>
-                        ) : pets && pets.length > 0 ? (
+                        ) : filteredPets && filteredPets.length > 0 ? (
                             <ScrollView 
                                 style={styles.scrollView}
                                 contentContainerStyle={styles.scrollContent}
                                 showsVerticalScrollIndicator={false}
                             >
-                                {pets.map((pet) => (
+                                {filteredPets.map((pet) => (
                                     <PetCard
                                         key={pet.petid}
                                         pet={pet}
@@ -67,7 +112,7 @@ const Pets = () => {
                             </ScrollView>
                         ) : (
                             <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>No pets found</Text>
+                                <Text style={styles.emptyText}>Không tìm thấy thú cưng</Text>
                             </View>
                         )}
                     </View>
@@ -79,15 +124,15 @@ const Pets = () => {
                             <ActivityIndicator size="large" color={COLORS.background.mint} />
                         ) : isDiaryError ? (
                             <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>Error: {diaryError.message}</Text>
+                                <Text style={styles.errorText}>Lỗi: {diaryError.message}</Text>
                             </View>
-                        ) : allDiaries && allDiaries.length > 0 ? (
+                        ) : filteredDiaries && filteredDiaries.length > 0 ? (
                             <ScrollView style={styles.scrollView}>
-                                <DiaryList diaries={allDiaries} />
+                                <DiaryList diaries={filteredDiaries} />
                             </ScrollView>
                         ) : (
                             <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>No diary entries found</Text>
+                                <Text style={styles.emptyText}>Không có nhật ký nào</Text>
                             </View>
                         )}
                     </View>
@@ -99,15 +144,15 @@ const Pets = () => {
                             <ActivityIndicator size="large" color={COLORS.background.mint} />
                         ) : isScheduleError ? (
                             <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>Error: {scheduleError.message}</Text>
+                                <Text style={styles.errorText}>Lỗi: {scheduleError.message}</Text>
                             </View>
-                        ) : allSchedules && allSchedules.length > 0 ? (
+                        ) : filteredSchedules && filteredSchedules.length > 0 ? (
                             <ScrollView 
                                 style={styles.scrollView}
                                 contentContainerStyle={styles.scrollContent}
                                 showsVerticalScrollIndicator={false}
                             >
-                                {allSchedules.map((schedule) => {
+                                {filteredSchedules.map((schedule) => {
                                     const pet = pets?.find(p => p.petid?.toString() === schedule.pet_id?.toString());
                                     return (
                                         <ScheduleCard
@@ -129,14 +174,36 @@ const Pets = () => {
             case 'APPOINTMENT':
                 return (
                     <View style={styles.tabContent}>
-                        {/* <AppointmentCard appointment={appointment} /> */}
+                        {isAppointmentsLoading ? (
+                            <ActivityIndicator size="large" color={COLORS.background.mint} />
+                        ) : isAppointmentsError ? (
+                            <View style={styles.errorContainer}>
+                                <Text style={styles.errorText}>Lỗi: {appointmentsError.message}</Text>
+                            </View>
+                        ) : filteredAppointments && filteredAppointments.length > 0 ? (
+                            <ScrollView 
+                                style={styles.scrollView}
+                                contentContainerStyle={styles.scrollContent}
+                                showsVerticalScrollIndicator={false}
+                            >
+                                {filteredAppointments.map((appointment) => (
+                                    <AppointmentCard
+                                        key={appointment.id}
+                                        appointment={appointment}
+                                    />
+                                ))}
+                            </ScrollView>
+                        ) : (
+                            <View style={styles.emptyContainer}>
+                                <Text style={styles.emptyText}>Không có cuộc hẹn nào</Text>
+                            </View>
+                        )}
                     </View>
                 );
             default:
                 return null;
         }
     };
-
 
     return (
         <>
@@ -148,7 +215,15 @@ const Pets = () => {
                 styles.container,
                 Platform.OS === 'android' && styles.androidSafeArea
             ]}>
-                <TabBar type="pets" initialTab="PROFILE" onTabChange={setActiveTab} pets={pets} isLoading={isPetsLoading} />
+                <TabBar 
+                    type="pets" 
+                    initialTab="PROFILE" 
+                    onTabChange={setActiveTab} 
+                    pets={pets} 
+                    isLoading={isPetsLoading}
+                    selectedAvatars={selectedAvatars}
+                    onAvatarChange={setSelectedAvatars}
+                />
                 <View style={styles.content}>
                     {renderContent()}
                 </View>
@@ -164,7 +239,8 @@ const Pets = () => {
             </SafeAreaView>
         </>
     )
-}
+};
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -249,4 +325,5 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
 })
+
 export default Pets;
