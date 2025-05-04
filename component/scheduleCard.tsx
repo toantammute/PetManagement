@@ -33,7 +33,8 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onToggle, petAvat
         return date.toLocaleTimeString('vi-VN', {
             hour: '2-digit',
             minute: '2-digit',
-            hour12: false
+            hour12: false,
+            timeZone: 'Asia/Ho_Chi_Minh'
         });
     };
 
@@ -43,7 +44,8 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onToggle, petAvat
             weekday: 'long',
             day: 'numeric',
             month: 'long',
-            year: 'numeric'
+            year: 'numeric',
+            timeZone: 'Asia/Ho_Chi_Minh'
         });
     };
 
@@ -89,7 +91,12 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onToggle, petAvat
                             <View style={styles.detailRow}>
                                 <MaterialIcons name="event" size={20} color={COLORS.text.textDisable} />
                                 <Text style={styles.detailText}>
-                                    Kết thúc: {new Date(schedule.end_date).toLocaleDateString('vi-VN')}
+                                    Kết thúc: {new Date(schedule.end_date).toLocaleDateString('vi-VN', {
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric',
+                                        timeZone: 'Asia/Ho_Chi_Minh'
+                                    })}
                                 </Text>
                             </View>
                         )}
@@ -156,7 +163,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
     },
     time: {
-        fontSize: 32,
+        fontSize: 24,
         fontWeight: '600',
         color: COLORS.text.text,
     },
@@ -180,7 +187,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     title: {
-        fontSize: 20,
+        fontSize: 16,
         fontWeight: '600',
         color: COLORS.text.text,
     },
@@ -192,7 +199,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     detailText: {
-        fontSize: 16,
+        fontSize: 14,
         color: COLORS.text.textDisable,
         marginLeft: 8,
         flex: 1,

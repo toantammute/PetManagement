@@ -26,3 +26,33 @@ export const createDiary = async(data:any) => {
     });
     return response.data;
 }
+
+export const deleteDiary = async(id: string) => {
+    const accessToken = await AsyncStorage.getItem('accessToken');
+    const response = await axios.delete(`${API}/pet/logs/${id}`, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    });
+    return response.data;
+}
+
+export const updateDiary = async(id: string, data: any) => {
+    const accessToken = await AsyncStorage.getItem('accessToken');
+    const response = await axios.put(`${API}/pet/logs/${id}`, data, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    });
+    return response.data;
+}
+
+export const getDiaryDetail = async (id: string): Promise<Diary> => {
+    const accessToken = await AsyncStorage.getItem('accessToken');
+    const response = await axios.get(`${API}/pet/log/${id}/details`, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    });
+    return response.data;
+}

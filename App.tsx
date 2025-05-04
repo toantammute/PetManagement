@@ -1,10 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React, { useEffect } from 'react';
 import type { PropsWithChildren } from 'react';
 import {
@@ -16,7 +9,7 @@ import {
   View,
   Alert,
 } from 'react-native';
-import {API_URL} from '@env';
+import { PUSH_NOTI } from '@env';
 import {AuthProvider} from './context/AuthContext';
 import {enableScreens} from 'react-native-screens';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
@@ -100,7 +93,7 @@ const App = () => {
           barStyle={isDarkMode ? 'light-content' : 'dark-content'}
           backgroundColor={backgroundStyle.backgroundColor}
         />
-        <Text>{API_URL}</Text>
+        <Text>{PUSH_NOTI}</Text>
         <AppNavigator />
         <Toast />
       </QueryClientProvider>

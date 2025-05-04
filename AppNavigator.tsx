@@ -19,6 +19,10 @@ import AddAppointment from './src/addAppointment';
 import ChatbotScreen from './src/ChatbotScreen';
 import { ConversationListScreen } from './component/chatbot';
 import BreedDetectionScreen from './src/BreedDetectionScreen';
+import DiaryDetail from './src/diaryDetail';
+// import PetDetail from './src/(tabs)/pets';
+// import AddPet from './src/addPet';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +46,7 @@ const AppNavigator = () => {
                         <Stack.Screen name="Chatbot" component={ChatbotScreen} />
                         <Stack.Screen name="BreedDetection" component={BreedDetectionScreen} />
                         <Stack.Screen name="ConversationList" component={ConversationListScreen} />
+                        <Stack.Screen name="DiaryDetail" component={DiaryDetail} />
                     </>
                 ) : (
                     <>

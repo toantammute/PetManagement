@@ -1,8 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { COLORS } from '../theme/color';
 import AvaBtn from './avabtn';
 import { usePetById } from '../hook/usePets';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Feather from 'react-native-vector-icons/Feather';
+
+type RootStackParamList = {
+    DiaryDetail: { diaryId: string };
+};
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'DiaryDetail'>;
 
 interface DiaryContentProps {
     title: string;
@@ -10,22 +19,45 @@ interface DiaryContentProps {
     date: string;
     onPress: () => void;
     petId: string;
+    diaryId: string;
 }
 
-const DiaryContent: React.FC<DiaryContentProps> = ({title, description, date, onPress, petId}) => {
+const DiaryContent: React.FC<DiaryContentProps> = ({title, description, date, onPress, petId, diaryId}) => {
     const { data: pet, isLoading } = usePetById(petId);
+    const navigation = useNavigation<NavigationProp>();
+    const handlePress = () => {
+        navigation.navigate('DiaryDetail', { diaryId });
+    };
+
+    const formattedDate = new Date(date).toLocaleDateString('vi-VN', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+
+    const formattedTime = new Date(date).toLocaleTimeString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'Asia/Ho_Chi_Minh'
+    });
 
     return (
-        <View style={styles.container}>
+        <TouchableOpacity style={styles.container} onPress={handlePress}>
             <View style={styles.infoContainer}>
                 <Text style={styles.title}>{title}</Text>
                 <Text style={styles.description}>{description}</Text>
             </View>
             {/* Line */}
-            <View style={styles.line} >
-            </View>
+            <View style={styles.line} />
             <View style={styles.dateContainer}>
-                <Text style={styles.date}>{date}</Text>
+                <View style={styles.dateTimeContainer}>
+                    <Feather name="calendar" size={14} color={COLORS.text.textDisable} />
+                    <Text style={styles.date}>{formattedDate}</Text>
+                    <Feather name="clock" size={14} color={COLORS.text.textDisable} />
+                    <Text style={styles.date}>{formattedTime}</Text>
+                </View>
                 
                 <View style={styles.avaBtnContainer}>
                     {isLoading ? (
@@ -44,7 +76,7 @@ const DiaryContent: React.FC<DiaryContentProps> = ({title, description, date, on
                     )}
                 </View>
             </View>
-        </View>
+        </TouchableOpacity>
     )
 }
 
@@ -75,15 +107,6 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         width: '100%',
     },
-    date: {
-        fontSize: 14,
-        fontWeight: 500,
-        fontFamily: 'Poppins-Regular',
-        fontStyle: 'normal',
-        textAlign: 'center',
-        color: COLORS.text.default,
-        alignSelf: 'center',
-    },
     dateContainer: {
         display: 'flex',
         flexDirection: 'row',
@@ -92,6 +115,18 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         height: 40,
     },
+    dateTimeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    date: {
+        fontSize: 14,
+        fontWeight: 500,
+        fontFamily: 'Poppins-Regular',
+        fontStyle: 'normal',
+        color: COLORS.text.textDisable,
+    },
     avaBtnContainer: {
         height: '100%',
         alignItems: 'center',
@@ -99,7 +134,7 @@ const styles = StyleSheet.create({
     infoContainer: {
         display: 'flex',
         flexDirection: 'column',
-        gap:5,
+        gap: 5,
         alignItems: 'flex-start',
         alignSelf: 'stretch',
         minHeight: 'auto',
@@ -113,10 +148,10 @@ const styles = StyleSheet.create({
         borderBottomColor: COLORS.border.mintbrd,
     },
     avatar: {
-        width:30,
+        width: 30,
         height: 30,
         borderRadius: 17.5,
     },
-})
+});
 
 export default DiaryContent;

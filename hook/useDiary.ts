@@ -1,4 +1,4 @@
-import { getDiarybyUser, createDiary } from "../services/diaryService";
+import { getDiarybyUser, createDiary, deleteDiary, updateDiary, getDiaryDetail } from "../services/diaryService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Diary } from "../models/models";
 
@@ -34,3 +34,57 @@ export const useCreateDiary = () => {
         }
     });
 }
+
+export const useDeleteDiary = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: deleteDiary,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['allDiaries'] });
+        },
+        onError: (error: Error) => {
+            console.error('Failed to delete diary:', error);
+        }
+    });
+}
+
+type UpdateDiaryParams = {
+    id: string;
+    data: Partial<Diary>;
+}
+
+export const useUpdateDiary = () => {
+    const queryClient = useQueryClient();
+    
+    return useMutation<Diary, Error, UpdateDiaryParams>({
+        mutationFn: ({ id, data }) => updateDiary(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['allDiaries'] });
+        },
+        onError: (error: Error) => {
+            console.error('Failed to update diary:', error);
+        }
+    });
+}
+
+export const useDiaryDetail = (id: string) => {
+    return useQuery<Diary, Error>({
+        queryKey: ['diaryDetail', id],
+        queryFn: () => getDiaryDetail(id),
+        staleTime: 5 * 60 * 1000,
+        gcTime: 30 * 60 * 1000,
+        refetchOnWindowFocus: true,
+        retry: 3,
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        throwOnError: (error: Error, query) => {
+            console.error('Failed to fetch diary detail:', error);
+            return false;
+        },
+        select: (data) => {
+            return data;
+        }
+        
+    });
+}
+
+
