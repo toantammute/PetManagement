@@ -15,13 +15,16 @@ export const scheduleNotification = async (schedule: Schedule, user_id: string) 
         const cronExpression = generateCronExpression(schedule);
         const schedule_id = schedule.id;
         
+        // Thêm thông tin về thời gian kết thúc
+        const end_date = schedule.end_type && schedule.end_date ? schedule.end_date : null;
 
         const response = await axios.post(`${PUSH_NOTI}/scheduleNotification`, {
             user_id,
             title,
             body,
             cronExpression,
-            schedule_id
+            schedule_id,
+            end_date // Thêm trường end_date vào request
         });
         console.log("Đã lên lịch thông báo:", response.data);
         return response.data;
