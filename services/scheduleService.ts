@@ -1,7 +1,8 @@
 import axios from 'axios';
-import { API} from "@env";
+import { API, PUSH_NOTI} from "@env";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Schedule } from '../models/models';
+
 
 export const getSchedulebyUser = async (): Promise<Schedule[]> => {
     const accessToken = await AsyncStorage.getItem('accessToken');

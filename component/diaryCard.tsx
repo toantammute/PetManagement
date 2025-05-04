@@ -36,6 +36,7 @@ const DiaryCard = ({diary}: DiaryCardProps) => {
                     date={diary.date_time} 
                     onPress={() => {}} 
                     petId={diary.pet_id}
+                    diaryId={diary.log_id}
                 />
             </View>
         </View>

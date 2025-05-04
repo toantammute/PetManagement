@@ -70,14 +70,24 @@ const AddSchedule = () => {
         reminderDateTime.setSeconds(0);
         reminderDateTime.setMilliseconds(0);
 
+        let formattedEndDate = null;
+        if (hasEndDate && endDate) {
+            const endDateTime = new Date(endDate);
+            endDateTime.setHours(23);
+            endDateTime.setMinutes(59);
+            endDateTime.setSeconds(59);
+            endDateTime.setMilliseconds(0);
+            formattedEndDate = endDateTime.toISOString();
+        }
+
         const scheduleData: Schedule = {
             pet_id: parseInt(petId, 10),
             title,
             notes: note,
             reminder_datetime: reminderDateTime.toISOString(),
             event_repeat: repeat,
-            end_type: hasEndDate ? "true" : "false",
-            end_date: hasEndDate && endDate ? endDate.toISOString().split('T')[0] : null,
+            end_type: hasEndDate,
+            end_date: formattedEndDate,
             is_active: initialSchedule?.is_active ?? true
         };
 

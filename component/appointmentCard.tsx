@@ -5,6 +5,7 @@ import Avatar from './avabtn';
 import Feather from 'react-native-vector-icons/Feather';
 import { Appointment } from '../models/models';
 import { usePetById } from '../hook/usePets';
+import { useDoctor } from '../hook/useAppointment';
 
 interface AppointmentCardProps {
     appointment: Appointment;
@@ -12,6 +13,7 @@ interface AppointmentCardProps {
 
 const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
     const { data: pet, isLoading: isPetLoading } = usePetById(appointment.pet.pet_id);
+    const { data: doctor, isLoading: isDoctorLoading } = useDoctor(appointment.doctor.doctor_id);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -27,6 +29,7 @@ const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
 
     const { day, date, month } = formatDate(appointment.date);
     const time = appointment.time_slot.start_time.split(':').slice(0, 2).join(':');
+    const endTime = appointment.time_slot.end_time.split(':').slice(0, 2).join(':');
 
     return (
         <View style={styles.container}>
@@ -51,7 +54,7 @@ const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
                     </View>
                     <View style={styles.infoContainer}>
                         <Text style={styles.serviceText}>{appointment.service.service_name}</Text>
-                        <Text style={styles.timeText}>{time}</Text>
+                        <Text style={styles.timeText}>{time} - {endTime}</Text>
                     </View>
                     <View style={styles.petContainer}>
                         <View style={styles.avaBtnContainer}>
@@ -87,11 +90,26 @@ const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
             {/* middle */}
             <View style={styles.doctorContainer}>
                 <View style={styles.doctorAvaContainer}>
-                    <Avatar
-                        variant='noava'
-                        onPress={() => { }}
-                        size={30}
-                    />
+                    {isDoctorLoading ? (
+                        <Avatar
+                            variant='noava'
+                            onPress={() => { }}
+                            size={30}
+                        />
+                    ) : doctor?.data_image ? (
+                        <Avatar
+                            variant="default"
+                            onPress={() => { }}
+                            size={30}
+                            imageUrl={`data:image/jpeg;base64,${doctor.data_image}`}
+                        />
+                    ) : (
+                        <Avatar
+                            variant='noava'
+                            onPress={() => { }}
+                            size={30}
+                        />
+                    )}
                 </View>
 
                 <Text style={styles.doctorName}>{appointment.doctor.doctor_name}</Text>

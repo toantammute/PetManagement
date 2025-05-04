@@ -43,7 +43,7 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
             const response = await axios.post(`${API}/user/login`, {
                 username,
                 password,
-                token: Math.random().toString(36).substring(2, 15),
+                token: deviceToken.toString(),
             });
 
             // console.log("Login response status:", response.status);
@@ -89,10 +89,18 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
     const logout = async () => {
         setIsLoading(true);
         try {
-            // const response = await axios.post(`${API_URL}/user/logout`, {
-            //     refresh_token: refreshToken
-            // });
-            // console.log("Logout response: ", response.data);
+            const deviceToken = await messaging().getToken();
+            console.log("Device Token:", deviceToken);
+            console.log("Access Token:", accessToken);
+            const response = await axios.post(`${API}/user/logout`, {
+                "token": deviceToken.toString(),
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+            });
+            console.log("Logout response: ", response.data);
             await AsyncStorage.multiRemove(['user', 'accessToken', 'refreshToken']);
             setUser(null);
             setAccessToken(null);

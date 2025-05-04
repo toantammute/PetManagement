@@ -118,7 +118,7 @@ export interface Schedule {
     notes: string;
     reminder_datetime: string;
     end_date: string | null;
-    end_type: string;
+    end_type: boolean;
     event_repeat: string;
     is_active: boolean;
     created_at?: string;

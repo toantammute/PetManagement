@@ -15,7 +15,6 @@ export const useAppointments = () => {
             console.error('Failed to fetch appointments:', error);
             return false;
         },
-
     })
 }
 
@@ -24,6 +23,15 @@ export const useDoctors = () => {
         queryKey: ['doctors'],
         queryFn: getDoctors,
     })
+}
+
+export const useDoctor = (doctorId: string) => {
+    const { data: doctors } = useDoctors();
+    return useQuery<Doctor | undefined, Error>({
+        queryKey: ['doctor', doctorId],
+        queryFn: () => doctors?.find(d => d.doctor_id === doctorId),
+        enabled: !!doctors && !!doctorId,
+    });
 }
 
 export const useDoctorTimeSlots = (doctorId: string, date: string) => {

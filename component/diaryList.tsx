@@ -65,6 +65,7 @@ const DiaryList: React.FC<DiaryListProps> = ({ diaries }) => {
                                     date={diary.date_time}
                                     onPress={() => {}}
                                     petId={diary.pet_id}
+                                    diaryId={diary.log_id}
                                 />
                             ))}
                         </View>
