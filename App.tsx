@@ -30,6 +30,7 @@ import {
 import messaging from '@react-native-firebase/messaging';
 import PushNotification from 'react-native-push-notification';
 import AppNavigator from './AppNavigator';
+import Toast from 'react-native-toast-message';
 
 const App = () => {
   async function requestUserPermission() {
@@ -101,6 +102,7 @@ const App = () => {
         />
         <Text>{API_URL}</Text>
         <AppNavigator />
+        <Toast />
       </QueryClientProvider>
     </AuthProvider>
   );

@@ -16,14 +16,11 @@ import CartScreen from './src/cart';
 import AddLog from './src/addLog';
 import AddSchedule from './src/addSchedule';
 import AddAppointment from './src/addAppointment';
-import ChatbotScreen from './src/screens/ChatbotScreen';
-import BreedDetectionScreen from './src/screens/BreedDetectionScreen';
-// import PetDetail from './src/(tabs)/pets';
-// import AddPet from './src/addPet';
-
+import ChatbotScreen from './src/ChatbotScreen';
+import { ConversationListScreen } from './component/chatbot';
+import BreedDetectionScreen from './src/BreedDetectionScreen';
 
 const Stack = createNativeStackNavigator();
-
 
 const AppNavigator = () => {
     const { accessToken } = useAuth();
@@ -44,6 +41,7 @@ const AppNavigator = () => {
                         <Stack.Screen name="AddAppointment" component={AddAppointment} />
                         <Stack.Screen name="Chatbot" component={ChatbotScreen} />
                         <Stack.Screen name="BreedDetection" component={BreedDetectionScreen} />
+                        <Stack.Screen name="ConversationList" component={ConversationListScreen} />
                     </>
                 ) : (
                     <>

@@ -31,7 +31,31 @@ const Login = () => {
             console.log('Đăng nhập thành công');
         } catch (error: any) {
             console.error('Lỗi đăng nhập:', error);
-            Alert.alert('Lỗi đăng nhập', error.message || 'Đăng nhập thất bại');
+            
+            // Enhanced error handling with more specific messages
+            if (error.response) {
+                // The server responded with a status code outside the 2xx range
+                const statusCode = error.response.status;
+                const errorData = error.response.data;
+                
+                if (statusCode === 400) {
+                    // Handle specific 400 Bad Request errors
+                    const message = errorData?.message || 'Thông tin đăng nhập không hợp lệ';
+                    Alert.alert('Lỗi đăng nhập', message);
+                } else if (statusCode === 401) {
+                    Alert.alert('Lỗi đăng nhập', 'Tên đăng nhập hoặc mật khẩu không chính xác');
+                } else if (statusCode === 404) {
+                    Alert.alert('Lỗi đăng nhập', 'Tài khoản không tồn tại');
+                } else {
+                    Alert.alert('Lỗi đăng nhập', `Lỗi máy chủ (${statusCode}): ${errorData?.message || 'Vui lòng thử lại sau'}`);
+                }
+            } else if (error.request) {
+                // The request was made but no response was received
+                Alert.alert('Lỗi kết nối', 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.');
+            } else {
+                // Something happened in setting up the request
+                Alert.alert('Lỗi đăng nhập', error.message || 'Đăng nhập thất bại');
+            }
         }
     };
 

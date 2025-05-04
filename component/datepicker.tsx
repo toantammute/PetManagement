@@ -23,15 +23,17 @@ const DateInput: React.FC<DateInputProps> = ({
 }) => {
     const [open, setOpen] = useState(false);
     const today = new Date();
-    // today.setHours(0, 0, 0, 0); // Đặt giờ về 00:00:00
 
     const formatDate = (date: Date) => {
-        // if (!date) return '';
         return date.toLocaleDateString('vi-VN', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
         });
+    };
+
+    const handleConfirm = (selectedDate: Date) => {
+        onChange(selectedDate);
     };
 
     return (
@@ -70,7 +72,7 @@ const DateInput: React.FC<DateInputProps> = ({
                             <TouchableOpacity 
                                 onPress={() => {
                                     if (value) {
-                                        onChange(value);
+                                        handleConfirm(value);
                                     }
                                     setOpen(false);
                                 }}

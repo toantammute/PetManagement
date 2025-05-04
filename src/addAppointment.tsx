@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Text, Platform, StatusBar, SafeAreaView, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Text, Platform, StatusBar, SafeAreaView } from 'react-native';
 import { COLORS } from '../theme/color';
 import Input from '../component/input';
 import DateInput from '../component/datepicker';
@@ -10,9 +10,10 @@ import { useDoctors, useDoctorTimeSlots, useCreateAppointment } from '../hook/us
 import { useServices } from '../hook/useService';
 import AvaBtn from '../component/avabtn';
 import { usePets } from '../hook/usePets';
+import Toast from 'react-native-toast-message';
 
 const AddAppointment = () => {
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
     const [formData, setFormData] = useState({
         petId: '',
         doctorId: '',
@@ -32,9 +33,41 @@ const AddAppointment = () => {
 
     const createAppointmentMutation = useCreateAppointment();
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            Toast.show({
+                type: 'info',
+                text1: 'Form Loaded',
+                text2: 'Please fill in all required fields',
+                position: 'top',
+                visibilityTime: 2000,
+            });
+        }, 500);
+        
+        return () => clearTimeout(timer);
+    }, []);
+
     const handleSubmit = () => {
+        Toast.show({
+            type: 'info',
+            text1: 'Processing',
+            text2: 'Đang xử lý yêu cầu...',
+            position: 'bottom',
+            visibilityTime: 2000,
+        });
+        
         if (!formData.petId || !formData.doctorId || !formData.date || !formData.timeSlotId || !formData.serviceId || !formData.reason) {
-            Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
+            setTimeout(() => {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Lỗi',
+                    text2: 'Vui lòng điền đầy đủ thông tin',
+                    position: 'bottom',
+                    visibilityTime: 4000,
+                    autoHide: true,
+                    bottomOffset: 80,
+                });
+            }, 500);
             return;
         }
 
@@ -49,11 +82,30 @@ const AddAppointment = () => {
 
         createAppointmentMutation.mutate(appointmentData, {
             onSuccess: () => {
-                Alert.alert('Thành công', 'Đã tạo cuộc hẹn mới');
-                navigation.goBack();
+                setTimeout(() => {
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Thành công',
+                        text2: 'Đã tạo cuộc hẹn mới',
+                        position: 'bottom',
+                        visibilityTime: 3000,
+                    });
+                }, 500);
+                
+                setTimeout(() => {
+                    navigation.goBack();
+                }, 2000);
             },
             onError: (error) => {
-                Alert.alert('Lỗi', 'Không thể tạo cuộc hẹn. Vui lòng thử lại sau.');
+                setTimeout(() => {
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Lỗi',
+                        text2: 'Không thể tạo cuộc hẹn. Vui lòng thử lại sau.',
+                        position: 'bottom',
+                        visibilityTime: 4000,
+                    });
+                }, 500);
                 console.error('Error creating appointment:', error);
             }
         });
@@ -70,7 +122,7 @@ const AddAppointment = () => {
                 Platform.OS === 'android' && styles.androidSafeArea
             ]}>
                 <Header 
-                    title="Tạo Cuộc Hẹn" 
+                    title="Tạo cuộc hẹn" 
                     variant="save" 
                     onSave={handleSubmit}
                 />
@@ -121,7 +173,7 @@ const AddAppointment = () => {
                             label="Ngày hẹn"
                             value={formData.date}
                             onChange={(date) => setFormData(prev => ({ ...prev, date, timeSlotId: '' }))}
-                            maximumDate={new Date()}
+                            minimumDate={new Date()}
                         />
 
                         <View style={styles.pickerContainer}>
@@ -171,6 +223,13 @@ const AddAppointment = () => {
                             value={formData.reason}
                             onChangeText={(text) => setFormData(prev => ({ ...prev, reason: text }))}
                         />
+                        
+                        <TouchableOpacity 
+                            style={styles.submitButton}
+                            onPress={handleSubmit}
+                        >
+                            <Text style={styles.submitButtonText}>Tạo Cuộc Hẹn</Text>
+                        </TouchableOpacity>
                     </View>
                 </ScrollView>
             </SafeAreaView>
@@ -220,11 +279,22 @@ const styles = StyleSheet.create({
     },
     picker: {
         height: 48,
+    },
+    submitButton: {
+        backgroundColor: COLORS.button.choose,
+        paddingVertical: 14,
+        borderRadius: 10,
+        alignItems: 'center',
+        marginTop: 10,
+        marginBottom: 30,
+    },
+    submitButtonText: {
+        color: 'white',
+        fontWeight: '600',
+        fontSize: 16,
     }
 });
 
 export default AddAppointment;
-
-// const AddAppointment = () => {
 
 

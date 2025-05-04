@@ -14,9 +14,13 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 interface MobileMessageListProps {
   messages: ChatMessage[];
+  onFollowUpPress?: (question: string) => void;
 }
 
-const MobileMessageList: React.FC<MobileMessageListProps> = ({ messages }) => {
+const MobileMessageList: React.FC<MobileMessageListProps> = ({ 
+  messages,
+  onFollowUpPress 
+}) => {
   const scrollViewRef = useRef<ScrollView>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -42,18 +46,9 @@ const MobileMessageList: React.FC<MobileMessageListProps> = ({ messages }) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Get bot name from bot type
+  // Sửa đổi hàm getBotName để chỉ hiển thị tên của chatbot duy nhất
   const getBotName = (botType?: string) => {
-    switch(botType) {
-      case 'HealthTrendBot':
-        return 'Health Trend Bot';
-      case 'MediBot':
-        return 'Medication Assistant';
-      case 'SideEffectHelper':
-        return 'Side Effect Advisor';
-      default:
-        return 'Vet Assistant';
-    }
+    return 'Trợ lý Thú cưng';
   };
 
   // Render message content based on type
@@ -89,6 +84,11 @@ const MobileMessageList: React.FC<MobileMessageListProps> = ({ messages }) => {
       );
     }
     
+    // Special handling for medical advice responses
+    if (message.sender === 'bot' && isMedicalAdviceResponse(message.text)) {
+      return renderMedicalAdviceContent(message.text, message.followUpQuestions);
+    }
+    
     // Default text message
     return (
       <Text style={[
@@ -100,6 +100,95 @@ const MobileMessageList: React.FC<MobileMessageListProps> = ({ messages }) => {
     );
   };
   
+  // Check if text appears to be medical advice
+  const isMedicalAdviceResponse = (text: string): boolean => {
+    if (!text) return false;
+    
+    const lowerText = text.toLowerCase();
+    return (
+      (lowerText.includes('bác sĩ') || lowerText.includes('y tế') || 
+       lowerText.includes('thuốc') || lowerText.includes('triệu chứng') ||
+       lowerText.includes('điều trị') || lowerText.includes('sốt') ||
+       lowerText.includes('bệnh') || lowerText.includes('sức khỏe') ||
+       lowerText.includes('khám') || lowerText.includes('uống thuốc'))
+    );
+  };
+  
+  // Render enhanced medical advice content with proper formatting
+  const renderMedicalAdviceContent = (text: string, followUpQuestions?: string[]) => {
+    // Split text into paragraphs
+    const paragraphs = text.split('\n\n').filter(p => p.trim().length > 0);
+    
+    // Find and format bullet point lists
+    const formattedParagraphs = paragraphs.map((paragraph, index) => {
+      // If paragraph contains bullet points (*)
+      if (paragraph.includes('* ')) {
+        const listItems = paragraph.split('* ').filter(item => item.trim().length > 0);
+        return (
+          <View key={`paragraph-${index}`} style={styles.adviceParagraph}>
+            {listItems.map((item, itemIndex) => (
+              <View key={`item-${itemIndex}`} style={styles.adviceListItem}>
+                <View style={styles.adviceBulletPoint} />
+                <Text style={styles.adviceListItemText}>{item.trim()}</Text>
+              </View>
+            ))}
+          </View>
+        );
+      }
+      
+      // Check if it's a header (often in bold or emphasized)
+      if (paragraph.startsWith('**') || paragraph.includes(':')) {
+        return (
+          <Text key={`paragraph-${index}`} style={styles.adviceHeader}>
+            {paragraph.replace(/\*\*/g, '')}
+          </Text>
+        );
+      }
+      
+      // Regular paragraph
+      return (
+        <Text key={`paragraph-${index}`} style={styles.adviceParagraph}>
+          {paragraph}
+        </Text>
+      );
+    });
+    
+    // Add disclaimer notice for medical advice
+    return (
+      <View style={styles.adviceContainer}>
+        <View style={styles.medicalInfoHeader}>
+          <MaterialIcons name="info" size={16} color="#3B82F6" />
+          <Text style={styles.medicalInfoText}>Thông tin y tế</Text>
+        </View>
+        
+        {formattedParagraphs}
+        
+        {followUpQuestions && followUpQuestions.length > 0 && (
+          <View style={styles.adviceFollowUpContainer}>
+            <Text style={styles.adviceFollowUpTitle}>Câu hỏi liên quan:</Text>
+            {followUpQuestions.map((question, index) => (
+              <TouchableOpacity
+                key={`followup-${index}`}
+                style={styles.adviceFollowUpItem}
+                onPress={() => onFollowUpPress && onFollowUpPress(question)}
+              >
+                <MaterialIcons name="help-outline" size={16} color="#4F46E5" />
+                <Text style={styles.adviceFollowUpText}>{question}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+        
+        <View style={styles.disclaimerContainer}>
+          <MaterialIcons name="medical-services" size={12} color="#9CA3AF" />
+          <Text style={styles.disclaimerText}>
+            Thông tin này chỉ mang tính tham khảo và không thay thế cho lời khuyên y tế chuyên nghiệp.
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
   // Clean response text by removing HTML tags and formatting properly
   const cleanResponseText = (text: string): string => {
     if (!text) return '';
@@ -151,6 +240,56 @@ const MobileMessageList: React.FC<MobileMessageListProps> = ({ messages }) => {
     return (
       <View style={[styles.confidenceIndicator, { backgroundColor: color }]}>
         <Text style={styles.confidenceText}>{confidence}%</Text>
+      </View>
+    );
+  };
+
+  // // Render follow-up questions if available
+  // const renderFollowUpQuestions = (message: ChatMessage) => {
+  //   if (!message.followUpQuestions || message.followUpQuestions.length === 0) {
+  //     return null;
+  //   }
+    
+  //   return (
+  //     <View style={styles.followUpContainer}>
+  //       <Text style={styles.followUpTitle}>Suggested follow-up questions:</Text>
+  //       <View style={styles.followUpList}>
+  //         {message.followUpQuestions.map((question, index) => (
+  //           <TouchableOpacity
+  //             key={`followup-${index}`}
+  //             style={styles.followUpItem}
+  //             onPress={() => onFollowUpPress && onFollowUpPress(question)}
+  //           >
+  //             <MaterialIcons name="arrow-right" size={14} color="#4F46E5" />
+  //             <Text style={styles.followUpText}>{question}</Text>
+  //           </TouchableOpacity>
+  //         ))}
+  //       </View>
+  //     </View>
+  //   );
+  // };
+
+  // Render priority level indicator if available
+  const renderPriorityLevel = (priorityLevel?: string) => {
+    if (!priorityLevel) return null;
+    
+    let color = '#4F46E5'; // Default color
+    let icon = 'info';
+    
+    if (priorityLevel.toLowerCase() === 'high') {
+      color = '#EF4444';
+      icon = 'warning';
+    } else if (priorityLevel.toLowerCase() === 'medium') {
+      color = '#F59E0B';
+      icon = 'priority-high';
+    }
+    
+    return (
+      <View style={[styles.priorityContainer, { borderColor: color }]}>
+        <MaterialIcons name={icon} size={14} color={color} />
+        <Text style={[styles.priorityText, { color }]}>
+          {priorityLevel.charAt(0).toUpperCase() + priorityLevel.slice(1).toLowerCase()} Priority
+        </Text>
       </View>
     );
   };
@@ -252,6 +391,10 @@ const MobileMessageList: React.FC<MobileMessageListProps> = ({ messages }) => {
                 {renderConfidence(message.confidence)}
               </View>
               
+              {message.priorityLevel && message.sender === 'bot' && (
+                renderPriorityLevel(message.priorityLevel)
+              )}
+              
               {message.sourceDetails && (
                 <View style={styles.footerContainer}>
                   <Text style={styles.sourceText}>{message.sourceDetails}</Text>
@@ -300,6 +443,17 @@ const MobileMessageList: React.FC<MobileMessageListProps> = ({ messages }) => {
                     }
                   </Text>
                 </TouchableOpacity>
+              )}
+              
+              {/* {message.followUpQuestions && message.followUpQuestions.length > 0 && 
+               message.sender === 'bot' && onFollowUpPress && (
+                //  renderFollowUpQuestions(message)
+              )}
+               */}
+              {message.conversationId && message.sender === 'bot' && (
+                <Text style={styles.conversationIdText}>
+                  Conversation #{message.conversationId.substring(0, 6)}
+                </Text>
               )}
             </View>
           </Animated.View>
@@ -563,6 +717,149 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontStyle: 'italic',
   },
+  followUpContainer: {
+    marginTop: 12,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  followUpTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4F46E5',
+    marginBottom: 8,
+  },
+  followUpList: {
+    gap: 6,
+  },
+  followUpItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  followUpText: {
+    fontSize: 13,
+    color: '#4F46E5',
+    marginLeft: 6,
+    flex: 1,
+  },
+  priorityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    padding: 6,
+    borderWidth: 1,
+    borderRadius: 8,
+    backgroundColor: '#FAFAFA',
+  },
+  priorityText: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginLeft: 4,
+  },
+  conversationIdText: {
+    marginTop: 8,
+    fontSize: 10,
+    fontStyle: 'italic',
+    color: '#9CA3AF',
+    textAlign: 'right',
+  },
+  adviceContainer: {
+    marginTop: 8,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  medicalInfoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  medicalInfoText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3B82F6',
+    marginLeft: 4,
+  },
+  adviceParagraph: {
+    marginBottom: 12,
+    fontSize: 14,
+    color: '#374151',
+    lineHeight: 20,
+  },
+  adviceHeader: {
+    marginBottom: 8,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  adviceListItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+    paddingLeft: 4,
+  },
+  adviceBulletPoint: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#3B82F6',
+    marginRight: 8,
+    marginTop: 6,
+  },
+  adviceListItemText: {
+    fontSize: 14,
+    color: '#374151',
+    flex: 1,
+    lineHeight: 20,
+  },
+  adviceFollowUpContainer: {
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  adviceFollowUpTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#4F46E5',
+    marginBottom: 8,
+  },
+  adviceFollowUpItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: '#EEF2FF',
+    borderRadius: 20,
+    marginBottom: 8,
+  },
+  adviceFollowUpText: {
+    fontSize: 13,
+    color: '#4F46E5',
+    marginLeft: 6,
+    flex: 1,
+  },
+  disclaimerContainer: {
+    marginTop: 12,
+    paddingTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  disclaimerText: {
+    fontSize: 11,
+    color: '#9CA3AF',
+    marginLeft: 4,
+    flex: 1,
+    fontStyle: 'italic',
+  },
 });
 
-export default MobileMessageList; 
+export default MobileMessageList;

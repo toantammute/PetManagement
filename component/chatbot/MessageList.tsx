@@ -19,6 +19,11 @@ export interface ChatMessage {
   confidence?: number; // 0-100 value indicating how confident the bot is
   imageUrl?: string;
   listItems?: string[];
+  // New properties for conversation API support
+  conversationId?: string;
+  followUpQuestions?: string[];
+  priorityLevel?: string;
+  language?: string;
 }
 
 interface MessageListProps {
@@ -41,19 +46,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Get bot name from bot type
-  const getBotName = (botType?: string) => {
-    switch(botType) {
-      case 'HealthTrendBot':
-        return 'Health Trend Bot';
-      case 'MediBot':
-        return 'Medication Assistant';
-      case 'SideEffectHelper':
-        return 'Side Effect Advisor';
-      default:
-        return 'Vet Assistant';
-    }
-  };
+
 
   // Render message content based on type
   const renderMessageContent = (message: ChatMessage) => {
@@ -160,7 +153,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
             ]}>
               <View style={styles.messageHeader}>
                 <Text style={styles.senderName}>
-                  {message.sender === 'user' ? 'You' : getBotName(message.botType)}
+                  {message.sender === 'user' }
                 </Text>
                 <View style={styles.messageTime}>
                   {message.isPending ? (
@@ -460,4 +453,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MessageList; 
+export default MessageList;

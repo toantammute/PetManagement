@@ -38,9 +38,6 @@ export const detectPetBreed = async (
   try {
     // Get the appropriate API URL
     const apiUrl = getApiUrl();
-    console.log('[API] Using URL:', apiUrl);
-    console.log('[API] Image URI:', imageUri);
-    
     const formData = new FormData();
 
     // Create a proper file object that the backend can process
@@ -53,13 +50,10 @@ export const detectPetBreed = async (
       type: 'image/jpeg',
       name: fileName || 'photo.jpg',
     };
-    
-    console.log('[API] Uploading file:', fileToUpload);
-    
+        
     // Append the file to form data
     formData.append('image', fileToUpload as any);
     
-  
 
     try {
       // Try the detect-pet endpoint 
@@ -68,13 +62,10 @@ export const detectPetBreed = async (
           'Content-Type': 'multipart/form-data',
         },
       });
-      
-      console.log('[API] Detection response received:', response.status);
-      console.log('[API] Detection response data:', response.data);
+
       return response.data;
     } catch (petEndpointError) {
-      console.log('Pet endpoint failed, trying base64 endpoint:', petEndpointError);
-      
+      console.error('[API] Pet endpoint detection failed:', petEndpointError);      
       // If the form upload fails, convert to base64 and try that endpoint
       try {
         // Convert the image to base64

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, StatusBar, SafeAreaView, Platform, TouchableOpacity, ActivityIndicator, Modal, Image as RNImage, Alert } from 'react-native';
 import { COLORS } from '../theme/color';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -12,6 +12,7 @@ import { useVaccinations } from '../hook/useVaccination';
 import Header from '../component/header';
 import { launchImageLibrary, launchCamera, MediaType, CameraType, PhotoQuality } from "react-native-image-picker";
 import { PermissionsAndroid } from 'react-native';
+import TreatmentPage from './treatmentPage';
 
 const PetDetail = () => {
     const navigation = useNavigation<any>();
@@ -212,18 +213,6 @@ const PetDetail = () => {
     const renderTabContent = () => {
         return (
             <View style={styles.bottomContainer}>
-                {/* <TouchableOpacity style={styles.buttonContainer} onPress={() => { }}>
-                    <Ionicons name="document-text-outline" size={28} color={COLORS.button.choose} />
-                    <Text style={styles.text}>Overview</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonContainer} onPress={() => { }}>
-                    <Ionicons name="paw-outline" size={28} color={COLORS.button.choose} />
-                    <Text style={styles.text}>Vaccination</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonContainer} onPress={() => { }}>
-                    <Ionicons name="calendar-outline" size={28} color={COLORS.button.choose} />
-                    <Text style={styles.text}>Treatment</Text>
-                </TouchableOpacity> */}
                 <TouchableOpacity 
                     style={[
                         styles.buttonContainer,
@@ -314,14 +303,6 @@ const PetDetail = () => {
                                                 new Date(vaccination.next_due_date).toLocaleDateString() : 
                                                 'Not scheduled'}
                                         </Text>
-                                        {/* <Text style={[
-                                            styles.vaccineStatus,
-                                            { color: vaccination.status === 'Completed' ? 
-                                                COLORS.text.success : COLORS.text.warning 
-                                            }
-                                        ]}>
-                                            {vaccination.status}
-                                        </Text> */}
                                     </View>
                                 </View>
                             ))
@@ -332,9 +313,8 @@ const PetDetail = () => {
                 );
             case 'Treatment':
                 return (
-                    <View style={styles.tabContentContainer}>
-                        <Text style={styles.contentTitle}>Treatment History</Text>
-                        {/* Thêm nội dung treatment ở đây */}
+                    <View style={styles.treatmentTabContainer}>
+                        <TreatmentPage petId={petId} />
                     </View>
                 );
             default:
@@ -368,23 +348,6 @@ const PetDetail = () => {
                 styles.container,
                 Platform.OS === 'android' && styles.androidSafeArea
             ]}>
-                {/* <View style={styles.headerContainer}>
-
-                    <TouchableOpacity style={styles.headerButton}
-                        onPress={() => {
-                            navigation.goBack();
-                        }}
-                    >
-                        <Feather name='chevron-left' size={25} color={COLORS.text.textDisable} />
-                    </TouchableOpacity>
-
-                    <Text style={styles.headerText}>Pet Detail</Text>
-
-                    <TouchableOpacity style={styles.headerButton}>
-                        <MaterialCommunityIcons name='dots-vertical' size={25} color={COLORS.text.textDisable} />
-                    </TouchableOpacity>
-                </View> */}
-
                 <Header 
                     title="Pet Detail" 
                     variant="three-dot" 
@@ -392,12 +355,8 @@ const PetDetail = () => {
                 />
 
                 <View style={styles.tabContent}>
-                    {/* <View style={styles.petContainer}> */}
-                    {/* Top */}
                     <View style={styles.infoContainer}>
-                        {/*Top*/}
                         <View style={styles.topInfoContainer}>
-                            {/*Left*/}
                             <View style={styles.leftContainer}>
                                 <View style={styles.avaBtnContainer}>
                                     <View style={styles.avatarWrapper}>
@@ -419,10 +378,8 @@ const PetDetail = () => {
                                     <Text style={styles.breedText}>{pet?.breed}</Text>
                                 </View>
                             </View>
-                            {/*Right*/}
                             <Text style={styles.editText}>Edit</Text>
                         </View>
-                        {/*Button*/}
                         <View style={styles.genAgeContainer}>
                             <View style={styles.genderContainer}>
                                 <Text style={styles.genderText}>Gender</Text>
@@ -435,7 +392,6 @@ const PetDetail = () => {
                         </View>
                     </View>
 
-                    {/* Modal cho image options */}
                     <Modal
                         visible={showOptions}
                         transparent={true}
@@ -473,36 +429,8 @@ const PetDetail = () => {
 
                     {renderTabContent()}
                     {renderActiveTabContent()}
-
-                    {/* <View style={styles.bottomContainer}> */}
-                        
-                        {/* <TouchableOpacity style={styles.buttonContainer} onPress={() => { }}>
-                            <Ionicons name="document-text-outline" size={28} color={COLORS.button.choose} />
-                            <Text style={styles.text}>Overview</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.buttonContainer} onPress={() => { }}>
-                            <Ionicons name="paw-outline" size={28} color={COLORS.button.choose} />
-                            <Text style={styles.text}>Vaccination</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.buttonContainer} onPress={() => { }}>
-                            <Ionicons name="calendar-outline" size={28} color={COLORS.button.choose} />
-                            <Text style={styles.text}>Treatment</Text>
-                        </TouchableOpacity> */}
-                    {/* </View> */}
-
-                    {/* Tab Content */}
-                    <View>
-
-                    </View>
-
                 </View>
-                {/* <View>
-                    <Text>Diary</Text>
-                </View> */}
 
-                {/* </View> */}
-
-                {/* Modal tùy chọn */}
                 <Modal
                     visible={showOptionsModal}
                     transparent={true}
@@ -538,7 +466,6 @@ const PetDetail = () => {
                     </TouchableOpacity>
                 </Modal>
 
-                {/* Modal xóa thú cưng */}
                 <Modal
                     visible={showDeleteModal}
                     transparent={true}
@@ -604,15 +531,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
     },
-    // buttonContainer: {
-    //     display: 'flex',
-    //     flexDirection: 'column',
-    //     gap: 7,
-    //     alignItems: 'center',
-    //     flex: 1,
-    //     borderBottomWidth: 1,
-    //     borderBottomColor: COLORS.background.darkBlue,
-    // },
     buttonContainer: {
         display: 'flex',
         flexDirection: 'column',
@@ -621,11 +539,11 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 10,
         borderBottomWidth: 3,
-        borderBottomColor: 'transparent', // Mặc định trong suốt
+        borderBottomColor: 'transparent',
     },
 
     activeTab: {
-        borderBottomColor: COLORS.button.choose, // Khi active hiện border
+        borderBottomColor: COLORS.button.choose,
     },
 
     activeText: {
@@ -634,6 +552,15 @@ const styles = StyleSheet.create({
     },
 
     tabContentContainer: {
+        backgroundColor: COLORS.background.white,
+        padding: 15,
+        borderRadius: 10,
+        alignSelf: 'stretch',
+        marginTop: 10,
+    },
+
+    treatmentTabContainer: {
+        flex: 1,
         backgroundColor: COLORS.background.white,
         padding: 15,
         borderRadius: 10,
@@ -763,7 +690,6 @@ const styles = StyleSheet.create({
     genderContainer: {
         display: 'flex',
         flexDirection: 'column',
-        // alignItems: 'center',
         gap: 2,
         flex: 1,
     },
