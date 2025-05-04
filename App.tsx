@@ -9,6 +9,7 @@ import {
   View,
   Alert,
 } from 'react-native';
+import { PUSH_NOTI } from '@env';
 import {AuthProvider} from './context/AuthContext';
 import {enableScreens} from 'react-native-screens';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
@@ -91,6 +92,7 @@ const App = () => {
           barStyle={isDarkMode ? 'light-content' : 'dark-content'}
           backgroundColor={backgroundStyle.backgroundColor}
         />
+        <Text>{PUSH_NOTI}</Text>
         <AppNavigator />
       </QueryClientProvider>
     </AuthProvider>
