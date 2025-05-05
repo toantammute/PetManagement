@@ -8,25 +8,24 @@ import {
     KeyboardAvoidingView, 
     Platform,
     StatusBar,
-    Alert,
     ActivityIndicator 
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Toast from 'react-native-toast-message';
 
 const OTP = () => {
     const [otp, setOtp] = useState(['', '', '', '']);
     const [timer, setTimer] = useState(60);
     const [loading, setLoading] = useState(false);
     const [resendDisabled, setResendDisabled] = useState(true);
-    
+
     const inputRefs = useRef<Array<TextInput | null>>([null, null, null, null]);
     const navigation = useNavigation();
     const route = useRoute();
     const params = route.params as { email?: string; phone?: string; forgotPassword?: boolean };
 
     useEffect(() => {
-        // Thiết lập bộ đếm thời gian cho việc gửi lại mã
         const interval = setInterval(() => {
             setTimer((prevTimer) => {
                 if (prevTimer <= 1) {
@@ -42,67 +41,79 @@ const OTP = () => {
     }, []);
 
     const handleChangeOtp = (text: string, index: number) => {
-        // Cập nhật giá trị OTP
         const newOtp = [...otp];
-        // Chỉ cho phép số
         newOtp[index] = text.replace(/[^0-9]/g, '');
         setOtp(newOtp);
 
-        // Tự động chuyển đến ô tiếp theo khi nhập
         if (text && index < 3) {
             inputRefs.current[index + 1]?.focus();
         }
     };
 
     const handleKeyPress = (e: any, index: number) => {
-        // Xử lý phím backspace để quay lại ô trước
         if (e.nativeEvent.key === 'Backspace' && !otp[index] && index > 0) {
             inputRefs.current[index - 1]?.focus();
         }
     };
 
-    const handleVerify = () => {
+    const handleVerify = async () => {
         const otpValue = otp.join('');
-        
+
         if (otpValue.length !== 4) {
-            Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ mã OTP');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Please enter the complete verification code',
+                position: 'bottom'
+            });
             return;
         }
 
         setLoading(true);
 
-        // Mô phỏng xác thực OTP
-        setTimeout(() => {
-            setLoading(false);
-            
-            if (params.forgotPassword) {
-                // Điều hướng đến trang đặt lại mật khẩu mới
-                // navigation.navigate('ResetPassword' as never);
-            } else {
-                // Xác thực thành công tài khoản mới đăng ký
-                Alert.alert(
-                    'Xác thực thành công',
-                    'Tài khoản của bạn đã được xác thực thành công.',
-                    [
-                        {
-                            text: 'OK',
-                            // onPress: () => navigation.navigate('Login' as never)
-                        }
-                    ]
-                );
-            }
-        }, 2000);
+        try {
+            // Simulate OTP verification
+            setTimeout(() => {
+                setLoading(false);
+
+                if (params.forgotPassword) {
+                    navigation.navigate('ResetPassword' as never);
+                } else {
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Success',
+                        text2: 'Your account has been verified',
+                        position: 'bottom'
+                    });
+                    navigation.navigate('Login' as never);
+                }
+            }, 2000);
+        } catch (error) {
+            console.error('OTP verification error:', error);
+            setLoading(false); // Ensure loading is set to false on error
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to verify the code. Please try again.',
+                position: 'bottom'
+            });
+        }
     };
 
     const handleResendOTP = () => {
-        // Đặt lại timer và vô hiệu hóa nút gửi lại
         setTimer(60);
         setResendDisabled(true);
-        
-        // Mô phỏng API gửi lại mã
-        Alert.alert('Thông báo', 'Mã xác thực mới đã được gửi.');
-        
-        // Khởi động lại bộ đếm
+
+        // Simulate resending OTP
+        setTimeout(() => {
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'A new verification code has been sent',
+                position: 'bottom'
+            });
+        }, 1500); // Simulate network delay
+
         const interval = setInterval(() => {
             setTimer((prevTimer) => {
                 if (prevTimer <= 1) {
@@ -116,23 +127,22 @@ const OTP = () => {
     };
 
     const handleGoBack = () => {
-        // navigation.goBack();
+        navigation.goBack();
     };
 
-    // Hiển thị địa chỉ liên hệ được che một phần
-    const maskedContact = params.email 
+    const maskedContact = params.email
         ? params.email.replace(/(\w{3})[\w.-]+@([\w.]+\w)/, '$1***@$2')
         : params.phone?.replace(/(\d{3})\d{4}(\d{3})/, '$1****$2');
 
     return (
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
             <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-            
-            <TouchableOpacity 
-                style={styles.backButton} 
+
+            <TouchableOpacity
+                style={styles.backButton}
                 onPress={handleGoBack}
             >
                 <Icon name="arrow-back" size={24} color="#333" />
@@ -141,9 +151,9 @@ const OTP = () => {
             <View style={styles.content}>
                 <View style={styles.header}>
                     <Icon name="mark-email-read" size={70} color="#4CAF50" />
-                    <Text style={styles.title}>Xác thực OTP</Text>
+                    <Text style={styles.title}>OTP Verification</Text>
                     <Text style={styles.subtitle}>
-                        Mã xác thực đã được gửi đến{'\n'}
+                        A verification code has been sent to{'\n'}
                         <Text style={styles.contactText}>{maskedContact}</Text>
                     </Text>
                 </View>
@@ -166,25 +176,25 @@ const OTP = () => {
                     ))}
                 </View>
 
-                <TouchableOpacity 
-                    style={[styles.verifyButton, loading && styles.verifyButtonDisabled]} 
+                <TouchableOpacity
+                    style={[styles.verifyButton, loading && styles.verifyButtonDisabled]}
                     onPress={handleVerify}
                     disabled={loading}
                 >
                     {loading ? (
                         <ActivityIndicator color="#fff" size="small" />
                     ) : (
-                        <Text style={styles.verifyButtonText}>Xác nhận</Text>
+                        <Text style={styles.verifyButtonText}>Verify</Text>
                     )}
                 </TouchableOpacity>
 
                 <View style={styles.resendContainer}>
                     <Text style={styles.resendText}>
-                        Chưa nhận được mã? {resendDisabled ? `Gửi lại sau (${timer}s)` : ''}
+                        Didn't receive the code? {resendDisabled ? `Resend after (${timer}s)` : ''}
                     </Text>
                     {!resendDisabled && (
                         <TouchableOpacity onPress={handleResendOTP}>
-                            <Text style={styles.resendButtonText}>Gửi lại mã</Text>
+                            <Text style={styles.resendButtonText}>Resend Code</Text>
                         </TouchableOpacity>
                     )}
                 </View>

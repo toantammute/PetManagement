@@ -14,6 +14,7 @@ import { useAppointments } from '../../hook/useAppointment';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Toast from 'react-native-toast-message';
 
 // Define the type for the navigation stack
 type RootStackParamList = {
@@ -33,7 +34,7 @@ const Pets = () => {
     const [activeTab, setActiveTab] = useState('PROFILE');
     const [selectedAvatars, setSelectedAvatars] = useState<string[]>(['all']);
 
-    // Lọc dữ liệu dựa trên pet được chọn
+    // Filter data based on selected pet
     const getFilteredData = () => {
         const isAllSelected = selectedAvatars.includes('all');
         
@@ -46,15 +47,15 @@ const Pets = () => {
         );
 
         const filteredSchedules = isAllSelected ? allSchedules : allSchedules?.filter(schedule => {
-            // Chuyển pet_id từ number sang string để so sánh
+            // Convert pet_id from number to string for comparison
             return selectedAvatars.some(avatarId => schedule.pet_id === parseInt(avatarId));
         });
 
-        // Lọc và sắp xếp appointments
+        // Filter and sort appointments
         const sortedAppointments = appointments?.slice()?.sort((a, b) => {
             const dateA = new Date(a.date).getTime();
             const dateB = new Date(b.date).getTime();
-            return dateB - dateA; // Sắp xếp giảm dần
+            return dateB - dateA; // Sort in descending order
         });
 
         const filteredAppointments = isAllSelected ? sortedAppointments : sortedAppointments?.filter(appointment => 
@@ -82,9 +83,9 @@ const Pets = () => {
         }
     };
 
-    const navigateToBreedDetection = () => {
-        navigation.navigate('BreedDetection');
-    };
+    // const navigateToBreedDetection = () => {
+    //     navigation.navigate('BreedDetection');
+    // };
 
     const renderContent = () => {
         switch (activeTab) {
@@ -95,7 +96,7 @@ const Pets = () => {
                             <ActivityIndicator size="large" color={COLORS.background.mint} />
                         ) : isPetsError ? (
                             <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>Lỗi: {petsError.message}</Text>
+                                <Text style={styles.errorText}>Error: {petsError.message}</Text>
                             </View>
                         ) : filteredPets && filteredPets.length > 0 ? (
                             <ScrollView 
@@ -112,7 +113,7 @@ const Pets = () => {
                             </ScrollView>
                         ) : (
                             <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>Không tìm thấy thú cưng</Text>
+                                <Text style={styles.emptyText}>No pets found</Text>
                             </View>
                         )}
                     </View>
@@ -124,7 +125,7 @@ const Pets = () => {
                             <ActivityIndicator size="large" color={COLORS.background.mint} />
                         ) : isDiaryError ? (
                             <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>Lỗi: {diaryError.message}</Text>
+                                <Text style={styles.errorText}>Error: {diaryError.message}</Text>
                             </View>
                         ) : filteredDiaries && filteredDiaries.length > 0 ? (
                             <ScrollView style={styles.scrollView}>
@@ -132,7 +133,7 @@ const Pets = () => {
                             </ScrollView>
                         ) : (
                             <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>Không có nhật ký nào</Text>
+                                <Text style={styles.emptyText}>No diary entries found</Text>
                             </View>
                         )}
                     </View>
@@ -144,7 +145,7 @@ const Pets = () => {
                             <ActivityIndicator size="large" color={COLORS.background.mint} />
                         ) : isScheduleError ? (
                             <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>Lỗi: {scheduleError.message}</Text>
+                                <Text style={styles.errorText}>Error: {scheduleError.message}</Text>
                             </View>
                         ) : filteredSchedules && filteredSchedules.length > 0 ? (
                             <ScrollView 
@@ -166,7 +167,7 @@ const Pets = () => {
                             </ScrollView>
                         ) : (
                             <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>Không có lịch trình nào</Text>
+                                <Text style={styles.emptyText}>No schedules found</Text>
                             </View>
                         )}
                     </View>
@@ -178,7 +179,7 @@ const Pets = () => {
                             <ActivityIndicator size="large" color={COLORS.background.mint} />
                         ) : isAppointmentsError ? (
                             <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>Lỗi: {appointmentsError.message}</Text>
+                                <Text style={styles.errorText}>Error: {appointmentsError.message}</Text>
                             </View>
                         ) : filteredAppointments && filteredAppointments.length > 0 ? (
                             <ScrollView 
@@ -195,7 +196,7 @@ const Pets = () => {
                             </ScrollView>
                         ) : (
                             <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>Không có cuộc hẹn nào</Text>
+                                <Text style={styles.emptyText}>No appointments found</Text>
                             </View>
                         )}
                     </View>
@@ -229,13 +230,13 @@ const Pets = () => {
                 </View>
                 
                 {/* Floating Action Button for Breed Detection */}
-                <TouchableOpacity 
+                {/* <TouchableOpacity 
                     style={styles.breedDetectionButton} 
                     onPress={navigateToBreedDetection}
                 >
                     <Icon name="paw" size={24} color="#fff" />
                     <Text style={styles.breedDetectionButtonText}>Detect Breed</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </SafeAreaView>
         </>
     )

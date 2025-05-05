@@ -1,4 +1,4 @@
-import { getPets, getPetById, createPet, deletePet } from "../services/petService";
+import { getPets, getPetById, createPet, deletePet, updatePet, updatePetAvatar } from "../services/petService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pet, Image } from "../models/models";
 import { queryClient } from "../utils/queryClient";
@@ -49,6 +49,30 @@ export const useDeletePet = () => {
         mutationFn: (id: string) => deletePet(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['pets'] });
+        },
+    });
+}
+
+export const useUpdatePet = () => {
+    const queryClient = useQueryClient();
+    
+    return useMutation({
+        mutationFn: ({ pet, id }: { pet: Pet; id: string }) => updatePet(pet,  id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pets'] });
+            queryClient.invalidateQueries({ queryKey: ['pet'] });
+        },
+    });
+}
+
+export const useUpdatePetAvatar = () => {
+    const queryClient = useQueryClient();
+    
+    return useMutation({
+        mutationFn: ({ image, id }: { image: Image; id: string }) => updatePetAvatar(id, image),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pets'] });
+            queryClient.invalidateQueries({ queryKey: ['pet'] });
         },
     });
 }

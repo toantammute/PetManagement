@@ -79,7 +79,7 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={COLORS.button.choose} />
-        <Text style={styles.loadingText}>Đang tải dữ liệu điều trị...</Text>
+        <Text style={styles.loadingText}>Loading treatment data...</Text>
       </View>
     );
   }
@@ -87,7 +87,7 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
   if (treatmentsError) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Có lỗi xảy ra khi tải dữ liệu</Text>
+        <Text style={styles.errorText}>An error occurred while loading data</Text>
       </View>
     );
   }
@@ -95,7 +95,7 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
   if (!treatments || treatments.length === 0) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.noDataText}>Không có dữ liệu điều trị nào cho thú cưng này</Text>
+        <Text style={styles.noDataText}>No treatment data for this pet</Text>
       </View>
     );
   }
@@ -112,7 +112,7 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
     
     Toast.show({
       type: 'info',
-      text1: 'Xem chi tiết điều trị',
+      text1: 'View Treatment Details',
       text2: `${treatment.name}`,
       position: 'bottom',
       visibilityTime: 3000,
@@ -122,9 +122,7 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
   };
 
   const renderTreatmentsList = () => (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Phác đồ điều trị</Text>
-      
+    <ScrollView style={styles.container}>      
       <View style={styles.treatmentsContainer}>
         {treatments.map((treatment: Treatment) => (
           <TouchableOpacity
@@ -142,7 +140,7 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
               />
             </View>
             <Text style={styles.treatmentDate}>
-              Bắt đầu: {formatDate(treatment.start_date)}
+              Started: {formatDate(treatment.start_date)}
             </Text>
             <View style={styles.treatmentFooter}>
               <Text 
@@ -154,7 +152,7 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
                 {treatment.status}
               </Text>
               <View style={styles.viewDetailButton}>
-                <Text style={styles.viewDetailText}>Xem chi tiết</Text>
+                <Text style={styles.viewDetailText}>View details</Text>
                 <Ionicons name="chevron-forward" size={16} color={COLORS.button.choose} />
               </View>
             </View>
@@ -178,9 +176,9 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
             onPress={() => setDetailModalVisible(false)}
           >
             <Ionicons name="chevron-back" size={24} color={COLORS.button.choose} />
-            <Text style={styles.backButtonText}>Quay lại</Text>
+            <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
-          <Text style={styles.detailTitle} numberOfLines={1}>Chi tiết điều trị</Text>
+          <Text style={styles.detailTitle} numberOfLines={1}>Treatment Details</Text>
           <View style={{ width: 40 }} />
         </View>
         
@@ -190,7 +188,7 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
             <Text style={styles.detailTreatmentName}>{selectedTreatment?.name}</Text>
             <View style={styles.detailTreatmentInfo}>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Trạng thái:</Text>
+                <Text style={styles.infoLabel}>Status:</Text>
                 <Text 
                   style={[
                     styles.statusBadge, 
@@ -201,12 +199,12 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
                 </Text>
               </View>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Ngày bắt đầu:</Text>
+                <Text style={styles.infoLabel}>Start Date:</Text>
                 <Text style={styles.infoValue}>{selectedTreatment ? formatDate(selectedTreatment.start_date) : ''}</Text>
               </View>
               {selectedTreatment?.description && (
                 <View style={styles.descriptionContainer}>
-                  <Text style={styles.descriptionTitle}>Mô tả:</Text>
+                  <Text style={styles.descriptionTitle}>Description:</Text>
                   <Text style={styles.descriptionText}>{selectedTreatment.description}</Text>
                 </View>
               )}
@@ -215,12 +213,12 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
           
           {/* Phases Section */}
           <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Các giai đoạn</Text>
+            <Text style={styles.sectionTitle}>Phases</Text>
             
             {phasesLoading ? (
               <View style={styles.loadingSectionContainer}>
                 <ActivityIndicator size="small" color={COLORS.button.choose} />
-                <Text style={styles.loadingSectionText}>Đang tải dữ liệu giai đoạn...</Text>
+                <Text style={styles.loadingSectionText}>Loading phase data...</Text>
               </View>
             ) : phases && phases.length > 0 ? (
               <>
@@ -276,30 +274,30 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
                       </View>
                       
                       <View style={styles.phaseDates}>
-                        <Text style={styles.phaseDateLabel}>Bắt đầu:</Text>
+                        <Text style={styles.phaseDateLabel}>Start:</Text>
                         <Text style={styles.phaseDate}>{formatDate(phase.start_date)}</Text>
                         
-                        <Text style={[styles.phaseDateLabel, { marginLeft: 20 }]}>Kết thúc:</Text>
+                        <Text style={[styles.phaseDateLabel, { marginLeft: 20 }]}>End:</Text>
                         <Text style={styles.phaseDate}>
-                          {phase.end_date ? formatDate(phase.end_date) : "Hiện tại"}
+                          {phase.end_date ? formatDate(phase.end_date) : "Present"}
                         </Text>
                       </View>
                       
                       {phase.description && (
                         <View style={styles.phaseDescriptionContainer}>
-                          <Text style={styles.phaseDescriptionTitle}>Mô tả giai đoạn:</Text>
+                          <Text style={styles.phaseDescriptionTitle}>Phase Description:</Text>
                           <Text style={styles.phaseDescription}>{phase.description}</Text>
                         </View>
                       )}
                       
                       {/* Medications in this phase */}
                       <View style={styles.medicationsContainer}>
-                        <Text style={styles.medicationsTitle}>Thuốc điều trị</Text>
+                        <Text style={styles.medicationsTitle}>Medications</Text>
                         
                         {medicationsLoading ? (
                           <View style={styles.loadingSectionContainer}>
                             <ActivityIndicator size="small" color={COLORS.button.choose} />
-                            <Text style={styles.loadingSectionText}>Đang tải dữ liệu thuốc...</Text>
+                            <Text style={styles.loadingSectionText}>Loading medication data...</Text>
                           </View>
                         ) : medications && medications.length > 0 ? (
                           <View style={styles.medicationsList}>
@@ -308,16 +306,16 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
                                 <Text style={styles.medicationName}>{medication.medicine_name}</Text>
                                 <View style={styles.medicationDivider} />
                                 <View style={styles.medicationDetail}>
-                                  <Text style={styles.medicationLabel}>Liều lượng:</Text>
+                                  <Text style={styles.medicationLabel}>Dosage:</Text>
                                   <Text style={styles.medicationValue}>{medication.dosage}</Text>
                                 </View>
                                 <View style={styles.medicationDetail}>
-                                  <Text style={styles.medicationLabel}>Tần suất:</Text>
+                                  <Text style={styles.medicationLabel}>Frequency:</Text>
                                   <Text style={styles.medicationValue}>{medication.frequency}</Text>
                                 </View>
                                 {medication.notes && (
                                   <View style={styles.medicationNoteContainer}>
-                                    <Text style={styles.medicationNoteLabel}>Ghi chú:</Text>
+                                    <Text style={styles.medicationNoteLabel}>Notes:</Text>
                                     <Text style={styles.medicationNotes}>{medication.notes}</Text>
                                   </View>
                                 )}
@@ -327,7 +325,7 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
                         ) : (
                           <View style={styles.noDataContainer}>
                             <Text style={styles.noDataText}>
-                              Không có thuốc nào được chỉ định trong giai đoạn này
+                              No medications prescribed for this phase
                             </Text>
                           </View>
                         )}
@@ -339,7 +337,7 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
             ) : (
               <View style={styles.noDataContainer}>
                 <Text style={styles.noDataText}>
-                  Không có giai đoạn nào được tìm thấy cho đợt điều trị này
+                  No phases found for this treatment
                 </Text>
               </View>
             )}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, SafeAreaView, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, StatusBar } from 'react-native';
 import { COLORS } from '../theme/color';
 import { useDiaryDetail } from "../hook/useDiary";
 import { useDeleteDiary } from '../hook/useDiary';
@@ -8,6 +8,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import { usePetById } from '../hook/usePets';
 import Avatar from '../component/avabtn';
 import Header from '../component/header';
+import Toast from 'react-native-toast-message';
 
 const DiaryDetail = () => {
     const route = useRoute();
@@ -18,30 +19,28 @@ const DiaryDetail = () => {
     const { mutate: deleteDiary } = useDeleteDiary();
 
     const handleDelete = () => {
-        Alert.alert(
-            'Xóa nhật ký',
-            'Bạn có chắc chắn muốn xóa nhật ký này không?',
-            [
-                { text: 'Hủy', style: 'cancel' },
-                {
-                    text: 'Xóa',
-                    onPress: () => {
-                        if (diary?.log_id) {
-                            deleteDiary(diary.log_id);
-                            navigation.goBack();
-                        }
-                    },
-                    style: 'destructive',
-                },
-            ],
-            { cancelable: true }
-        );
+        Toast.show({
+            type: 'info',
+            text1: 'Delete Diary',
+            text2: 'Are you sure you want to delete this diary?',
+            onPress: () => {
+                if (diary?.log_id) {
+                    deleteDiary(diary.log_id);
+                    navigation.goBack();
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Success',
+                        text2: 'Diary deleted successfully'
+                    });
+                }
+            }
+        });
     };
 
     if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
-                <Text style={styles.loadingText}>Đang tải...</Text>
+                <Text style={styles.loadingText}>Loading...</Text>
             </View>
         );
     }
@@ -49,30 +48,29 @@ const DiaryDetail = () => {
     if (!diary) {
         return (
             <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>Không tìm thấy nhật ký</Text>
+                <Text style={styles.errorText}>Diary not found</Text>
             </View>
         );
     }
 
-    const formattedDate = new Date(diary.date_time).toLocaleDateString('vi-VN', {
+    const formattedDate = new Date(diary.date_time).toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric',
     });
 
-    const formattedTime = new Date(diary.date_time).toLocaleTimeString('vi-VN', {
+    const formattedTime = new Date(diary.date_time).toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
-        hour12: false,
-        timeZone: 'Asia/Ho_Chi_Minh'
+        hour12: true
     });
 
     return (
         <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="dark-content" backgroundColor={COLORS.background.white} />
             <View style={styles.container}>
-                <Header title="Chi tiết nhật ký" />
+                <Header title="Diary Details" />
 
                 <ScrollView 
                     style={styles.scrollView}
@@ -87,7 +85,7 @@ const DiaryDetail = () => {
                             onPress={() => {}}
                         />
                         <View style={styles.petInfo}>
-                            <Text style={styles.petName}>{pet?.name || 'Không có tên'}</Text>
+                            <Text style={styles.petName}>{pet?.name || 'No name'}</Text>
                             <View style={styles.dateTimeContainer}>
                                 <Feather name="calendar" size={14} color={COLORS.text.textDisable} />
                                 <Text style={styles.date}>{formattedDate}</Text>
@@ -104,7 +102,7 @@ const DiaryDetail = () => {
                     <View style={styles.contentCard}>
                         <View style={styles.contentHeader}>
                             <Feather name="book-open" size={20} color={COLORS.text.text} />
-                            <Text style={styles.contentTitle}>Ghi chú</Text>
+                            <Text style={styles.contentTitle}>Notes</Text>
                         </View>
                         <Text style={styles.content}>{diary.notes}</Text>
                     </View>
@@ -116,14 +114,14 @@ const DiaryDetail = () => {
                             onPress={() => {}}
                         >
                             <Feather name="edit-2" size={20} color={COLORS.background.white} />
-                            <Text style={styles.buttonText}>Chỉnh sửa</Text>
+                            <Text style={styles.buttonText}>Edit</Text>
                         </TouchableOpacity>
                         <TouchableOpacity 
                             style={[styles.actionButton, styles.deleteButton]}
                             onPress={handleDelete}
                         >
                             <Feather name="trash-2" size={20} color={COLORS.background.white} />
-                            <Text style={styles.buttonText}>Xóa</Text>
+                            <Text style={styles.buttonText}>Delete</Text>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>

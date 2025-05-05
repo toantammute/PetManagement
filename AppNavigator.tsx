@@ -20,6 +20,9 @@ import ChatbotScreen from './src/ChatbotScreen';
 import { ConversationListScreen } from './component/chatbot';
 import BreedDetectionScreen from './src/BreedDetectionScreen';
 import DiaryDetail from './src/diaryDetail';
+import ResetPassword from './src/resetPassword';
+import ForgotPassword from './src/forgotPass';
+import Profile from './src/Profile';
 // import PetDetail from './src/(tabs)/pets';
 // import AddPet from './src/addPet';
 
@@ -47,11 +50,15 @@ const AppNavigator = () => {
                         <Stack.Screen name="BreedDetection" component={BreedDetectionScreen} />
                         <Stack.Screen name="ConversationList" component={ConversationListScreen} />
                         <Stack.Screen name="DiaryDetail" component={DiaryDetail} />
+                        <Stack.Screen name="Splash" component={Splash} />
+                        <Stack.Screen name="ResetPassword" component={ResetPassword} />
+                        <Stack.Screen name="Profile" component={Profile} />
                     </>
                 ) : (
                     <>
                         <Stack.Screen name="Login" component={Login} />
                         <Stack.Screen name="SignUp" component={SignUp} />
+                        <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
                     </>
                 )}
             </Stack.Navigator>

@@ -9,7 +9,6 @@ import {
     StatusBar,
     Dimensions,
     ActivityIndicator,
-    Alert,
     FlatList
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -18,6 +17,7 @@ import { COLORS } from '../theme/color';
 import { ProductDetail } from '../models/models';
 import { useProductById } from '../hook/useProduct';
 import { useCart } from '../hook/useCart';
+import Toast from 'react-native-toast-message';
 
 interface ProductDetails {
     id: string;
@@ -98,26 +98,20 @@ const ProductDetailScreen = () => {
 
     const toggleFavorite = () => {
         setIsFavorite(!isFavorite);
-        if (!isFavorite) {
-            Alert.alert('Thông báo', 'Đã thêm sản phẩm vào danh sách yêu thích');
-        }
+        Toast.show({
+            type: 'success',
+            text1: 'Thông báo',
+            text2: 'Đã thêm sản phẩm vào danh sách yêu thích'
+        });
     };
 
     const addToCart = () => {
-        Alert.alert(
-            'Thành công',
-            `Đã thêm ${quantity} sản phẩm vào giỏ hàng`,
-            [
-                {
-                    text: 'Tiếp tục mua sắm',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Xem giỏ hàng',
-                    onPress: () => navigation.navigate('Cart' as never),
-                },
-            ]
-        );
+        Toast.show({
+            type: 'success',
+            text1: 'Thông báo',
+            text2: 'Đã thêm sản phẩm vào giỏ hàng'
+        });
+        onPress: () =>  navigation.navigate('Cart' as never);
     };
 
     const navigateToCart = () => {

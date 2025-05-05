@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, StatusBar, SafeAreaView, Platform, TouchableOpacity, ActivityIndicator, Modal, Image as RNImage, Alert } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, SafeAreaView, Platform, TouchableOpacity, ActivityIndicator, Modal, Image as RNImage, ScrollView, Alert } from 'react-native';
 import { COLORS } from '../theme/color';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Feather from 'react-native-vector-icons/Feather';
@@ -7,12 +7,18 @@ import Avatar from '../component/avabtn';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { usePetById, useDeletePet } from '../hook/usePets';
+import { usePetById, useDeletePet, useUpdatePet, useUpdatePetAvatar } from '../hook/usePets';
 import { useVaccinations } from '../hook/useVaccination';
 import Header from '../component/header';
 import { launchImageLibrary, launchCamera, MediaType, CameraType, PhotoQuality } from "react-native-image-picker";
 import { PermissionsAndroid } from 'react-native';
 import TreatmentPage from './treatmentPage';
+import Toast from 'react-native-toast-message';
+import { Allergy, CreateAllergyRequest } from '../services/allergyService';
+import { useGetAllergiesByPetId } from '../hook/useAllergy';
+import Input from '../component/input';
+import DatePicker from '../component/datepicker';
+import { Pet } from '../models/models';
 
 const PetDetail = () => {
     const navigation = useNavigation<any>();
@@ -20,7 +26,11 @@ const PetDetail = () => {
     const petId = (route.params as any).petId;
     const { data: pet, isLoading, isError, error } = usePetById(petId);
     const { data: vaccinations, isLoading: isLoadingVaccinations } = useVaccinations(petId);
+    const { data: allergies, isLoading: isLoadingAllergies } = useGetAllergiesByPetId(petId);
     const { mutate: deletePet, isPending } = useDeletePet();
+    const { data: PetDetail } = usePetById(petId);
+    const { mutate: updatePet, isPending: isUpdating } = useUpdatePet();
+    const { mutate: updatePetAvatar, isPending: isUpdatingAvatar } = useUpdatePetAvatar();
 
     const [activeTab, setActiveTab] = useState<string>('Overview');
     const [showOptions, setShowOptions] = useState(false);
@@ -28,6 +38,35 @@ const PetDetail = () => {
     const [showOptionsModal, setShowOptionsModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // Add edit pet state
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [petName, setPetName] = useState('');
+    const [petType, setPetType] = useState('');
+    const [petBreed, setPetBreed] = useState('');
+    const [petAge, setPetAge] = useState('');
+    const [petWeight, setPetWeight] = useState('');
+    const [petGender, setPetGender] = useState('');
+    const [petHealthNotes, setPetHealthNotes] = useState('');
+    const [petMicrochipNumber, setPetMicrochipNumber] = useState('');
+    const [birthDate, setBirthDate] = useState<Date | null>(null);
+
+    // Initialize pet data when pet details are loaded
+    useEffect(() => {
+        if (PetDetail) {
+            setPetName(PetDetail.name || '');
+            setPetType(PetDetail.type || '');
+            setPetBreed(PetDetail.breed || '');
+            setPetAge(PetDetail.age?.toString() || '');
+            setPetWeight(PetDetail.weight?.toString() || '');
+            setPetGender(PetDetail.gender || '');
+            setPetHealthNotes(PetDetail.healthnotes || '');
+            setPetMicrochipNumber(PetDetail.microchip_number || '');
+            if (PetDetail.birth_date) {
+                setBirthDate(new Date(PetDetail.birth_date));
+            }
+        }
+    }, [PetDetail]);
 
     type ImageFile = {
         uri: string;
@@ -103,10 +142,11 @@ const PetDetail = () => {
             const hasPermission = await requestPermissions();
 
             if (!hasPermission) {
-                Alert.alert(
-                    'Permission Required',
-                    'Please grant storage permission from app settings to select images'
-                );
+                Toast.show({
+                    type: 'error',
+                    text1: 'Permission Request',
+                    text2: 'Please grant storage access to select photos',
+                });
                 return;
             }
 
@@ -119,7 +159,6 @@ const PetDetail = () => {
 
             const response = await launchImageLibrary(options);
             if (response.didCancel) {
-                console.log('User cancelled image picker');
             } else if (response.assets && response.assets[0]) {
                 const selectedImage = response.assets[0];
                 setImage({
@@ -130,7 +169,11 @@ const PetDetail = () => {
             }
         } catch (error) {
             console.log('Error picking image:', error);
-            Alert.alert('Error', 'Failed to pick image');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Unable to select image',
+            });
         } finally {
             setLoading(false);
             setShowOptions(false);
@@ -145,10 +188,11 @@ const PetDetail = () => {
             const hasPermission = await requestPermissions();
 
             if (!hasPermission) {
-                Alert.alert(
-                    'Yêu cầu quyền truy cập',
-                    'Vui lòng cấp quyền truy cập máy ảnh để chụp ảnh'
-                );
+                Toast.show({
+                    type: 'error',
+                    text1: 'Permission Request',
+                    text2: 'Please grant camera access to take photos',
+                });
                 return;
             }
 
@@ -163,7 +207,7 @@ const PetDetail = () => {
 
             const response = await launchCamera(options);
             if (response.didCancel) {
-                console.log('Người dùng đã hủy chụp ảnh');
+                console.log('User canceled photo capture');
             } else if (response.assets && response.assets[0]) {
                 const selectedImage = response.assets[0];
                 setImage({
@@ -173,8 +217,12 @@ const PetDetail = () => {
                 });
             }
         } catch (error) {
-            console.log('Lỗi khi chụp ảnh:', error);
-            Alert.alert('Lỗi', 'Không thể chụp ảnh');
+            console.log('Error capturing photo:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Unable to capture photo',
+            });
         } finally {
             setLoading(false);
             setShowOptions(false);
@@ -191,14 +239,19 @@ const PetDetail = () => {
 
         try {
             await deletePet(petId);
-            Alert.alert('Thành công', 'Đã xóa thú cưng thành công');
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'Pet has been deleted successfully',
+            });
             navigation.goBack();
         } catch (error: any) {
-            console.error('Lỗi khi xóa thú cưng:', error);
-            Alert.alert(
-                'Lỗi', 
-                error.response?.data?.message || 'Không thể xóa thú cưng. Vui lòng thử lại sau.'
-            );
+            console.error('Error deleting pet:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: error.response?.data?.message || 'Unable to delete pet. Please try again later.',
+            });
         } finally {
             setIsDeleting(false);
             setShowDeleteModal(false);
@@ -206,42 +259,97 @@ const PetDetail = () => {
     };
 
     const handleSharePet = () => {
-        // TODO: Implement chức năng chia sẻ
-        Alert.alert('Thông báo', 'Chức năng chia sẻ đang được phát triển');
+        // TODO: Implement sharing functionality
+        Toast.show({
+            type: 'info',
+            text1: 'Notification',
+            text2: 'Sharing feature is under development',
+        });
+    };
+
+    const handleUpdatePet = async () => {
+        if (isUpdating) return;
+
+        // Convert form state into a Pet object
+        const petData: Pet = {
+            name: petName,
+            type: petType,
+            breed: petBreed,
+            age: Number(petAge),
+            weight: Number(petWeight),
+            gender: petGender,
+            healthnotes: petHealthNotes,
+            microchip_number: petMicrochipNumber,
+            birth_date: birthDate ? birthDate.toISOString().split('T')[0] : undefined,
+        } as Pet; // Type assertion since we don't have all fields of Pet
+
+        try {
+            // Call updatePet with the structure it expects: { pet, id }
+            await updatePet({ pet: petData, id: petId });
+
+            // If image was changed, update avatar separately
+            if (image) {
+                await updatePetAvatar({ image, id: petId });
+            }
+
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'Pet information has been updated',
+            });
+            setShowEditModal(false);
+        } catch (error: any) {
+            console.error('Error updating pet information:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: error.response?.data?.message || 'Unable to update pet information. Please try again later.',
+            });
+        }
+    };
+
+    const handleBirthDateChange = (date: Date) => {
+        setBirthDate(date);
+
+        const currentYear = new Date().getFullYear();
+        const birthYear = date.getFullYear();
+        const calculatedAge = currentYear - birthYear;
+
+        setPetAge(calculatedAge.toString());
     };
 
     const renderTabContent = () => {
         return (
             <View style={styles.bottomContainer}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={[
                         styles.buttonContainer,
-                        activeTab === 'Overview' && styles.activeTab
-                    ]} 
-                    onPress={() => setActiveTab('Overview')}
+                        activeTab === 'Allergy' && styles.activeTab
+                    ]}
+                    onPress={() => setActiveTab('Allergy')}
                 >
-                    <Ionicons 
-                        name="document-text-outline" 
-                        size={28} 
-                        color={activeTab === 'Overview' ? COLORS.button.choose : COLORS.text.default} 
+                    <Ionicons
+                        name="alert-circle-outline"
+                        size={28}
+                        color={activeTab === 'Allergy' ? COLORS.button.choose : COLORS.text.default}
                     />
                     <Text style={[
                         styles.text,
-                        activeTab === 'Overview' && styles.activeText
-                    ]}>Overview</Text>
+                        activeTab === 'Allergy' && styles.activeText
+                    ]}>Allergy</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={[
                         styles.buttonContainer,
                         activeTab === 'Vaccination' && styles.activeTab
-                    ]} 
+                    ]}
                     onPress={() => setActiveTab('Vaccination')}
                 >
-                    <Ionicons 
-                        name="paw-outline" 
-                        size={28} 
-                        color={activeTab === 'Vaccination' ? COLORS.button.choose : COLORS.text.default} 
+                    <MaterialCommunityIcons
+                        name="needle"
+                        size={28}
+                        color={activeTab === 'Vaccination' ? COLORS.button.choose : COLORS.text.default}
                     />
                     <Text style={[
                         styles.text,
@@ -249,22 +357,22 @@ const PetDetail = () => {
                     ]}>Vaccination</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={[
                         styles.buttonContainer,
                         activeTab === 'Treatment' && styles.activeTab
-                    ]} 
+                    ]}
                     onPress={() => setActiveTab('Treatment')}
                 >
-                    <Ionicons 
-                        name="calendar-outline" 
-                        size={28} 
-                        color={activeTab === 'Treatment' ? COLORS.button.choose : COLORS.text.default} 
+                    <Ionicons
+                        name="medical-outline"
+                        size={28}
+                        color={activeTab === 'Treatment' ? COLORS.button.choose : COLORS.text.default}
                     />
                     <Text style={[
                         styles.text,
                         activeTab === 'Treatment' && styles.activeText
-                    ]}>Treatment</Text>
+                    ]}>Treatment Plans</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -272,11 +380,22 @@ const PetDetail = () => {
 
     const renderActiveTabContent = () => {
         switch (activeTab) {
-            case 'Overview':
+            case 'Allergy':
                 return (
                     <View style={styles.tabContentContainer}>
-                        <Text style={styles.contentTitle}>Pet Overview</Text>
-                        {/* Thêm nội dung overview ở đây */}
+                        <Text style={styles.contentTitle}>Allergies</Text>
+                        {isLoadingAllergies ? (
+                            <ActivityIndicator size="small" color={COLORS.button.choose} />
+                        ) : allergies?.data && allergies.data.length > 0 ? (
+                            allergies.data.map((allergy) => (
+                                <View key={allergy.id} style={styles.vaccinationItem}>
+                                    <Text style={styles.vaccineName}>{allergy.type}</Text>
+                                    <Text style={styles.vaccineDescription}>{allergy.detail}</Text>
+                                </View>
+                            ))
+                        ) : (
+                            <Text style={styles.emptyText}>No allergy records found</Text>
+                        )}
                     </View>
                 );
             case 'Vaccination':
@@ -299,8 +418,8 @@ const PetDetail = () => {
                                     </Text>
                                     <View style={styles.vaccineInfo}>
                                         <Text style={styles.vaccineDetail}>
-                                            Next dose: {vaccination.next_due_date ? 
-                                                new Date(vaccination.next_due_date).toLocaleDateString() : 
+                                            Next dose: {vaccination.next_due_date ?
+                                                new Date(vaccination.next_due_date).toLocaleDateString() :
                                                 'Not scheduled'}
                                         </Text>
                                     </View>
@@ -348,10 +467,10 @@ const PetDetail = () => {
                 styles.container,
                 Platform.OS === 'android' && styles.androidSafeArea
             ]}>
-                <Header 
-                    title="Pet Detail" 
-                    variant="three-dot" 
-                    onThreeDotPress={handleThreeDotPress} 
+                <Header
+                    title="Pet Details"
+                    variant="three-dot"
+                    onThreeDotPress={handleThreeDotPress}
                 />
 
                 <View style={styles.tabContent}>
@@ -361,10 +480,10 @@ const PetDetail = () => {
                                 <View style={styles.avaBtnContainer}>
                                     <View style={styles.avatarWrapper}>
                                         <Avatar
-                                            variant={pet?.data_image ? 'default' : 'noava'} 
+                                            variant={pet?.data_image ? 'default' : 'noava'}
                                             size={45}
                                             onPress={handleImagePress}
-                                            imageUrl={pet?.data_image ? `data:image/jpeg;base64,${pet.data_image}` : undefined}/>
+                                            imageUrl={pet?.data_image ? `data:image/jpeg;base64,${pet.data_image}` : undefined} />
                                         <TouchableOpacity
                                             style={styles.cameraButton}
                                             onPress={handleImagePress}
@@ -378,16 +497,23 @@ const PetDetail = () => {
                                     <Text style={styles.breedText}>{pet?.breed}</Text>
                                 </View>
                             </View>
-                            <Text style={styles.editText}>Edit</Text>
+                            <TouchableOpacity onPress={() => setShowEditModal(true)}>
+                                <Text style={styles.editText}>Update</Text>
+                            </TouchableOpacity>
                         </View>
                         <View style={styles.genAgeContainer}>
                             <View style={styles.genderContainer}>
                                 <Text style={styles.genderText}>Gender</Text>
-                                <Text style={styles.valueText}>Male</Text>
+                                <Text style={styles.valueText}>{PetDetail?.gender || 'Unknown'}</Text>
                             </View>
                             <View style={styles.genderContainer}>
                                 <Text style={styles.genderText}>Age</Text>
-                                <Text style={styles.valueText}>1 years</Text>
+                                <Text style={styles.valueText}>{PetDetail?.age || 'Unknown'} years</Text>
+                            </View>
+
+                            <View style={styles.genderContainer}>
+                                <Text style={styles.genderText}>Weight</Text>
+                                <Text style={styles.valueText}>{PetDetail?.weight || 'Unknown'} kg</Text>
                             </View>
                         </View>
                     </View>
@@ -449,7 +575,7 @@ const PetDetail = () => {
                                 }}
                             >
                                 <MaterialIcons name="delete" size={24} color="#FF3B30" />
-                                <Text style={[styles.modalOptionText, { color: '#FF3B30' }]}>Xóa thú cưng</Text>
+                                <Text style={[styles.modalOptionText, { color: '#FF3B30' }]}>Delete Pet</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -460,7 +586,7 @@ const PetDetail = () => {
                                 }}
                             >
                                 <MaterialIcons name="share" size={24} color={COLORS.text.default} />
-                                <Text style={styles.modalOptionText}>Chia sẻ</Text>
+                                <Text style={styles.modalOptionText}>Share</Text>
                             </TouchableOpacity>
                         </View>
                     </TouchableOpacity>
@@ -473,16 +599,16 @@ const PetDetail = () => {
                     onRequestClose={() => setShowDeleteModal(false)}>
                     <View style={styles.deleteModalOverlay}>
                         <View style={styles.deleteModalContent}>
-                            <Text style={styles.deleteModalTitle}>Xóa thú cưng</Text>
+                            <Text style={styles.deleteModalTitle}>Delete Pet</Text>
                             <Text style={styles.deleteModalText}>
-                                Bạn có chắc chắn muốn xóa thú cưng này không? Hành động này không thể hoàn tác.
+                                Are you sure you want to delete this pet? This action cannot be undone.
                             </Text>
                             <View style={styles.deleteModalButtons}>
                                 <TouchableOpacity
                                     style={[styles.deleteModalButton, styles.deleteModalButtonCancel]}
                                     onPress={() => setShowDeleteModal(false)}
                                     disabled={isDeleting}>
-                                    <Text style={styles.deleteModalButtonText}>Hủy</Text>
+                                    <Text style={styles.deleteModalButtonText}>Cancel</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     style={[styles.deleteModalButton, styles.deleteModalButtonDelete]}
@@ -492,13 +618,132 @@ const PetDetail = () => {
                                         <ActivityIndicator size="small" color="#fff" />
                                     ) : (
                                         <Text style={[styles.deleteModalButtonText, styles.deleteModalButtonTextDelete]}>
-                                            Xóa
+                                            Delete
                                         </Text>
                                     )}
                                 </TouchableOpacity>
                             </View>
                         </View>
                     </View>
+                </Modal>
+
+                {/* Edit Pet Modal */}
+                <Modal
+                    visible={showEditModal}
+                    transparent={true}
+                    animationType="slide"
+                    onRequestClose={() => setShowEditModal(false)}>
+                    <SafeAreaView style={styles.editModalContainer}>
+                        <View style={styles.editModalHeader}>
+                            <TouchableOpacity onPress={() => setShowEditModal(false)} style={styles.closeButton}>
+                                <MaterialIcons name="close" size={24} color={COLORS.text.default} />
+                            </TouchableOpacity>
+                            <Text style={styles.editModalTitle}>Update Pet Information</Text>
+                            <TouchableOpacity onPress={handleUpdatePet} style={styles.saveButton} disabled={isUpdating}>
+                                {isUpdating ? (
+                                    <ActivityIndicator size="small" color={COLORS.text.control} />
+                                ) : (
+                                    <Text style={styles.saveButtonText}>Save</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView style={styles.editModalContent}>
+                            <View style={styles.avatarContainer}>
+                                <View style={styles.avatarEditWrapper}>
+                                    {image ? (
+                                        <RNImage source={{ uri: image.uri }} style={styles.avatarImage} />
+                                    ) : pet?.data_image ? (
+                                        <RNImage
+                                            source={{ uri: `data:image/jpeg;base64,${pet.data_image}` }}
+                                            style={styles.avatarImage}
+                                        />
+                                    ) : (
+                                        <View style={styles.placeholderAvatar}>
+                                            <MaterialIcons name="pets" size={50} color='#A2C1DA' />
+                                        </View>
+                                    )}
+                                    <TouchableOpacity
+                                        style={styles.editAvatarButton}
+                                        onPress={handleImagePress}
+                                    >
+                                        <MaterialIcons name="camera-alt" size={24} color={COLORS.text.default} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            <View style={styles.form}>
+                                <Input
+                                    label="Pet Name"
+                                    placeholder="Enter your pet's name"
+                                    value={petName}
+                                    onChangeText={setPetName}
+                                />
+
+                                <Input
+                                    label="Species"
+                                    placeholder="Dog, cat, ..."
+                                    value={petType}
+                                    onChangeText={setPetType}
+                                />
+
+                                <Input
+                                    label="Breed"
+                                    placeholder="Pet breed"
+                                    value={petBreed}
+                                    onChangeText={setPetBreed}
+                                />
+
+                                <DatePicker
+                                    label="Birth Date"
+                                    value={birthDate}
+                                    onChange={handleBirthDateChange}
+                                />
+
+                                <View style={styles.row}>
+                                    <View style={styles.halfWidth}>
+                                        <Input
+                                            label="Age"
+                                            placeholder="Age"
+                                            value={petAge}
+                                            onChangeText={setPetAge}
+                                            editable={false} // Added this property to prevent direct editing
+                                        />
+                                    </View>
+
+                                    <View style={styles.halfWidth}>
+                                        <Input
+                                            label="Weight (kg)"
+                                            placeholder="Weight"
+                                            value={petWeight}
+                                            onChangeText={setPetWeight}
+                                        />
+                                    </View>
+                                </View>
+
+                                <Input
+                                    label="Gender"
+                                    placeholder="Enter pet gender"
+                                    value={petGender}
+                                    onChangeText={setPetGender}
+                                />
+
+                                <Input
+                                    label="Health Notes"
+                                    placeholder="Enter health notes"
+                                    value={petHealthNotes}
+                                    onChangeText={setPetHealthNotes}
+                                />
+
+                                <Input
+                                    label="Microchip Number"
+                                    placeholder="Enter microchip number"
+                                    value={petMicrochipNumber}
+                                    onChangeText={setPetMicrochipNumber}
+                                />
+                            </View>
+                        </ScrollView>
+                    </SafeAreaView>
                 </Modal>
 
             </SafeAreaView>
@@ -578,7 +823,7 @@ const styles = StyleSheet.create({
         color: COLORS.text.default,
         fontFamily: 'Poppins-Regular',
         fontSize: 12,
-        fontWeight: 600,
+        fontWeight: '600',
         textAlign: 'center',
         alignSelf: 'center',
         fontStyle: 'normal',
@@ -603,7 +848,7 @@ const styles = StyleSheet.create({
     },
     headerText: {
         fontSize: 20,
-        fontWeight: 500,
+        fontWeight: '500',
         color: COLORS.text.textDisable,
         fontFamily: 'Poppins-Regular',
         fontStyle: 'normal',
@@ -639,7 +884,7 @@ const styles = StyleSheet.create({
     },
     nameText: {
         fontSize: 17,
-        fontWeight: 700,
+        fontWeight: '700',
         color: COLORS.text.text,
         fontFamily: 'Poppins-Regular',
         fontStyle: 'normal',
@@ -647,7 +892,7 @@ const styles = StyleSheet.create({
     },
     breedText: {
         fontSize: 14,
-        fontWeight: 400,
+        fontWeight: '400',
         color: COLORS.text.default,
         fontFamily: 'Poppins-Regular',
         fontStyle: 'normal',
@@ -669,7 +914,7 @@ const styles = StyleSheet.create({
     },
     editText: {
         fontSize: 15,
-        fontWeight: 700,
+        fontWeight: '700',
         color: COLORS.text.control,
         fontFamily: 'Poppins-Regular',
         fontStyle: 'normal',
@@ -714,14 +959,14 @@ const styles = StyleSheet.create({
     },
     genderText: {
         fontSize: 12,
-        fontWeight: 400,
+        fontWeight: '400',
         color: COLORS.text.default,
         fontFamily: 'Poppins-Regular',
         fontStyle: 'normal',
     },
     valueText: {
         fontSize: 15,
-        fontWeight: 600,
+        fontWeight: '600',
         color: COLORS.text.text,
         fontFamily: 'Poppins-Regular',
         fontStyle: 'normal',
@@ -734,52 +979,52 @@ const styles = StyleSheet.create({
         borderLeftWidth: 4,
         borderLeftColor: COLORS.button.choose,
     },
-    
+
     vaccinationHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 8,
     },
-    
+
     vaccineName: {
         fontSize: 16,
         fontWeight: '600',
         color: COLORS.text.text,
         fontFamily: 'Poppins-Regular',
     },
-    
+
     vaccinationDate: {
         fontSize: 12,
         color: COLORS.text.default,
         fontFamily: 'Poppins-Regular',
     },
-    
+
     vaccineDescription: {
         fontSize: 14,
         color: COLORS.text.default,
         marginBottom: 8,
         fontFamily: 'Poppins-Regular',
     },
-    
+
     vaccineInfo: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
-    
+
     vaccineDetail: {
         fontSize: 12,
         color: COLORS.text.default,
         fontFamily: 'Poppins-Regular',
     },
-    
+
     vaccineStatus: {
         fontSize: 12,
         fontWeight: '600',
         fontFamily: 'Poppins-Regular',
     },
-    
+
     emptyText: {
         textAlign: 'center',
         color: COLORS.text.textDisable,
@@ -903,6 +1148,97 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
 
+    editModalContainer: {
+        flex: 1,
+        backgroundColor: COLORS.background.white,
+    },
+
+    editModalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.background.gray,
+    },
+
+    closeButton: {
+        padding: 10,
+    },
+
+    editModalTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: COLORS.text.text,
+    },
+
+    saveButton: {
+        padding: 10,
+    },
+
+    saveButtonText: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: COLORS.text.control,
+    },
+
+    editModalContent: {
+        flex: 1,
+        paddingHorizontal: 20,
+    },
+
+    avatarContainer: {
+        alignItems: 'center',
+        marginVertical: 20,
+    },
+
+    avatarEditWrapper: {
+        position: 'relative',
+    },
+
+    avatarImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+    },
+
+    placeholderAvatar: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: COLORS.background.gray,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    editAvatarButton: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        backgroundColor: COLORS.background.lightBlue,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#ffffff',
+    },
+
+    form: {
+        marginTop: 20,
+    },
+
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 15,
+    },
+
+    halfWidth: {
+        width: '48%',
+    },
 });
 
 export default PetDetail;

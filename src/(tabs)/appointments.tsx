@@ -6,6 +6,7 @@ import AppointmentCard from '../../component/appointmentCard';
 import { useAppointments } from '../../hook/useAppointment';
 import { Appointment } from '../../models/models';
 import { usePets } from '../../hook/usePets';
+import Toast from 'react-native-toast-message';
 
 const Appointments = () => {
     const { data: appointments, isLoading, error } = useAppointments();
@@ -37,17 +38,28 @@ const Appointments = () => {
 
     const renderContent = () => {
         if (isLoading) {
+            Toast.show({
+                type: 'info',
+                text1: 'Loading...',
+                position: 'bottom'
+            });
             return (
                 <View style={styles.tabContent}>
-                    <Text style={styles.contentText}>Đang tải...</Text>
+                    <Text style={styles.contentText}>Loading...</Text>
                 </View>
             );
         }
 
         if (error) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: error.message,
+                position: 'bottom'
+            });
             return (
                 <View style={styles.tabContent}>
-                    <Text style={styles.contentText}>Có lỗi xảy ra</Text>
+                    <Text style={styles.contentText}>Error occurred</Text>
                     <Text style={styles.subText}>{error.message}</Text>
                 </View>
             );
@@ -56,13 +68,13 @@ const Appointments = () => {
         if (filteredAppointments.length === 0) {
             return (
                 <View style={styles.tabContent}>
-                    <Text style={styles.contentText}>Không có cuộc hẹn</Text>
+                    <Text style={styles.contentText}>No appointments</Text>
                     <Text style={styles.subText}>
                         {activeTab === 'UPCOMING' 
-                            ? 'Bạn chưa có cuộc hẹn nào sắp tới'
+                            ? 'You have no upcoming appointments'
                             : activeTab === 'PAST'
-                            ? 'Bạn chưa có cuộc hẹn nào trong quá khứ'
-                            : 'Bạn chưa có cuộc hẹn nào bị hủy'}
+                            ? 'You have no past appointments'
+                            : 'You have no cancelled appointments'}
                     </Text>
                 </View>
             );

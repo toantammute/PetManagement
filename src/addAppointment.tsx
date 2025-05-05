@@ -43,7 +43,7 @@ const AddAppointment = () => {
                 visibilityTime: 2000,
             });
         }, 500);
-        
+
         return () => clearTimeout(timer);
     }, []);
 
@@ -51,17 +51,17 @@ const AddAppointment = () => {
         Toast.show({
             type: 'info',
             text1: 'Processing',
-            text2: 'Đang xử lý yêu cầu...',
+            text2: 'Processing request...',
             position: 'bottom',
             visibilityTime: 2000,
         });
-        
+
         if (!formData.petId || !formData.doctorId || !formData.date || !formData.timeSlotId || !formData.serviceId || !formData.reason) {
             setTimeout(() => {
                 Toast.show({
                     type: 'error',
-                    text1: 'Lỗi',
-                    text2: 'Vui lòng điền đầy đủ thông tin',
+                    text1: 'Error',
+                    text2: 'Please fill in all required fields',
                     position: 'bottom',
                     visibilityTime: 4000,
                     autoHide: true,
@@ -85,13 +85,13 @@ const AddAppointment = () => {
                 setTimeout(() => {
                     Toast.show({
                         type: 'success',
-                        text1: 'Thành công',
-                        text2: 'Đã tạo cuộc hẹn mới',
+                        text1: 'Success',
+                        text2: 'New appointment created',
                         position: 'bottom',
                         visibilityTime: 3000,
                     });
                 }, 500);
-                
+
                 setTimeout(() => {
                     navigation.goBack();
                 }, 2000);
@@ -100,8 +100,8 @@ const AddAppointment = () => {
                 setTimeout(() => {
                     Toast.show({
                         type: 'error',
-                        text1: 'Lỗi',
-                        text2: 'Không thể tạo cuộc hẹn. Vui lòng thử lại sau.',
+                        text1: 'Error',
+                        text2: 'Could not create appointment. Please try again later.',
                         position: 'bottom',
                         visibilityTime: 4000,
                     });
@@ -121,15 +121,15 @@ const AddAppointment = () => {
                 styles.container,
                 Platform.OS === 'android' && styles.androidSafeArea
             ]}>
-                <Header 
-                    title="Tạo cuộc hẹn" 
-                    variant="save" 
+                <Header
+                    title="Create Appointment"
+                    variant="save"
                     onSave={handleSubmit}
                 />
 
                 <ScrollView style={styles.content}>
                     <View style={styles.form}>
-                        <Text style={styles.label}>Chọn thú cưng</Text>
+                        <Text style={styles.label}>Select Pet</Text>
                         <View style={styles.avatarList}>
                             <ScrollView
                                 horizontal
@@ -150,14 +150,14 @@ const AddAppointment = () => {
                         </View>
 
                         <View style={styles.pickerContainer}>
-                            <Text style={styles.label}>Chọn Bác Sĩ</Text>
+                            <Text style={styles.label}>Select Doctor</Text>
                             <View style={styles.pickerWrapper}>
                                 <Picker
                                     selectedValue={formData.doctorId}
                                     onValueChange={(value) => setFormData(prev => ({ ...prev, doctorId: value, timeSlotId: '' }))}
                                     style={styles.picker}
                                 >
-                                    <Picker.Item label="Chọn bác sĩ" value="" />
+                                    <Picker.Item label="Select a doctor" value="" />
                                     {doctors?.map((doctor) => (
                                         <Picker.Item
                                             key={doctor.doctor_id}
@@ -170,14 +170,14 @@ const AddAppointment = () => {
                         </View>
 
                         <DateInput
-                            label="Ngày hẹn"
+                            label="Appointment Date"
                             value={formData.date}
                             onChange={(date) => setFormData(prev => ({ ...prev, date, timeSlotId: '' }))}
                             minimumDate={new Date()}
                         />
 
                         <View style={styles.pickerContainer}>
-                            <Text style={styles.label}>Chọn Khung Giờ</Text>
+                            <Text style={styles.label}>Select Time Slot</Text>
                             <View style={styles.pickerWrapper}>
                                 <Picker
                                     selectedValue={formData.timeSlotId}
@@ -185,7 +185,7 @@ const AddAppointment = () => {
                                     style={styles.picker}
                                     enabled={!!formData.doctorId && !!formData.date}
                                 >
-                                    <Picker.Item label="Chọn khung giờ" value="" />
+                                    <Picker.Item label="Select a time slot" value="" />
                                     {timeSlots?.map((slot) => (
                                         <Picker.Item
                                             key={slot.id}
@@ -198,14 +198,14 @@ const AddAppointment = () => {
                         </View>
 
                         <View style={styles.pickerContainer}>
-                            <Text style={styles.label}>Chọn Dịch Vụ</Text>
+                            <Text style={styles.label}>Select Service</Text>
                             <View style={styles.pickerWrapper}>
                                 <Picker
                                     selectedValue={formData.serviceId}
                                     onValueChange={(value) => setFormData(prev => ({ ...prev, serviceId: value }))}
                                     style={styles.picker}
                                 >
-                                    <Picker.Item label="Chọn dịch vụ" value="" />
+                                    <Picker.Item label="Select a service" value="" />
                                     {services?.map((service) => (
                                         <Picker.Item
                                             key={service.id}
@@ -218,17 +218,17 @@ const AddAppointment = () => {
                         </View>
 
                         <Input
-                            label="Lý do khám"
-                            placeholder="Nhập lý do khám"
+                            label="Reason for Visit"
+                            placeholder="Enter reason for visit"
                             value={formData.reason}
                             onChangeText={(text) => setFormData(prev => ({ ...prev, reason: text }))}
                         />
-                        
-                        <TouchableOpacity 
+
+                        <TouchableOpacity
                             style={styles.submitButton}
                             onPress={handleSubmit}
                         >
-                            <Text style={styles.submitButtonText}>Tạo Cuộc Hẹn</Text>
+                            <Text style={styles.submitButtonText}>Create Appointment</Text>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>

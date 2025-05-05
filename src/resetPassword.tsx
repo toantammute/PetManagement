@@ -7,64 +7,80 @@ import {
     ScrollView, 
     KeyboardAvoidingView, 
     Platform,
-    StatusBar,
-    Alert 
+    StatusBar
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Input from '../component/input';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Toast from 'react-native-toast-message';
 
 const ResetPassword = () => {
-    const [password, setPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     
     const navigation = useNavigation();
 
     const handleResetPassword = async () => {
-        // Kiểm tra mật khẩu
-        if (!password) {
-            Alert.alert('Lỗi', 'Vui lòng nhập mật khẩu mới');
+        if (!newPassword) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Please enter a new password',
+                position: 'bottom'
+            });
             return;
         }
 
-        if (password.length < 6) {
-            Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự');
+        if (newPassword.length < 6) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Password must be at least 6 characters',
+                position: 'bottom'
+            });
             return;
         }
 
-        if (password !== confirmPassword) {
-            Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
+        if (newPassword !== confirmPassword) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Passwords do not match',
+                position: 'bottom'
+            });
             return;
         }
 
         setLoading(true);
         
         try {
-            // Mô phỏng API đặt lại mật khẩu
+            // Simulate API call
             setTimeout(() => {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Success',
+                    text2: 'Your password has been reset successfully',
+                    position: 'bottom'
+                });
+                navigation.navigate('Login' as never);
                 setLoading(false);
-                Alert.alert(
-                    'Thành công',
-                    'Mật khẩu của bạn đã được cập nhật thành công.',
-                    [
-                        {
-                            text: 'Đăng nhập ngay',
-                            onPress: () => navigation.navigate('Login' as never)
-                        }
-                    ]
-                );
             }, 1500);
         } catch (error) {
-            Alert.alert('Lỗi', 'Không thể đặt lại mật khẩu. Vui lòng thử lại sau.');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to reset password. Please try again.',
+                position: 'bottom'
+            });
             setLoading(false);
         }
     };
 
-    const toggleShowPassword = () => {
-        setShowPassword(!showPassword);
+    const toggleShowNewPassword = () => {
+        setShowNewPassword(!showNewPassword);
     };
 
     const toggleShowConfirmPassword = () => {
@@ -92,27 +108,27 @@ const ResetPassword = () => {
                 
                 <View style={styles.header}>
                     <Icon name="lock-reset" size={80} color="#4CAF50" />
-                    <Text style={styles.title}>Đặt lại mật khẩu</Text>
+                    <Text style={styles.title}>Reset Password</Text>
                     <Text style={styles.subtitle}>
-                        Tạo mật khẩu mới cho tài khoản của bạn
+                        Create a new password for your account
                     </Text>
                 </View>
 
                 <View style={styles.formContainer}>
                     <View style={styles.passwordContainer}>
                         <Input 
-                            label="Mật khẩu mới" 
-                            placeholder="Nhập mật khẩu mới" 
-                            value={password} 
-                            onChangeText={setPassword}
-                            secureTextEntry={!showPassword}
+                            label="New Password" 
+                            placeholder="Enter new password" 
+                            value={newPassword} 
+                            onChangeText={setNewPassword}
+                            secureTextEntry={!showNewPassword}
                         />
                         <TouchableOpacity 
                             style={styles.eyeIcon} 
-                            onPress={toggleShowPassword}
+                            onPress={toggleShowNewPassword}
                         >
                             <Icon 
-                                name={showPassword ? 'visibility' : 'visibility-off'} 
+                                name={showNewPassword ? 'visibility' : 'visibility-off'} 
                                 size={24} 
                                 color="#757575"
                             />
@@ -121,8 +137,8 @@ const ResetPassword = () => {
 
                     <View style={styles.passwordContainer}>
                         <Input 
-                            label="Xác nhận mật khẩu" 
-                            placeholder="Nhập lại mật khẩu mới" 
+                            label="Confirm Password" 
+                            placeholder="Re-enter new password" 
                             value={confirmPassword} 
                             onChangeText={setConfirmPassword}
                             secureTextEntry={!showConfirmPassword}
@@ -142,7 +158,7 @@ const ResetPassword = () => {
                     <View style={styles.passwordInfo}>
                         <Icon name="info-outline" size={16} color="#757575" />
                         <Text style={styles.infoText}>
-                            Mật khẩu phải có ít nhất 6 ký tự và nên bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
+                            Password must be at least 6 characters and should include uppercase, lowercase, numbers, and special characters.
                         </Text>
                     </View>
 
@@ -152,7 +168,7 @@ const ResetPassword = () => {
                         disabled={loading}
                     >
                         <Text style={styles.resetButtonText}>
-                            {loading ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
+                            {loading ? 'Updating...' : 'Update Password'}
                         </Text>
                     </TouchableOpacity>
                 </View>

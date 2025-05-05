@@ -30,13 +30,13 @@ const Account = () => {
 
     const menuItems = [
         {
-            icon: 'lock',
+            icon: 'lock-reset',
             label: 'Đổi mật khẩu',
-            onPress: () => navigation.navigate('ChangePassword')
+            onPress: () => navigation.navigate('ResetPassword')
         },
         {
-            icon: 'person',
-            label: 'Hồ sơ',
+            icon: 'account-circle',
+            label: 'Profile',
             onPress: () => navigation.navigate('Profile')
         },
         {
@@ -55,17 +55,17 @@ const Account = () => {
             onPress: () => navigation.navigate('Settings')
         },
         {
-            icon: 'bot',
+            icon: 'chat',
             label: 'Chatbot',
             onPress: () => navigation.navigate('Chatbot')
         },
-        {
-            icon: 'info',
-            label: 'Về chúng tôi',
-            onPress: () => navigation.navigate('About')
+        {    
+            icon: 'pets',
+            label: 'Dự đoán giống',
+            onPress: () => navigation.navigate('BreedDetection')
         },
         {
-            icon: 'star',
+            icon: 'star-rate',
             label: 'Đánh giá',
             onPress: () => navigation.navigate('Rate')
         },
@@ -112,7 +112,7 @@ const Account = () => {
                 styles.container,
                 Platform.OS === 'android' && styles.androidSafeArea
             ]}>
-                <Header title="Tài khoản" />
+                <Header title="Account" />
                 <ScrollView style={styles.content}>
                     <View style={styles.menuContainer}>
                         {renderMenuGrid()}

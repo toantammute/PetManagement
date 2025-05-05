@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, StatusBar, TouchableOpacity, Platform, ScrollView, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, TouchableOpacity, Platform, ScrollView, Image } from 'react-native';
 import Input from '../component/input';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { API_URL } from '@env';
+import Toast from 'react-native-toast-message';
 
 const Login = () => {
     const navigation = useNavigation<any>();
@@ -16,21 +17,31 @@ const Login = () => {
 
     const handleLogin = async () => {
         if (!username.trim()) {
-            Alert.alert('Lỗi', 'Vui lòng nhập username');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Please enter your username',
+                position: 'bottom'
+            });
             return;
         }
 
         if (!password) {
-            Alert.alert('Lỗi', 'Vui lòng nhập mật khẩu');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Please enter your password',
+                position: 'bottom'
+            });
             return;
         }
 
         try {
-            console.log('Bắt đầu đăng nhập với:', { username, API_URL });
+            console.log('Starting login with:', { username, API_URL });
             await login(username, password);
-            console.log('Đăng nhập thành công');
+            console.log('Login successful');
         } catch (error: any) {
-            console.error('Lỗi đăng nhập:', error);
+            console.error('Login error:', error);
             
             // Enhanced error handling with more specific messages
             if (error.response) {
@@ -40,21 +51,51 @@ const Login = () => {
                 
                 if (statusCode === 400) {
                     // Handle specific 400 Bad Request errors
-                    const message = errorData?.message || 'Thông tin đăng nhập không hợp lệ';
-                    Alert.alert('Lỗi đăng nhập', message);
+                    const message = errorData?.message || 'Invalid login information';
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Login Error',
+                        text2: message,
+                        position: 'bottom'
+                    });
                 } else if (statusCode === 401) {
-                    Alert.alert('Lỗi đăng nhập', 'Tên đăng nhập hoặc mật khẩu không chính xác');
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Login Error',
+                        text2: 'Incorrect username or password',
+                        position: 'bottom'
+                    });
                 } else if (statusCode === 404) {
-                    Alert.alert('Lỗi đăng nhập', 'Tài khoản không tồn tại');
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Login Error',
+                        text2: 'Account does not exist',
+                        position: 'bottom'
+                    });
                 } else {
-                    Alert.alert('Lỗi đăng nhập', `Lỗi máy chủ (${statusCode}): ${errorData?.message || 'Vui lòng thử lại sau'}`);
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Login Error',
+                        text2: `Server error (${statusCode}): ${errorData?.message || 'Please try again later'}`,
+                        position: 'bottom'
+                    });
                 }
             } else if (error.request) {
                 // The request was made but no response was received
-                Alert.alert('Lỗi kết nối', 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.');
+                Toast.show({
+                    type: 'error',
+                    text1: 'Connection Error',
+                    text2: 'Unable to connect to the server. Please check your network connection and try again.',
+                    position: 'bottom'
+                });
             } else {
                 // Something happened in setting up the request
-                Alert.alert('Lỗi đăng nhập', error.message || 'Đăng nhập thất bại');
+                Toast.show({
+                    type: 'error',
+                    text1: 'Login Error',
+                    text2: error.message || 'Login failed',
+                    position: 'bottom'
+                });
             }
         }
     };
@@ -79,24 +120,24 @@ const Login = () => {
                 </View>
 
                 <View style={styles.titleContainer}>
-                    <Text style={styles.title}>Đăng nhập</Text>
+                    <Text style={styles.title}>Login</Text>
                     <Text style={styles.subtitle}>
-                        Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục
+                        Welcome back! Please sign in to continue
                     </Text>
                 </View>
 
                 <View style={styles.formContainer}>
                     <Input 
                         label="Username" 
-                        placeholder="Nhập username của bạn" 
+                        placeholder="Enter your username" 
                         value={username} 
                         onChangeText={setusername}
                     />
                     
                     <View style={styles.passwordContainer}>
                         <Input 
-                            label="Mật khẩu" 
-                            placeholder="Nhập mật khẩu của bạn" 
+                            label="Password" 
+                            placeholder="Enter your password" 
                             value={password} 
                             onChangeText={setPassword}
                             secureTextEntry={!showPassword}
@@ -115,8 +156,9 @@ const Login = () => {
 
                     <TouchableOpacity 
                         style={styles.forgotPassword} 
+                        onPress={() => navigation.navigate('ForgotPassword')}
                     >
-                        <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
+                        <Text style={styles.forgotPasswordText}>Forgot password?</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity 
@@ -125,20 +167,20 @@ const Login = () => {
                         disabled={isLoading}
                     >
                         <Text style={styles.loginButtonText}>
-                            {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                            {isLoading ? 'Signing in...' : 'Sign In'}
                         </Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.footer}>
-                    <Text style={styles.noAccountText}>Chưa có tài khoản? </Text>
+                    <Text style={styles.noAccountText}>Don't have an account? </Text>
                     <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                        <Text style={styles.signupText}>Đăng ký ngay</Text>
+                        <Text style={styles.signupText}>Sign up now</Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.socialLoginContainer}>
-                    <Text style={styles.orText}>Hoặc đăng nhập với</Text>
+                    <Text style={styles.orText}>Or sign in with</Text>
                     
                     <View style={styles.socialButtons}>
                         <TouchableOpacity style={styles.socialButton}>
@@ -155,6 +197,7 @@ const Login = () => {
                     </View>
                 </View>
             </ScrollView>
+            <Toast />
         </>
     );
 };

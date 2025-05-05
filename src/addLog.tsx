@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, Platform, StatusBar, SafeAreaView, ScrollView } from 'react-native';
+import { View, StyleSheet, Platform, StatusBar, SafeAreaView, ScrollView } from 'react-native';
 import { Diary } from '../models/models';
 import DatePicker from '../component/datepicker';
 import Input from '../component/input';
 import Header from '../component/header';
-import Avatar from '../component/avabtn';
 import { usePets } from '../hook/usePets';
 import AvaBtn from '../component/avabtn';
 import { useCreateDiary } from '../hook/useDiary';
+import Toast from 'react-native-toast-message';
 
 const AddLog = () => {
     const { data: pets, isLoading, isError, error } = usePets();
@@ -21,7 +21,10 @@ const AddLog = () => {
 
     const handleSubmit = async () => {
         if (!title || !notes || !dateTime || !petId) {
-            Alert.alert('Vui lòng nhập đầy đủ thông tin');
+            Toast.show({
+                type: 'error',
+                text1: 'Please fill in all the information',
+            });
             return;
         }
 
@@ -32,14 +35,22 @@ const AddLog = () => {
                 date_time: dateTime.toISOString(),
                 pet_id: petId
             });
-            Alert.alert('Thành công', 'Đã thêm nhật ký mới');
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'New diary entry added',
+            });
             // Reset form
             setTitle('');
             setNotes('');
             setDateTime(new Date());
             setPetId('');
         } catch (error) {
-            Alert.alert('Lỗi', 'Không thể thêm nhật ký mới');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Unable to add new diary entry',
+            });
         }
     };
 
@@ -70,21 +81,21 @@ const AddLog = () => {
                         </View>
                         
                         <Input
-                            label="Tiêu đề"
-                            placeholder="Nhập tiêu đề"
+                            label="Title"
+                            placeholder="Enter title"
                             value={title}
                             onChangeText={setTitle}
                         />
 
                         <Input
-                            label="Ghi chú"
-                            placeholder="Nhập ghi chú"
+                            label="Notes"
+                            placeholder="Enter notes"
                             value={notes}
                             onChangeText={setNotes}
                         />
 
                         <DatePicker
-                            label="Ngày giờ"
+                            label="Date and Time"
                             value={dateTime}
                             onChange={setDateTime}
                             maximumDate={new Date()}

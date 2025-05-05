@@ -71,20 +71,16 @@ function CustomTabBar({
             <Text style={styles.overlayText}>Diary</Text>
           </TouchableOpacity>
 
-          {/* <TouchableOpacity style={styles.button} onPress={() => { toggleOverlay(); navigation.navigate(AddPet); }}>
-            <MaterialIcons style={styles.overlayItem} name="schedule" size={25} color={COLORS.background.mint} />
-            <Text style={styles.overlayText}>Schedule</Text>
-          </TouchableOpacity> */}
 
           <TouchableOpacity style={styles.button} onPress={() => { toggleOverlay(); navigation.navigate('AddAppointment'); }}>
             <FontAwesome style={styles.overlayItem} name="calendar-plus-o" size={30} color={COLORS.background.mint} />
             <Text style={styles.overlayText}>Appointment</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.button} onPress={() => { toggleOverlay(); navigation.navigate('AddSchedule'); }}>
-            <Icon style={styles.overlayItem} name="chatbox-outline" size={30} color={COLORS.background.mint} />
-            <Text style={styles.overlayText}>Chat</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => { toggleOverlay(); navigation.navigate('AddSchedule'); }}>
+            <MaterialIcons style={styles.overlayItem} name="schedule" size={30} color={COLORS.background.mint} />
+            <Text style={styles.overlayText}>Schedule</Text>
+            </TouchableOpacity>
         </View>
       </Animated.View>
 
@@ -125,10 +121,9 @@ function CustomTabBar({
         <TouchableOpacity
           style={styles.tabItem}
           onPress={() => navigation.navigate('ProductList')}
-          // onPress={() => navigation.navigate('Appointments')}
         >
-          <Icon
-            name="calendar-outline"
+          <FontAwesome
+            name="shopping-cart"
             size={SIZES.icon.medium}
             color={state.index === 3 ? COLORS.button.choose : COLORS.button.default}
           />

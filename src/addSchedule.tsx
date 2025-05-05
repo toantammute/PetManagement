@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Text, Modal, SafeAreaView, StatusBar, Platform, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Text, Modal, SafeAreaView, StatusBar, Platform } from 'react-native';
 import { COLORS } from '../theme/color';
 import Input from '../component/input';
 import DateInput from '../component/datepicker';
@@ -11,12 +11,13 @@ import { usePets } from '../hook/usePets';
 import { useCreateSchedule, useUpdateSchedule, useDeleteSchedule } from '../hook/useSchedule';
 import { Schedule } from '../models/models';
 import DatePicker from 'react-native-date-picker';
+import Toast from 'react-native-toast-message';
 
 const AddSchedule = () => {
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const { schedule: initialSchedule, isUpdate } = route.params || {};
-    
+
     const { data: pets, isLoading, isError, error } = usePets();
     const [title, setTitle] = useState('');
     const [note, setNote] = useState('');
@@ -36,11 +37,11 @@ const AddSchedule = () => {
             setPetId(initialSchedule.pet_id.toString());
             setRepeat(initialSchedule.event_repeat);
             setHasEndDate(initialSchedule.end_type === "true");
-            
+
             const reminderDate = new Date(initialSchedule.reminder_datetime);
             setStartDate(reminderDate);
             setStartTime(reminderDate);
-            
+
             if (initialSchedule.end_date && initialSchedule.end_date !== "0001-01-01T00:00:00Z") {
                 setEndDate(new Date(initialSchedule.end_date));
             }
@@ -48,10 +49,10 @@ const AddSchedule = () => {
     }, [initialSchedule]);
 
     const repeatOptions = [
-        { label: 'Không lặp lại', value: 'none' },
-        { label: 'Hàng ngày', value: 'daily' },
-        { label: 'Hàng tuần', value: 'weekly' },
-        { label: 'Hàng tháng', value: 'monthly' },
+        { label: 'No repeat', value: 'none' },
+        { label: 'Daily', value: 'daily' },
+        { label: 'Weekly', value: 'weekly' },
+        { label: 'Monthly', value: 'monthly' },
     ];
 
     const { mutate: createSchedule } = useCreateSchedule();
@@ -60,7 +61,11 @@ const AddSchedule = () => {
 
     const handleSave = () => {
         if (!title || !startDate || !startTime || !petId) {
-            Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Please enter all required information'
+            });
             return;
         }
 
@@ -94,22 +99,38 @@ const AddSchedule = () => {
         if (isUpdate && initialSchedule?.id) {
             updateSchedule({ id: initialSchedule.id, ...scheduleData }, {
                 onSuccess: () => {
-                    Alert.alert('Thành công', 'Đã cập nhật lịch trình');
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Success',
+                        text2: 'Schedule updated successfully'
+                    });
                     navigation.goBack();
                 },
                 onError: (error) => {
-                    Alert.alert('Lỗi', 'Không thể cập nhật lịch trình');
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Error',
+                        text2: 'Unable to update schedule'
+                    });
                     console.error('Error updating schedule:', error);
                 }
             });
         } else {
             createSchedule(scheduleData, {
                 onSuccess: () => {
-                    Alert.alert('Thành công', 'Đã thêm lịch trình mới');
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Success',
+                        text2: 'New schedule added successfully'
+                    });
                     navigation.goBack();
                 },
                 onError: (error) => {
-                    Alert.alert('Lỗi', 'Không thể thêm lịch trình mới');
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Error',
+                        text2: 'Unable to add new schedule'
+                    });
                     console.error('Error creating schedule:', error);
                 }
             });
@@ -118,37 +139,34 @@ const AddSchedule = () => {
 
     const handleDelete = () => {
         if (initialSchedule?.id) {
-            Alert.alert(
-                'Xác nhận',
-                'Bạn có chắc chắn muốn xóa lịch trình này?',
-                [
-                    {
-                        text: 'Hủy',
-                        style: 'cancel',
-                    },
-                    {
-                        text: 'Xóa',
-                        style: 'destructive',
-                        onPress: () => {
-                            deleteSchedule(initialSchedule.id, {
-                                onSuccess: () => {
-                                    Alert.alert('Thành công', 'Đã xóa lịch trình');
-                                    navigation.goBack();
-                                },
-                                onError: (error) => {
-                                    Alert.alert('Lỗi', 'Không thể xóa lịch trình');
-                                    console.error('Error deleting schedule:', error);
-                                }
-                            });
-                        },
-                    },
-                ]
-            );
+            Toast.show({
+                type: 'info',
+                text1: 'Confirm',
+                text2: 'Are you sure you want to delete this schedule?'
+            });
+            deleteSchedule(initialSchedule.id, {
+                onSuccess: () => {
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Success',
+                        text2: 'Schedule deleted successfully'
+                    });
+                    navigation.goBack();
+                },
+                onError: (error) => {
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Error',
+                        text2: 'Unable to delete schedule'
+                    });
+                    console.error('Error deleting schedule:', error);
+                }
+            });
         }
     };
 
     const formatTime = (date: Date) => {
-        return date.toLocaleTimeString('vi-VN', {
+        return date.toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false
@@ -167,14 +185,14 @@ const AddSchedule = () => {
             ]}>
                 <View style={styles.container}>
                     <Header
-                        title={isUpdate ? "Cập nhật lịch trình" : "Thêm lịch trình"}
+                        title={isUpdate ? "Update Schedule" : "Add Schedule"}
                         variant="save"
                         onSave={handleSave}
                     />
 
                     <ScrollView style={styles.content}>
                         <View style={styles.form}>
-                            <Text style={styles.label}>Chọn thú cưng</Text>
+                            <Text style={styles.label}>Select Pet</Text>
                             <View style={styles.avatarList}>
                                 <ScrollView
                                     horizontal
@@ -195,21 +213,21 @@ const AddSchedule = () => {
                             </View>
 
                             <Input
-                                label="Tiêu đề"
-                                placeholder="Nhập tiêu đề"
+                                label="Title"
+                                placeholder="Enter title"
                                 value={title}
                                 onChangeText={setTitle}
                             />
 
                             <Input
-                                label="Ghi chú"
-                                placeholder="Nhập ghi chú"
+                                label="Note"
+                                placeholder="Enter note"
                                 value={note}
                                 onChangeText={setNote}
                             />
 
                             <View style={styles.section}>
-                                <Text style={styles.label}>Lặp lại</Text>
+                                <Text style={styles.label}>Repeat</Text>
                                 <TouchableOpacity
                                     style={styles.repeatButton}
                                     onPress={() => setShowRepeatModal(true)}
@@ -224,20 +242,20 @@ const AddSchedule = () => {
                             <View style={styles.dateTimeContainer}>
                                 <View style={styles.dateTimeItem}>
                                     <DateInput
-                                        label="Ngày bắt đầu"
+                                        label="Start Date"
                                         value={startDate}
                                         onChange={setStartDate}
                                         minimumDate={new Date()}
                                     />
                                 </View>
                                 <View style={styles.dateTimeItem}>
-                                    <Text style={styles.label}>Giờ bắt đầu</Text>
+                                    <Text style={styles.label}>Start Time</Text>
                                     <TouchableOpacity
                                         style={styles.timeButton}
                                         onPress={() => setShowTimePicker(true)}
                                     >
                                         <Text style={styles.timeText}>
-                                            {startTime ? formatTime(startTime) : 'Chọn giờ'}
+                                            {startTime ? formatTime(startTime) : 'Select time'}
                                         </Text>
                                         <MaterialIcons name="access-time" size={20} color={COLORS.text.default} />
                                     </TouchableOpacity>
@@ -245,7 +263,7 @@ const AddSchedule = () => {
                             </View>
 
                             <View style={styles.section}>
-                                <Text style={styles.label}>Có ngày kết thúc</Text>
+                                <Text style={styles.label}>Has End Date</Text>
                                 <TouchableOpacity
                                     style={styles.switchButton}
                                     onPress={() => setHasEndDate(!hasEndDate)}
@@ -264,7 +282,7 @@ const AddSchedule = () => {
 
                             {hasEndDate && (
                                 <DateInput
-                                    label="Ngày kết thúc"
+                                    label="End Date"
                                     value={endDate}
                                     onChange={setEndDate}
                                     minimumDate={startDate || new Date()}
@@ -274,11 +292,11 @@ const AddSchedule = () => {
                     </ScrollView>
 
                     {isUpdate && (
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={styles.deleteButton}
                             onPress={handleDelete}
                         >
-                            <Text style={styles.deleteButtonText}>Xóa lịch trình</Text>
+                            <Text style={styles.deleteButtonText}>Delete Schedule</Text>
                         </TouchableOpacity>
                     )}
 
@@ -296,9 +314,9 @@ const AddSchedule = () => {
                             <View style={styles.modalContent}>
                                 <View style={styles.datePickerHeader}>
                                     <TouchableOpacity onPress={() => setShowTimePicker(false)}>
-                                        <Text style={styles.cancelButton}>Hủy</Text>
+                                        <Text style={styles.cancelButton}>Cancel</Text>
                                     </TouchableOpacity>
-                                    <Text style={styles.headerTitle}>Chọn giờ</Text>
+                                    <Text style={styles.headerTitle}>Select Time</Text>
                                     <TouchableOpacity
                                         onPress={() => {
                                             if (startTime) {
@@ -307,14 +325,14 @@ const AddSchedule = () => {
                                             setShowTimePicker(false);
                                         }}
                                     >
-                                        <Text style={styles.doneButton}>Xong</Text>
+                                        <Text style={styles.doneButton}>Done</Text>
                                     </TouchableOpacity>
                                 </View>
                                 <DatePicker
                                     date={startTime || new Date()}
                                     mode="time"
                                     onDateChange={setStartTime}
-                                    locale="vi"
+                                    locale="en"
                                 />
                             </View>
                         </TouchableOpacity>
@@ -329,7 +347,7 @@ const AddSchedule = () => {
                         <View style={styles.modalOverlay}>
                             <View style={styles.modalContent}>
                                 <View style={styles.modalHeader}>
-                                    <Text style={styles.modalTitle}>Chọn tần suất lặp lại</Text>
+                                    <Text style={styles.modalTitle}>Select Repeat Frequency</Text>
                                     <TouchableOpacity onPress={() => setShowRepeatModal(false)}>
                                         <MaterialIcons name="close" size={24} color={COLORS.text.default} />
                                     </TouchableOpacity>
@@ -414,7 +432,6 @@ const styles = StyleSheet.create({
     dateTimeContainer: {
         flexDirection: 'row',
         gap: 10,
-        // marginBottom: 10,
     },
     dateTimeItem: {
         flex: 1,

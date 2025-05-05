@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, ScrollView, Platform, PermissionsAndroid, Alert, TouchableOpacity, StyleSheet, Image as RNImage, StatusBar, SafeAreaView, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Platform, PermissionsAndroid, TouchableOpacity, StyleSheet, Image as RNImage, StatusBar, SafeAreaView, Modal } from 'react-native';
 import Input from '../component/input';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { launchImageLibrary, launchCamera, MediaType, CameraType, PhotoQuality } from "react-native-image-picker";
@@ -9,6 +9,7 @@ import DatePicker from '../component/datepicker';
 import { useCreatePet } from '../hook/usePets';
 import { useNavigation } from '@react-navigation/native';
 import { Pet, Image } from '../models/models';
+import Toast from 'react-native-toast-message';
 
 const AddPet = () => {
     const navigation = useNavigation<any>();
@@ -17,7 +18,6 @@ const AddPet = () => {
         name: string;
         type: string;
     };
-
 
     const [loading, setLoading] = useState(false);
     const [petName, setPetName] = useState('');
@@ -51,12 +51,10 @@ const AddPet = () => {
         return age.toString();
     };
 
-
     const handleBirthDateChange = (date: Date) => {
         setBirthDate(date);
         setPetAge(calculateAge(date));
     };
-
 
     const requestPermissions = async () => {
         if (Platform.OS === 'android') {
@@ -140,10 +138,11 @@ const AddPet = () => {
             const hasPermission = await requestPermissions();
 
             if (!hasPermission) {
-                Alert.alert(
-                    'Permission Required',
-                    'Please grant storage permission from app settings to select images'
-                );
+                Toast.show({
+                    type: 'error',
+                    text1: 'Permission Required',
+                    text2: 'Please grant storage permission from app settings to select images'
+                });
                 return;
             }
 
@@ -169,7 +168,11 @@ const AddPet = () => {
             }
         } catch (error) {
             console.log('Error picking image:', error);
-            Alert.alert('Error', 'Failed to pick image');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to pick image'
+            });
         } finally {
             setLoading(false);
         }
@@ -178,7 +181,7 @@ const AddPet = () => {
     const takePhoto = useCallback(async () => {
 
         console.log('takePhoto');
-        // Tránh nhiều lần gọi khi đang tải
+        // Prevent multiple calls while loading
         if (loading) return;
 
         setLoading(true);
@@ -187,10 +190,11 @@ const AddPet = () => {
             const hasPermission = await requestPermissions();
 
             if (!hasPermission) {
-                Alert.alert(
-                    'Yêu cầu quyền truy cập',
-                    'Vui lòng cấp quyền truy cập máy ảnh để chụp ảnh'
-                );
+                Toast.show({
+                    type: 'error',
+                    text1: 'Permission Required',
+                    text2: 'Please grant camera access to take photos'
+                });
                 return;
             }
 
@@ -200,13 +204,12 @@ const AddPet = () => {
                 includeBase64: false,
                 maxHeight: 2000,
                 maxWidth: 2000,
-                // quality: 0.8,
                 quality: 0.8 as PhotoQuality,
             };
 
             const response = await launchCamera(options);
             if (response.didCancel) {
-                console.log('Người dùng đã hủy chụp ảnh');
+                console.log('User cancelled taking photo');
             } else if (response.assets && response.assets[0]) {
                 const selectedImage = response.assets[0];
                 setImage({
@@ -216,8 +219,12 @@ const AddPet = () => {
                 });
             }
         } catch (error) {
-            console.log('Lỗi khi chụp ảnh:', error);
-            Alert.alert('Lỗi', 'Không thể chụp ảnh');
+            console.log('Error taking photo:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to take photo'
+            });
         } finally {
             setLoading(false);
         }
@@ -225,15 +232,19 @@ const AddPet = () => {
 
     const handleSubmit = async () => {
         if (!image) {
-            Alert.alert('Lỗi', 'Vui lòng chọn ảnh cho thú cưng');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Please select an image for the pet'
+            });
             return;
         }
 
         try {
-            console.log('Bắt đầu thêm thú cưng...');
-            
+            console.log('Starting to add pet...');
+
             // Format birth_date to YYYY-MM-DD
-            const formattedBirthDate = birthDate 
+            const formattedBirthDate = birthDate
                 ? birthDate.toISOString().split('T')[0]
                 : new Date().toISOString().split('T')[0];
 
@@ -255,21 +266,27 @@ const AddPet = () => {
                     name: 'pet_image.jpg'
                 }
             };
-            
-            console.log('Dữ liệu thú cưng:', petData);
-            
+
+            console.log('Pet data:', petData);
+
             const result = await createPet(petData);
-            console.log('Thêm thú cưng thành công:', result);
-            
-            Alert.alert('Thành công', 'Đã thêm thú cưng thành công');
+            console.log('Pet added successfully:', result);
+
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'Pet added successfully'
+            });
             navigation.goBack();
         } catch (error) {
-            console.error('Lỗi khi thêm thú cưng:', error);
-            Alert.alert('Lỗi', 'Không thể thêm thú cưng. Vui lòng thử lại sau.');
+            console.error('Error adding pet:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to add pet. Please try again later.'
+            });
         }
     };
-
-
 
     return (
         <>
@@ -281,13 +298,11 @@ const AddPet = () => {
                 styles.container,
                 Platform.OS === 'android' && styles.androidSafeArea
             ]}>
-                {/* <ScrollView style={styles.container}> */}
-                <Header title="Add Pet" variant="save" onSave={handleSubmit}  />
+                <Header title="Add Pet" variant="save" onSave={handleSubmit} />
                 <View style={styles.contentContainer}>
                     <ScrollView style={styles.content}>
                         <View style={styles.avatarContainer}>
                             <View style={styles.avatarWrapper}>
-                                {/* <Image source={{ uri: image?.uri || '' }} style={styles.avatar} /> */}
                                 {image ? (
                                     <RNImage source={{ uri: image.uri }} style={styles.avatar} />
                                 ) : (
@@ -304,7 +319,6 @@ const AddPet = () => {
                             </View>
                         </View>
 
-                        {/* Modal cho image options */}
                         <Modal
                             visible={showOptions}
                             transparent={true}
@@ -342,28 +356,28 @@ const AddPet = () => {
 
                         <View style={styles.form}>
                             <Input
-                                label="Tên thú cưng"
-                                placeholder="Nhập tên thú cưng của bạn"
+                                label="Pet Name"
+                                placeholder="Enter your pet's name"
                                 value={petName}
                                 onChangeText={setPetName}
                             />
 
                             <Input
-                                label="Loài"
-                                placeholder="Chó, mèo, ..."
+                                label="Species"
+                                placeholder="Dog, cat, ..."
                                 value={petType}
                                 onChangeText={setPetType}
                             />
 
                             <Input
-                                label="Giống"
-                                placeholder="Giống thú cưng"
+                                label="Breed"
+                                placeholder="Enter pet breed"
                                 value={petBreed}
                                 onChangeText={setPetBreed}
                             />
 
                             <DatePicker
-                                label="Ngày sinh"
+                                label="Date of Birth"
                                 value={birthDate}
                                 onChange={handleBirthDateChange}
                             />
@@ -371,18 +385,18 @@ const AddPet = () => {
                             <View style={styles.row}>
                                 <View style={styles.halfWidth}>
                                     <Input
-                                        label="Tuổi"
-                                        placeholder="Tuổi"
+                                        label="Age"
+                                        placeholder="Age"
                                         value={petAge}
                                         onChangeText={setPetAge}
-                                        editable={false} // Thêm thuộc tính này để không cho phép chỉnh sửa trực tiếp
+                                        editable={false}
                                     />
                                 </View>
 
                                 <View style={styles.halfWidth}>
                                     <Input
-                                        label="Cân nặng (kg)"
-                                        placeholder="Cân nặng"
+                                        label="Weight (kg)"
+                                        placeholder="Enter weight"
                                         value={petWeight}
                                         onChangeText={setPetWeight}
                                     />
@@ -390,26 +404,25 @@ const AddPet = () => {
                             </View>
 
                             <Input
-                                label="Giới tính"
-                                placeholder="Nhập giới tính thú cưng"
+                                label="Gender"
+                                placeholder="Enter pet's gender"
                                 value={petGender}
                                 onChangeText={setPetGender}
                             />
 
                             <Input
-                                label="Ghi chú sức khỏe"
-                                placeholder="Nhập ghi chú sức khỏe"
+                                label="Health Notes"
+                                placeholder="Enter health notes"
                                 value={petHealthNotes}
                                 onChangeText={setPetHealthNotes}
                             />
 
                             <Input
-                                label="Số microchip"
-                                placeholder="Nhập số microchip"
+                                label="Microchip Number"
+                                placeholder="Enter microchip number"
                                 value={petMicrochipNumber}
                                 onChangeText={setPetMicrochipNumber}
                             />
-
                         </View>
                     </ScrollView>
                 </View>
@@ -433,7 +446,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5',
         flexDirection: 'column',
         alignItems: 'center',
-        // gap: 30,
         alignSelf: 'stretch',
         paddingVertical: 20,
         paddingHorizontal: 18
@@ -443,7 +455,6 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         alignSelf: 'stretch',
     },
-
     header: {
         padding: 16,
         alignItems: 'center',
@@ -458,8 +469,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         display: 'flex',
         flexDirection: 'column',
-        // flex: 1,
-        // marginBottom: 20,
     },
     avatarWrapper: {
         width: 150,
@@ -467,25 +476,22 @@ const styles = StyleSheet.create({
         borderRadius: 100,
         borderWidth: 2,
         borderColor: '#fff',
-        overflow: 'visible', // Thay đổi để hiển thị nút camera
+        overflow: 'visible',
         backgroundColor: COLORS.background.lightBlue,
         justifyContent: 'center',
         alignItems: 'center',
         position: 'relative',
     },
-
     avatar: {
         width: '100%',
         height: '100%',
-        borderRadius: 75, // Thêm để đảm bảo ảnh tròn
+        borderRadius: 75,
     },
-
     cameraButton: {
         position: 'absolute',
         bottom: -8,
         right: 0,
         backgroundColor: COLORS.background.lightBlue,
-        // padding:20,
         width: 50,
         height: 50,
         borderRadius: 30,
@@ -493,58 +499,40 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 2,
         borderColor: '#ffffff',
-        // elevation: 2,
-        // shadowColor: '#000',
-        // shadowOffset: { width: 0, height: 2 },
-        // shadowOpacity: 0.25,
-        // shadowRadius: 3.84,
     },
-
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'flex-end',
     },
-
     modalContent: {
         backgroundColor: '#ffffff',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         paddingHorizontal: 20,
         paddingVertical: 15,
-        // paddingBottom: 30,
     },
-
     modalOption: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: 15,
         borderRadius: 10,
     },
-
     modalOptionText: {
         marginLeft: 15,
         fontSize: 16,
         color: '#333333',
         fontWeight: '500',
     },
-    // avatar: {
-    //     width: '100%',
-    //     height: '100%',
-    // },
     placeholderAvatar: {
-        // width: '100%',
-        // height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        // backgroundColor: '#e0e0e0',
     },
     imageButtonsContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
         gap: 20,
         padding: 10
-        // marginBottom: 10,
     },
     imageButton: {
         flexDirection: 'row',
@@ -553,11 +541,9 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         paddingVertical: 8,
         paddingHorizontal: 15,
-        // marginHorizontal: 5,
     },
     imageButtonText: {
         color: '#ffffff',
-        // marginLeft: 5,
         fontWeight: '500',
     },
     form: {
@@ -579,7 +565,6 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 15,
         alignItems: 'center',
-        // marginTop: 20,
     },
     submitButtonText: {
         color: 'white',
@@ -589,41 +574,5 @@ const styles = StyleSheet.create({
 });
 
 export default AddPet;
-
-//         {/* <View style={styles.imageButtonsContainer}>
-//             <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
-//                 <Icon name="photo-library" size={20} color="#ffffff" />
-//                 <Text style={styles.imageButtonText}>Thư viện</Text>
-//             </TouchableOpacity>
-
-//             <TouchableOpacity style={styles.imageButton} onPress={takePhoto}>
-//                 <Icon name="camera-alt" size={20} color="#ffffff" />
-//                 <Text style={styles.imageButtonText}>Chụp ảnh</Text>
-//             </TouchableOpacity>
-//         </View> */}
-// {/* </View> */}
-
-
-
-// import React from 'react';
-// import { View, Text, StyleSheet } from 'react-native';
-// import { COLORS } from '../theme/color';
-
-// const AddPet = () => {
-//     return (
-//         <View style={styles.container}>
-//             <Text>Add Pet</Text>
-//         </View>
-//     );
-// };
-
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         backgroundColor: COLORS.background.lightBlue,
-//     },
-// }); 
-
-// export default AddPet;
 
 

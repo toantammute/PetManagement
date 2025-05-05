@@ -16,10 +16,14 @@ import { useCart } from '../hook/useCart';
 import { useProductById } from '../hook/useProduct';
 import { Cart } from '../models/models';
 import { COLORS } from '../theme/color';
+import Toast from 'react-native-toast-message';
 
 const CartScreen = () => {
     const { data: cartItems, isLoading, isError, error } = useCart();
     const navigation = useNavigation();
+    // const { mutate: updateCartItem } = useUpdateCartItem();
+    // const { mutate: removeFromCart } = useRemoveFromCart();
+    // const { mutate: clearCart } = useClearCart();
 
     const calculateTotal = () => {
         if (!cartItems) return 0;
@@ -27,15 +31,83 @@ const CartScreen = () => {
     };
 
     const handleQuantityChange = (itemId: string, newQuantity: number) => {
-        // TODO: Implement quantity change
+        // updateCartItem({ id: itemId, quantity: newQuantity }, {
+        //     onSuccess: () => {
+        //         Toast.show({
+        //             type: 'success',
+        //             text1: 'Cart Updated',
+        //             text2: 'Quantity updated successfully'
+        //         });
+        //     },
+        //     onError: (error) => {
+        //         Toast.show({
+        //             type: 'error',
+        //             text1: 'Error',
+        //             text2: 'Failed to update quantity'
+        //         });
+        //     }
+        // });
     };
 
     const handleRemoveItem = (itemId: string) => {
-        // TODO: Implement remove item
+        Toast.show({
+            type: 'info',
+            text1: 'Remove Item',
+            text2: 'Are you sure you want to remove this item?',
+            onPress: () => {
+                // removeFromCart(itemId, {
+                //     onSuccess: () => {
+                //         Toast.show({
+                //             type: 'success',
+                //             text1: 'Item Removed',
+                //             text2: 'Item removed from cart'
+                //         });
+                //     },
+                //     onError: () => {
+                //         Toast.show({
+                //             type: 'error',
+                //             text1: 'Error',
+                //             text2: 'Failed to remove item'
+                //         });
+                //     }
+                // });
+            }
+        });
+    };
+
+    const handleClearCart = () => {
+        Toast.show({
+            type: 'info',
+            text1: 'Clear Cart',
+            text2: 'Are you sure you want to clear your cart?',
+            onPress: () => {
+                // clearCart(undefined, {
+                //     onSuccess: () => {
+                //         Toast.show({
+                //             type: 'success',
+                //             text1: 'Cart Cleared',
+                //             text2: 'All items removed from cart'
+                //         });
+                //     },
+                //     onError: () => {
+                //         Toast.show({
+                //             type: 'error',
+                //             text1: 'Error',
+                //             text2: 'Failed to clear cart'
+                //         });
+                //     }
+                // });
+            }
+        });
     };
 
     const handleCheckout = () => {
-        // TODO: Implement checkout
+        Toast.show({
+            type: 'success',
+            text1: 'Checkout',
+            text2: 'Proceeding to checkout...'
+        });
+        // TODO: Implement actual checkout process
     };
 
     const CartItem = ({ item }: { item: Cart }) => {
@@ -97,7 +169,7 @@ const CartScreen = () => {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={COLORS.background.mint} />
-                <Text style={styles.loadingText}>Đang tải giỏ hàng...</Text>
+                <Text style={styles.loadingText}>Loading cart...</Text>
             </View>
         );
     }
@@ -106,7 +178,7 @@ const CartScreen = () => {
         return (
             <View style={styles.errorContainer}>
                 <Icon name="error-outline" size={80} color="#FF5252" />
-                <Text style={styles.errorText}>Không thể tải giỏ hàng</Text>
+                <Text style={styles.errorText}>Unable to load cart</Text>
                 <Text style={styles.errorSubText}>{error?.message}</Text>
             </View>
         );
@@ -125,11 +197,14 @@ const CartScreen = () => {
                     <Icon name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
                 
-                <Text style={styles.headerTitle}>Giỏ hàng</Text>
+                <Text style={styles.headerTitle}>Cart</Text>
                 
                 <View style={styles.headerRight}>
-                    <TouchableOpacity style={styles.clearButton}>
-                        <Text style={styles.clearButtonText}>Xóa tất cả</Text>
+                    <TouchableOpacity 
+                        style={styles.clearButton}
+                        onPress={handleClearCart}
+                    >
+                        <Text style={styles.clearButtonText}>Clear all</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -147,28 +222,28 @@ const CartScreen = () => {
                     {/* Checkout Section */}
                     <View style={styles.checkoutContainer}>
                         <View style={styles.totalContainer}>
-                            <Text style={styles.totalLabel}>Tổng cộng:</Text>
-                            <Text style={styles.totalPrice}>{calculateTotal().toLocaleString()}đ</Text>
+                            <Text style={styles.totalLabel}>Total:</Text>
+                            <Text style={styles.totalPrice}>{calculateTotal().toLocaleString()}₫</Text>
                         </View>
                         
                         <TouchableOpacity 
                             style={styles.checkoutButton}
                             onPress={handleCheckout}
                         >
-                            <Text style={styles.checkoutButtonText}>Thanh toán</Text>
+                            <Text style={styles.checkoutButtonText}>Checkout</Text>
                         </TouchableOpacity>
                     </View>
                 </>
             ) : (
                 <View style={styles.emptyContainer}>
                     <Icon name="shopping-cart" size={80} color="#CCCCCC" />
-                    <Text style={styles.emptyText}>Giỏ hàng trống</Text>
-                    <Text style={styles.emptySubText}>Hãy thêm sản phẩm vào giỏ hàng</Text>
+                    <Text style={styles.emptyText}>Cart is empty</Text>
+                    <Text style={styles.emptySubText}>Please add products to your cart</Text>
                     <TouchableOpacity 
                         style={styles.continueShoppingButton}
                         onPress={() => navigation.navigate('Products' as never)}
                     >
-                        <Text style={styles.continueShoppingText}>Tiếp tục mua sắm</Text>
+                        <Text style={styles.continueShoppingText}>Continue shopping</Text>
                     </TouchableOpacity>
                 </View>
             )}

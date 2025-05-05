@@ -8,12 +8,12 @@ import {
     Image, 
     KeyboardAvoidingView, 
     Platform,
-    StatusBar,
-    Alert 
+    StatusBar
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Input from '../component/input';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Toast from 'react-native-toast-message';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -22,26 +22,31 @@ const ForgotPassword = () => {
     const navigation = useNavigation();
 
     const handleSubmit = async () => {
-        // Kiểm tra email
         if (!email.trim()) {
-            Alert.alert('Lỗi', 'Vui lòng nhập email hoặc số điện thoại của bạn');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Please enter your email address',
+                position: 'bottom'
+            });
             return;
         }
 
         setLoading(true);
         
         try {
-            // Mô phỏng API gửi mã xác nhận
+            // Simulate API call
             setTimeout(() => {
-                // Chuyển đến màn hình OTP
-                // navigation.navigate('OTP' as never, { 
-                //     email,
-                //     forgotPassword: true
-                // } as never);
+                navigation.navigate('OTP' as never);
                 setLoading(false);
             }, 1500);
         } catch (error) {
-            Alert.alert('Lỗi', 'Không thể gửi mã xác nhận. Vui lòng thử lại sau.');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to send verification code. Please try again.',
+                position: 'bottom'
+            });
             setLoading(false);
         }
     };
@@ -70,23 +75,24 @@ const ForgotPassword = () => {
                 </TouchableOpacity>
 
                 <View style={styles.header}>
+                    {/* Replace the missing image with an existing one */}
                     <Image 
-                        source={require('../assets/images/download.jpg')} 
+                        source={require('../assets/images/bus.png')} 
                         style={styles.logo}
                     />
                 </View>
 
                 <View style={styles.titleContainer}>
-                    <Text style={styles.title}>Quên mật khẩu?</Text>
+                    <Text style={styles.title}>Forgot Password?</Text>
                     <Text style={styles.subtitle}>
-                        Vui lòng nhập email hoặc số điện thoại đã đăng ký để nhận mã xác nhận
+                        Please enter your registered email or phone number to receive a verification code
                     </Text>
                 </View>
 
                 <View style={styles.formContainer}>
                     <Input 
-                        label="Email hoặc số điện thoại" 
-                        placeholder="Nhập email hoặc số điện thoại" 
+                        label="Email or phone number" 
+                        placeholder="Enter your email or phone number" 
                         value={email} 
                         onChangeText={setEmail}
                     />
@@ -97,22 +103,22 @@ const ForgotPassword = () => {
                         disabled={loading}
                     >
                         <Text style={styles.submitButtonText}>
-                            {loading ? 'Đang gửi...' : 'Gửi mã xác nhận'}
+                            {loading ? 'Sending...' : 'Send verification code'}
                         </Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.footer}>
-                    <Text style={styles.rememberText}>Bạn đã nhớ mật khẩu? </Text>
+                    <Text style={styles.rememberText}>Remember your password? </Text>
                     <TouchableOpacity onPress={navigateToLogin}>
-                        <Text style={styles.loginText}>Đăng nhập</Text>
+                        <Text style={styles.loginText}>Login</Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.helpContainer}>
                     <TouchableOpacity style={styles.helpButton}>
                         <Icon name="help-outline" size={20} color="#4CAF50" />
-                        <Text style={styles.helpText}>Cần trợ giúp thêm?</Text>
+                        <Text style={styles.helpText}>Need additional help?</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>

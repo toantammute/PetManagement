@@ -8,9 +8,9 @@ import {
     Image, 
     KeyboardAvoidingView, 
     Platform,
-    StatusBar,
-    Alert 
+    StatusBar
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 // import { useNavigation } from '@react-navigation/native';
 import Input from '../component/input';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -28,29 +28,53 @@ const Signup = () => {
     // const navigation = useNavigation();
 
     const handleSignup = async () => {
-        // Kiểm tra các trường nhập liệu
         if (!fullName.trim()) {
-            Alert.alert('Lỗi', 'Vui lòng nhập họ tên');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Please enter your full name',
+                position: 'bottom'
+            });
             return;
         }
 
         if (!email.trim()) {
-            Alert.alert('Lỗi', 'Vui lòng nhập email');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Please enter your email',
+                position: 'bottom'
+            });
             return;
         }
 
         if (!phone.trim()) {
-            Alert.alert('Lỗi', 'Vui lòng nhập số điện thoại');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Please enter your phone number',
+                position: 'bottom'
+            });
             return;
         }
 
         if (!password) {
-            Alert.alert('Lỗi', 'Vui lòng nhập mật khẩu');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Please enter your password',
+                position: 'bottom'
+            });
             return;
         }
 
         if (password !== confirmPassword) {
-            Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Passwords do not match',
+                position: 'bottom'
+            });
             return;
         }
 
@@ -63,8 +87,34 @@ const Signup = () => {
                 // navigation.navigate('OTP' as never, { email, phone } as never);
                 setLoading(false);
             }, 1500);
-        } catch (error) {
-            Alert.alert('Lỗi đăng ký', 'Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.');
+        } catch (error: any) {
+            console.error('Signup error:', error);
+            
+            if (error.response) {
+                const statusCode = error.response.status;
+                const errorData = error.response.data;
+                
+                Toast.show({
+                    type: 'error',
+                    text1: 'Registration Error',
+                    text2: errorData?.message || `Server error (${statusCode})`,
+                    position: 'bottom'
+                });
+            } else if (error.request) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Connection Error',
+                    text2: 'Unable to connect to the server. Please check your network connection and try again.',
+                    position: 'bottom'
+                });
+            } else {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Registration Error',
+                    text2: error.message || 'Registration failed',
+                    position: 'bottom'
+                });
+            }
             setLoading(false);
         }
     };
@@ -109,38 +159,38 @@ const Signup = () => {
                 </View>
 
                 <View style={styles.titleContainer}>
-                    <Text style={styles.title}>Tạo tài khoản</Text>
+                    <Text style={styles.title}>Create Account</Text>
                     <Text style={styles.subtitle}>
-                        Vui lòng điền thông tin để đăng ký tài khoản mới
+                        Please fill in the details below to create your account.
                     </Text>
                 </View>
 
                 <View style={styles.formContainer}>
                     <Input 
-                        label="Họ và tên" 
-                        placeholder="Nhập họ và tên" 
+                        label="Full Name" 
+                        placeholder="Enter your full name" 
                         value={fullName} 
                         onChangeText={setFullName}
                     />
                     
                     <Input 
                         label="Email" 
-                        placeholder="Nhập địa chỉ email" 
+                        placeholder="Enter your email" 
                         value={email} 
                         onChangeText={setEmail}
                     />
                     
                     <Input 
-                        label="Số điện thoại" 
-                        placeholder="Nhập số điện thoại" 
+                        label="Phone Number" 
+                        placeholder="Enter your phone number" 
                         value={phone} 
                         onChangeText={setPhone}
                     />
                     
                     <View style={styles.passwordContainer}>
                         <Input 
-                            label="Mật khẩu" 
-                            placeholder="Nhập mật khẩu" 
+                            label="Password" 
+                            placeholder="Enter your password" 
                             value={password} 
                             onChangeText={setPassword}
                             secureTextEntry={!showPassword}
@@ -159,8 +209,8 @@ const Signup = () => {
 
                     <View style={styles.passwordContainer}>
                         <Input 
-                            label="Xác nhận mật khẩu" 
-                            placeholder="Nhập lại mật khẩu" 
+                            label="Confirm Password" 
+                            placeholder="Re-enter your password" 
                             value={confirmPassword} 
                             onChangeText={setConfirmPassword}
                             secureTextEntry={!showConfirmPassword}
@@ -183,17 +233,17 @@ const Signup = () => {
                         disabled={loading}
                     >
                         <Text style={styles.signupButtonText}>
-                            {loading ? 'Đang đăng ký...' : 'Đăng ký'}
+                            {loading ? 'Registering...' : 'Register'}
                         </Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.footer}>
-                    <Text style={styles.haveAccountText}>Đã có tài khoản? </Text>
+                    <Text style={styles.haveAccountText}>Do you have an account yet? </Text>
                     <TouchableOpacity 
                     // onPress={navigateToLogin}
                     >
-                        <Text style={styles.loginText}>Đăng nhập</Text>
+                        <Text style={styles.loginText}>Login</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
