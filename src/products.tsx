@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    View, 
-    Text, 
-    StyleSheet, 
-    TouchableOpacity, 
-    FlatList, 
-    Image, 
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    FlatList,
+    Image,
     TextInput,
     StatusBar,
     ActivityIndicator,
@@ -14,10 +14,11 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useProducts } from '../hook/useProduct';
-import { useCart } from '../hook/useCart';
+import { useAddToCart, useCart } from '../hook/useCart';
+import { addToCart } from '../services/cartService';
 import { Product } from '../models/models';
 import Toast from 'react-native-toast-message';
-
+import { useQueryClient } from '@tanstack/react-query';
 
 const ProductList = () => {
     const { data: products, isLoading, isError, error } = useProducts();
@@ -26,9 +27,13 @@ const ProductList = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [sortBy, setSortBy] = useState('popularity');
-    
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
+    const { mutate: addToCart } = useAddToCart();
+
     const navigation = useNavigation<any>();
-    
+
+
+
     const categories = [
         { id: 'All', name: 'All' },
         { id: 'Food', name: 'Food' },
@@ -40,19 +45,19 @@ const ProductList = () => {
     // Filter products when category or search changes
     useEffect(() => {
         let result = [...products || []];
-        
+
         // Filter by category
         if (selectedCategory !== 'All') {
             result = result.filter(item => item.category === selectedCategory);
         }
-        
+
         // Filter by search
         if (searchQuery) {
-            result = result.filter(item => 
+            result = result.filter(item =>
                 item.name.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
-        
+
         // Sort
         switch (sortBy) {
             case 'price_low':
@@ -66,7 +71,7 @@ const ProductList = () => {
                 // Keep default order
                 break;
         }
-        
+
         setFilteredProducts(result);
     }, [products, selectedCategory, searchQuery, sortBy]);
 
@@ -77,6 +82,7 @@ const ProductList = () => {
     const handleSortPress = (sortOption: string) => {
         setSortBy(sortOption);
     };
+
     const navigateToProductDetail = (productId: string) => {
         navigation.navigate('ProductDetail', { productId });
     };
@@ -85,14 +91,35 @@ const ProductList = () => {
         navigation.navigate('Cart');
     };
 
+    const handleAddToCart = async (productId: string) => {
+        try {
+            setIsAddingToCart(true);
+            await addToCart({ productId, quantity: 1 });
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'Product added to cart'
+            });
+        } catch (error: any) {
+            console.error('Failed to add product to cart:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: error.response?.data?.message || 'Failed to add product to cart'
+            });
+        } finally {
+            setIsAddingToCart(false);
+        }
+    };
+
     const renderProductItem = ({ item }: { item: Product }) => (
-        <TouchableOpacity 
+        <TouchableOpacity
             style={styles.productCard}
             onPress={() => navigateToProductDetail(item.product_id)}
         >
             <View style={styles.imageContainer}>
-                <Image 
-                    source={{ uri: item.data_image ? `data:image/jpeg;base64,${item.data_image}` : 'https://via.placeholder.com/150' }} 
+                <Image
+                    source={{ uri: item.data_image ? `data:image/jpeg;base64,${item.data_image}` : 'https://via.placeholder.com/150' }}
                     style={styles.productImage}
                     defaultSource={require('../assets/images/bus.png')} // Default image when loading fails
                 />
@@ -100,15 +127,10 @@ const ProductList = () => {
             <View style={styles.productInfo}>
                 <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
                 <Text style={styles.productPrice}>{item.price.toLocaleString()}đ</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.addToCartButton}
-                    onPress={() => {
-                        Toast.show({
-                            type: 'success',
-                            text1: 'Success',
-                            text2: 'Product added to cart'
-                        });
-                    }}
+                    onPress={() => handleAddToCart(item.product_id)}
+                    disabled={isAddingToCart}
                 >
                     <Icon name="add-shopping-cart" size={18} color="#FFFFFF" />
                 </TouchableOpacity>
@@ -117,16 +139,16 @@ const ProductList = () => {
     );
 
     const renderCategoryItem = ({ item }: { item: { id: string, name: string } }) => (
-        <TouchableOpacity 
+        <TouchableOpacity
             style={[
-                styles.categoryButton, 
+                styles.categoryButton,
                 selectedCategory === item.id && styles.selectedCategoryButton
             ]}
             onPress={() => handleCategoryPress(item.id)}
         >
-            <Text 
+            <Text
                 style={[
-                    styles.categoryText, 
+                    styles.categoryText,
                     selectedCategory === item.id && styles.selectedCategoryText
                 ]}
             >
@@ -147,18 +169,18 @@ const ProductList = () => {
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-            
+
             <View style={styles.header}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.backButton}
                     onPress={() => navigation.goBack()}
                 >
                     <Icon name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
-                
+
                 <Text style={styles.title}>Pet Products</Text>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                     style={styles.cartButton}
                     onPress={navigateToCart}
                 >
@@ -170,7 +192,7 @@ const ProductList = () => {
                     )}
                 </TouchableOpacity>
             </View>
-            
+
             <View style={styles.searchContainer}>
                 <Icon name="search" size={20} color="#757575" style={styles.searchIcon} />
                 <TextInput
@@ -180,7 +202,7 @@ const ProductList = () => {
                     onChangeText={setSearchQuery}
                 />
                 {searchQuery.length > 0 && (
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={styles.clearButton}
                         onPress={() => setSearchQuery('')}
                     >
@@ -188,7 +210,7 @@ const ProductList = () => {
                     </TouchableOpacity>
                 )}
             </View>
-            
+
             <View style={styles.categoriesContainer}>
                 <FlatList
                     data={categories}
@@ -199,20 +221,20 @@ const ProductList = () => {
                     contentContainerStyle={styles.categoriesList}
                 />
             </View>
-            
+
             <View style={styles.sortContainer}>
                 <Text style={styles.resultCount}>{filteredProducts.length} products</Text>
-                
+
                 <View style={styles.sortOptions}>
                     <Text style={styles.sortLabel}>Sort by:</Text>
-                    
-                    <TouchableOpacity 
+
+                    <TouchableOpacity
                         style={[styles.sortButton, sortBy === 'price_low' && styles.activeSortButton]}
                         onPress={() => handleSortPress('price_low')}
                     >
                         <Text style={styles.sortButtonText}>Price ↑</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={[styles.sortButton, sortBy === 'price_high' && styles.activeSortButton]}
                         onPress={() => handleSortPress('price_high')}
                     >
@@ -220,7 +242,7 @@ const ProductList = () => {
                     </TouchableOpacity>
                 </View>
             </View>
-            
+
             {filteredProducts.length === 0 ? (
                 <View style={styles.emptyContainer}>
                     <Icon name="search-off" size={60} color="#CCCCCC" />

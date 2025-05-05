@@ -1,13 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
-import { getCart } from '../services/cartService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { addToCart, getCart } from '../services/cartService';
 import { Cart } from '../models/models';
+import { use } from 'react';
 
 export const useCart = () => {
     return useQuery<Cart[], Error>({
         queryKey: ['cart'],
         queryFn: getCart,
-        // staleTime: 5 * 60 * 1000,
-        // gcTime: 30 * 60 * 1000,
         refetchOnWindowFocus: true,
         retry: 3,
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -21,3 +20,35 @@ export const useCart = () => {
     });
 }
 
+
+export const useAddToCart = () => {
+    const queryClient = useQueryClient();
+    // Implement the add to cart mutation here
+    return useMutation({
+        mutationFn: (variables: { productId: string; quantity: number }) => 
+            addToCart(variables.productId, variables.quantity),
+        onSuccess: () => {
+            // Invalidate the cart query to refetch the updated cart
+            queryClient.invalidateQueries({ queryKey: ['cart'] });
+        },
+        onError: (error) => {
+            console.error('Failed to add item to cart:', error);
+        }
+    });
+};
+
+export const useUpdateCart = () => {
+    const queryClient = useQueryClient();
+    // Implement the update cart mutation here
+    return useMutation({
+        mutationFn: (variables: { cartId: string; quantity: number }) => 
+            addToCart(variables.cartId, variables.quantity),
+        onSuccess: () => {
+            // Invalidate the cart query to refetch the updated cart
+            queryClient.invalidateQueries({ queryKey: ['cart'] });
+        },
+        onError: (error) => {
+            console.error('Failed to update item in cart:', error);
+        }
+    });
+}

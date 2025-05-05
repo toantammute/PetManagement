@@ -12,7 +12,6 @@ export const getProducts = async (): Promise<Product[]> => {
             'Authorization': `Bearer ${accessToken}`
         }
     });
-    console.log('response.data of products', response.data);
     return response.data;
 }
 
@@ -25,6 +24,5 @@ export const getProductById = async (productId: string): Promise<Product> => {
             'Authorization': `Bearer ${accessToken}`
         }
     });
-    console.log('response.data of product', response.data);
     return response.data;
 }
