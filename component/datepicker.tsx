@@ -17,7 +17,7 @@ const DateInput: React.FC<DateInputProps> = ({
     label,
     value,
     onChange,
-    placeholder = "Chọn ngày",
+    placeholder = "Choose a date",
     minimumDate,
     maximumDate
 }) => {
@@ -66,9 +66,9 @@ const DateInput: React.FC<DateInputProps> = ({
                     <View style={styles.modalContent}>
                         <View style={styles.datePickerHeader}>
                             <TouchableOpacity onPress={() => setOpen(false)}>
-                                <Text style={styles.cancelButton}>Hủy</Text>
+                                <Text style={styles.cancelButton}>Cancle</Text>
                             </TouchableOpacity>
-                            <Text style={styles.headerTitle}>Chọn ngày</Text>
+                            <Text style={styles.headerTitle}>Choose a date</Text>
                             <TouchableOpacity 
                                 onPress={() => {
                                     if (value) {
@@ -77,7 +77,7 @@ const DateInput: React.FC<DateInputProps> = ({
                                     setOpen(false);
                                 }}
                             >
-                                <Text style={styles.doneButton}>Xong</Text>
+                                <Text style={styles.doneButton}>Complete</Text>
                             </TouchableOpacity>
                         </View>
                         <DatePicker
