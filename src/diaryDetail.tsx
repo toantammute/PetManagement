@@ -12,7 +12,7 @@ import Toast from 'react-native-toast-message';
 
 const DiaryDetail = () => {
     const route = useRoute();
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
     const { diaryId } = route.params as { diaryId: string };
     const { data: diary, isLoading } = useDiaryDetail(diaryId);
     const { data: pet } = usePetById(diary?.pet_id || '');
@@ -111,7 +111,13 @@ const DiaryDetail = () => {
                     <View style={styles.actionButtons}>
                         <TouchableOpacity 
                             style={[styles.actionButton, styles.editButton]}
-                            onPress={() => {}}
+                            onPress={() => {
+                                navigation.navigate('AddLog' as never, {
+                                    isEditMode: true,
+                                    diary: diary,
+                                    diaryId: diary.log_id
+                                } as never);
+                            }}
                         >
                             <Feather name="edit-2" size={20} color={COLORS.background.white} />
                             <Text style={styles.buttonText}>Edit</Text>

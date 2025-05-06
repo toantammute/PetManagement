@@ -57,7 +57,7 @@ export const useUpdatePet = () => {
     const queryClient = useQueryClient();
     
     return useMutation({
-        mutationFn: ({ pet, id }: { pet: Pet; id: string }) => updatePet(pet,  id),
+        mutationFn: ({ pet, id }: { pet: Pet; id: string }) => updatePet(pet, id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['pets'] });
             queryClient.invalidateQueries({ queryKey: ['pet'] });

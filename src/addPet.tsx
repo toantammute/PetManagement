@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { View, Text, ScrollView, Platform, PermissionsAndroid, TouchableOpacity, StyleSheet, Image as RNImage, StatusBar, SafeAreaView, Modal } from 'react-native';
 import Input from '../component/input';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -6,13 +6,16 @@ import { launchImageLibrary, launchCamera, MediaType, CameraType, PhotoQuality }
 import Header from '../component/header';
 import { COLORS } from '../theme/color';
 import DatePicker from '../component/datepicker';
-import { useCreatePet } from '../hook/usePets';
-import { useNavigation } from '@react-navigation/native';
+import { useCreatePet, useUpdatePet, useUpdatePetAvatar } from '../hook/usePets';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Pet, Image } from '../models/models';
 import Toast from 'react-native-toast-message';
 
 const AddPet = () => {
     const navigation = useNavigation<any>();
+    const route = useRoute();
+    const { isEditMode, petId, pet } = route.params as any || {};
+    
     type ImageFile = {
         uri: string;
         name: string;
@@ -30,10 +33,42 @@ const AddPet = () => {
     const [petMicrochipNumber, setPetMicrochipNumber] = useState('');
     const [image, setImage] = useState<ImageFile | null>(null);
     const [birthDate, setBirthDate] = useState<Date | null>(null);
+    const [initialImageSet, setInitialImageSet] = useState(false);
 
     const [showOptions, setShowOptions] = useState(false);
 
     const { mutate: createPet } = useCreatePet();
+    const { mutate: updatePet } = useUpdatePet();
+    const { mutate: updatePetAvatar } = useUpdatePetAvatar();
+
+    // Điền thông tin vào các trường khi ở chế độ chỉnh sửa
+    useEffect(() => {
+        if (isEditMode && pet) {
+            setPetName(pet.name || '');
+            setPetType(pet.type || '');
+            setPetBreed(pet.breed || '');
+            setPetAge(pet.age ? pet.age.toString() : '');
+            setPetWeight(pet.weight ? pet.weight.toString() : '');
+            setPetGender(pet.gender || '');
+            setPetHealthNotes(pet.healthnotes || '');
+            setPetMicrochipNumber(pet.microchip_number || '');
+            
+            if (pet.birth_date) {
+                const date = new Date(pet.birth_date);
+                setBirthDate(date);
+            }
+            
+            // Tạo ảnh từ data_image nếu có
+            if (pet.data_image && !initialImageSet) {
+                setImage({
+                    uri: `data:image/jpeg;base64,${pet.data_image}`,
+                    type: 'image/jpeg',
+                    name: 'pet_image.jpg'
+                });
+                setInitialImageSet(true);
+            }
+        }
+    }, [pet, isEditMode, initialImageSet]);
 
     const handleImagePress = () => {
         setShowOptions(true);
@@ -231,59 +266,90 @@ const AddPet = () => {
     }, [loading]);
 
     const handleSubmit = async () => {
-        if (!image) {
+        if (!petName) {
             Toast.show({
                 type: 'error',
-                text1: 'Error',
-                text2: 'Please select an image for the pet'
+                text1: 'Lỗi',
+                text2: 'Vui lòng nhập tên thú cưng'
             });
             return;
         }
 
         try {
-            console.log('Starting to add pet...');
-
             // Format birth_date to YYYY-MM-DD
             const formattedBirthDate = birthDate
                 ? birthDate.toISOString().split('T')[0]
                 : new Date().toISOString().split('T')[0];
 
             const petData = {
-                pet: {
-                    name: petName,
-                    type: petType,
-                    breed: petBreed,
-                    age: Number(petAge),
-                    weight: Number(petWeight),
-                    gender: petGender,
-                    healthnotes: petHealthNotes,
-                    microchip_number: petMicrochipNumber,
-                    birth_date: formattedBirthDate
-                },
-                image: {
-                    uri: image.uri,
-                    type: image.type || 'image/jpeg',
-                    name: 'pet_image.jpg'
-                }
+                name: petName,
+                type: petType,
+                breed: petBreed,
+                age: Number(petAge),
+                weight: Number(petWeight),
+                gender: petGender,
+                healthnotes: petHealthNotes,
+                microchip_number: petMicrochipNumber,
+                birth_date: formattedBirthDate
             };
 
-            console.log('Pet data:', petData);
+            // Chế độ chỉnh sửa
+            if (isEditMode && petId) {
+                await updatePet({
+                    pet: petData as Pet,
+                    id: petId
+                });
 
-            const result = await createPet(petData);
-            console.log('Pet added successfully:', result);
+                // Cập nhật ảnh nếu đã thay đổi
+                if (image && image.uri.indexOf('base64') === -1) {
+                    await updatePetAvatar({
+                        image: {
+                            uri: image.uri,
+                            type: image.type || 'image/jpeg',
+                            name: 'pet_image.jpg'
+                        },
+                        id: petId
+                    });
+                }
 
-            Toast.show({
-                type: 'success',
-                text1: 'Success',
-                text2: 'Pet added successfully'
-            });
+                Toast.show({
+                    type: 'success',
+                    text1: 'Thành công',
+                    text2: 'Đã cập nhật thú cưng'
+                });
+            } else {
+                // Chế độ thêm mới
+                if (!image) {
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Lỗi',
+                        text2: 'Vui lòng chọn ảnh cho thú cưng'
+                    });
+                    return;
+                }
+
+                const result = await createPet({
+                    pet: petData,
+                    image: {
+                        uri: image.uri,
+                        type: image.type || 'image/jpeg',
+                        name: 'pet_image.jpg'
+                    }
+                });
+
+                Toast.show({
+                    type: 'success',
+                    text1: 'Thành công',
+                    text2: 'Đã thêm thú cưng mới'
+                });
+            }
             navigation.goBack();
         } catch (error) {
-            console.error('Error adding pet:', error);
+            console.error('Lỗi khi xử lý thú cưng:', error);
             Toast.show({
                 type: 'error',
-                text1: 'Error',
-                text2: 'Failed to add pet. Please try again later.'
+                text1: 'Lỗi',
+                text2: 'Có lỗi xảy ra. Vui lòng thử lại sau.'
             });
         }
     };
@@ -298,7 +364,11 @@ const AddPet = () => {
                 styles.container,
                 Platform.OS === 'android' && styles.androidSafeArea
             ]}>
-                <Header title="Add Pet" variant="save" onSave={handleSubmit} />
+                <Header 
+                    title={isEditMode ? "Edit Pet" : "Add Pet"} 
+                    variant="save" 
+                    onSave={handleSubmit} 
+                />
                 <View style={styles.contentContainer}>
                     <ScrollView style={styles.content}>
                         <View style={styles.avatarContainer}>

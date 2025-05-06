@@ -48,18 +48,18 @@ export const useDeleteDiary = () => {
     });
 }
 
-type UpdateDiaryParams = {
-    id: string;
-    data: Partial<Diary>;
+type UpdateDiaryParams = Partial<Diary> & {
+    log_id: string;
 }
 
 export const useUpdateDiary = () => {
     const queryClient = useQueryClient();
     
     return useMutation<Diary, Error, UpdateDiaryParams>({
-        mutationFn: ({ id, data }) => updateDiary(id, data),
+        mutationFn: (params) => updateDiary(params.log_id, params),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['allDiaries'] });
+            queryClient.invalidateQueries({ queryKey: ['diaryDetail'] });
         },
         onError: (error: Error) => {
             console.error('Failed to update diary:', error);

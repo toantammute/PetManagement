@@ -26,10 +26,10 @@ const PetDetail = () => {
     const petId = (route.params as any).petId;
     const { data: pet, isLoading, isError, error } = usePetById(petId);
     const { data: vaccinations, isLoading: isLoadingVaccinations } = useVaccinations(petId);
-    const { data: allergies, isLoading: isLoadingAllergies } = useGetAllergiesByPetId(petId);
+    
     const { mutate: deletePet, isPending } = useDeletePet();
     const { data: PetDetail } = usePetById(petId);
-    const { mutate: updatePet, isPending: isUpdating } = useUpdatePet();
+    
     const { mutate: updatePetAvatar, isPending: isUpdatingAvatar } = useUpdatePetAvatar();
 
     const [activeTab, setActiveTab] = useState<string>('Overview');
@@ -39,35 +39,9 @@ const PetDetail = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Add edit pet state
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [petName, setPetName] = useState('');
-    const [petType, setPetType] = useState('');
-    const [petBreed, setPetBreed] = useState('');
-    const [petAge, setPetAge] = useState('');
-    const [petWeight, setPetWeight] = useState('');
-    const [petGender, setPetGender] = useState('');
-    const [petHealthNotes, setPetHealthNotes] = useState('');
-    const [petMicrochipNumber, setPetMicrochipNumber] = useState('');
-    const [birthDate, setBirthDate] = useState<Date | null>(null);
+   
 
-    // Initialize pet data when pet details are loaded
-    useEffect(() => {
-        if (PetDetail) {
-            setPetName(PetDetail.name || '');
-            setPetType(PetDetail.type || '');
-            setPetBreed(PetDetail.breed || '');
-            setPetAge(PetDetail.age?.toString() || '');
-            setPetWeight(PetDetail.weight?.toString() || '');
-            setPetGender(PetDetail.gender || '');
-            setPetHealthNotes(PetDetail.healthnotes || '');
-            setPetMicrochipNumber(PetDetail.microchip_number || '');
-            if (PetDetail.birth_date) {
-                setBirthDate(new Date(PetDetail.birth_date));
-            }
-        }
-    }, [PetDetail]);
-
+    
     type ImageFile = {
         uri: string;
         name: string;
@@ -267,56 +241,6 @@ const PetDetail = () => {
         });
     };
 
-    const handleUpdatePet = async () => {
-        if (isUpdating) return;
-
-        // Convert form state into a Pet object
-        const petData: Pet = {
-            name: petName,
-            type: petType,
-            breed: petBreed,
-            age: Number(petAge),
-            weight: Number(petWeight),
-            gender: petGender,
-            healthnotes: petHealthNotes,
-            microchip_number: petMicrochipNumber,
-            birth_date: birthDate ? birthDate.toISOString().split('T')[0] : undefined,
-        } as Pet; // Type assertion since we don't have all fields of Pet
-
-        try {
-            // Call updatePet with the structure it expects: { pet, id }
-            await updatePet({ pet: petData, id: petId });
-
-            // If image was changed, update avatar separately
-            if (image) {
-                await updatePetAvatar({ image, id: petId });
-            }
-
-            Toast.show({
-                type: 'success',
-                text1: 'Success',
-                text2: 'Pet information has been updated',
-            });
-            setShowEditModal(false);
-        } catch (error: any) {
-            console.error('Error updating pet information:', error);
-            Toast.show({
-                type: 'error',
-                text1: 'Error',
-                text2: error.response?.data?.message || 'Unable to update pet information. Please try again later.',
-            });
-        }
-    };
-
-    const handleBirthDateChange = (date: Date) => {
-        setBirthDate(date);
-
-        const currentYear = new Date().getFullYear();
-        const birthYear = date.getFullYear();
-        const calculatedAge = currentYear - birthYear;
-
-        setPetAge(calculatedAge.toString());
-    };
 
     const renderTabContent = () => {
         return (
@@ -324,19 +248,19 @@ const PetDetail = () => {
                 <TouchableOpacity
                     style={[
                         styles.buttonContainer,
-                        activeTab === 'Allergy' && styles.activeTab
+                        activeTab === 'Overview' && styles.activeTab
                     ]}
-                    onPress={() => setActiveTab('Allergy')}
+                    onPress={() => setActiveTab('Overview')}
                 >
                     <Ionicons
-                        name="alert-circle-outline"
-                        size={28}
-                        color={activeTab === 'Allergy' ? COLORS.button.choose : COLORS.text.default}
+                        name="document-text-outline" 
+                        size={28} 
+                        color={activeTab === 'Overview' ? COLORS.button.choose : COLORS.text.default} 
                     />
-                    <Text style={[
+                     <Text style={[
                         styles.text,
-                        activeTab === 'Allergy' && styles.activeText
-                    ]}>Allergy</Text>
+                        activeTab === 'Overview' && styles.activeText
+                    ]}>Overview</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -361,18 +285,18 @@ const PetDetail = () => {
                     style={[
                         styles.buttonContainer,
                         activeTab === 'Treatment' && styles.activeTab
-                    ]}
+                    ]} 
                     onPress={() => setActiveTab('Treatment')}
                 >
-                    <Ionicons
-                        name="medical-outline"
-                        size={28}
-                        color={activeTab === 'Treatment' ? COLORS.button.choose : COLORS.text.default}
+                    <Ionicons 
+                        name="calendar-outline" 
+                        size={28} 
+                        color={activeTab === 'Treatment' ? COLORS.button.choose : COLORS.text.default} 
                     />
                     <Text style={[
                         styles.text,
                         activeTab === 'Treatment' && styles.activeText
-                    ]}>Treatment Plans</Text>
+                    ]}>Treatment</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -380,22 +304,11 @@ const PetDetail = () => {
 
     const renderActiveTabContent = () => {
         switch (activeTab) {
-            case 'Allergy':
+            case 'Overview':
                 return (
                     <View style={styles.tabContentContainer}>
-                        <Text style={styles.contentTitle}>Allergies</Text>
-                        {isLoadingAllergies ? (
-                            <ActivityIndicator size="small" color={COLORS.button.choose} />
-                        ) : allergies?.data && allergies.data.length > 0 ? (
-                            allergies.data.map((allergy) => (
-                                <View key={allergy.id} style={styles.vaccinationItem}>
-                                    <Text style={styles.vaccineName}>{allergy.type}</Text>
-                                    <Text style={styles.vaccineDescription}>{allergy.detail}</Text>
-                                </View>
-                            ))
-                        ) : (
-                            <Text style={styles.emptyText}>No allergy records found</Text>
-                        )}
+                        <Text style={styles.contentTitle}>Pet Overview</Text>
+                        {/* Thêm nội dung overview ở đây */}
                     </View>
                 );
             case 'Vaccination':
@@ -497,8 +410,14 @@ const PetDetail = () => {
                                     <Text style={styles.breedText}>{pet?.breed}</Text>
                                 </View>
                             </View>
-                            <TouchableOpacity onPress={() => setShowEditModal(true)}>
-                                <Text style={styles.editText}>Update</Text>
+                            <TouchableOpacity onPress={() => {
+                                navigation.navigate('AddPet', {
+                                    petId: petId,
+                                    isEditMode: true,
+                                    pet: pet
+                                });
+                            }}>
+                                <Text style={styles.editText}>Edit</Text>
                             </TouchableOpacity>
                         </View>
                         <View style={styles.genAgeContainer}>
@@ -511,10 +430,6 @@ const PetDetail = () => {
                                 <Text style={styles.valueText}>{PetDetail?.age || 'Unknown'} years</Text>
                             </View>
 
-                            <View style={styles.genderContainer}>
-                                <Text style={styles.genderText}>Weight</Text>
-                                <Text style={styles.valueText}>{PetDetail?.weight || 'Unknown'} kg</Text>
-                            </View>
                         </View>
                     </View>
 
@@ -627,7 +542,7 @@ const PetDetail = () => {
                     </View>
                 </Modal>
 
-                {/* Edit Pet Modal */}
+                {/* Edit Pet Modal
                 <Modal
                     visible={showEditModal}
                     transparent={true}
@@ -744,7 +659,7 @@ const PetDetail = () => {
                             </View>
                         </ScrollView>
                     </SafeAreaView>
-                </Modal>
+                </Modal> */}
 
             </SafeAreaView>
         </>
