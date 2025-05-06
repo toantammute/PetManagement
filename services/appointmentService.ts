@@ -13,7 +13,6 @@ export const getAppointments = async (): Promise<Appointment[]> => {
             'Accept': 'application/json'
         }
     });
-    console.log('response.data of appointments', response.data.data);
     return response.data.data;
 }
 
@@ -26,7 +25,6 @@ export const getDoctors = async (): Promise<Doctor[]> => {
             'Accept': 'application/json'
         }
     });
-    console.log('response.data of doctors', response.data.data);
     return response.data.data;
 }
 
@@ -42,7 +40,6 @@ export const getDoctorTimeSlots = async (doctorId: string, date: string): Promis
             date: date // format: YYYY-MM-DD
         }
     });
-    console.log('response.data of time slots', response.data.data);
     return response.data.data;
 }
 
@@ -64,7 +61,28 @@ export const createAppointment = async (appointment: AppointmentCreate): Promise
             'Accept': 'application/json'
         }
     });
-    console.log('response.data of create appointment', response.data.data);
     return response.data.data;
 }
 
+
+// authRoute.GET("appointments/pet/:pet_id/history", appointmentApi.controller.getHistoryAppointmentsByPetID)
+
+export const getHistoryAppointmentsByPetID = async (petId: string): Promise<Appointment[]> => {
+    try {
+        const accessToken = await AsyncStorage.getItem('accessToken');
+        const response = await axios.get(`${API}/appointments/pet/${petId}/history`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        console.log('getHistoryAppointmentsByPetID', response.data);
+        // Make sure response.data exists and has a data property, otherwise return an empty array
+        return response.data?.data || [];
+    } catch (error) {
+        console.error(`Error getting appointment history for pet ${petId}:`, error);
+        return []; // Return an empty array instead of throwing an error
+    }
+}

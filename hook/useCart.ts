@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { addToCart, getCart } from '../services/cartService';
+import { addToCart, getCart, getOrderHistory } from '../services/cartService';
 import { Cart } from '../models/models';
 import { use } from 'react';
 
@@ -52,3 +52,19 @@ export const useUpdateCart = () => {
         }
     });
 }
+
+export const useOrderHistory = () => {
+    const queryClient = useQueryClient();
+    return useQuery({
+        queryKey: ['orderHistory'],
+        queryFn: getOrderHistory,
+        refetchOnWindowFocus: true,
+        retry: 3,
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        throwOnError: (error: Error, query) => {
+            console.error('Failed to fetch order history:', error);
+            return false;
+        }
+    });
+}
+

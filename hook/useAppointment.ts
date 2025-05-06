@@ -1,4 +1,4 @@
-import { getAppointments, getDoctorTimeSlots, getDoctors, createAppointment } from "../services/appointmentService";
+import { getAppointments, getDoctorTimeSlots, getDoctors, createAppointment, getHistoryAppointmentsByPetID } from "../services/appointmentService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Appointment, Doctor, TimeSlot } from "../models/models";
 
@@ -51,4 +51,30 @@ export const useCreateAppointment = () => {
             queryClient.invalidateQueries({ queryKey: ['appointments'] });
         },
     });
+}
+
+export const useGetAppointmentHistory = (pet_id: string) => {
+    const queryClient = useQueryClient();
+    return useQuery<Appointment[], Error>({
+        queryKey: ['appointmentHistory', pet_id],
+        queryFn: () => {
+            // Make sure pet_id is valid before making the API call
+            if (!pet_id) {
+                console.log('No pet ID provided for appointment history');
+                return Promise.resolve([]);
+            }
+            return getHistoryAppointmentsByPetID(pet_id);
+        },
+        staleTime: 5 * 60 * 1000,
+        gcTime: 30 * 60 * 1000,
+        refetchOnWindowFocus: true,
+        retry: 3,
+        // Only run the query if we have a valid pet_id
+        enabled: Boolean(pet_id && typeof pet_id === 'string' && pet_id.trim() !== ''),
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        throwOnError: (error: Error, query) => {
+            console.error('Failed to fetch appointment history:', error);
+            return false;
+        },
+    })
 }

@@ -10,7 +10,6 @@ export const getPets = async (): Promise<Pet[]> => {
     console.log('getPets');
     const accessToken = await AsyncStorage.getItem('accessToken');
     // const accessToken = await AsyncStorage.getItem('accessToken');
-    console.log('access_token4', accessToken);
     const response = await axios.get(`${API}/pet/`, {
         headers: {
             'Content-Type': 'application/json',
@@ -37,8 +36,6 @@ export const getPetById = async (id: string): Promise<Pet> => {
 
 export const createPet = async (pet: Pet, image: Image): Promise<Pet> => {
     const accessToken = await AsyncStorage.getItem('accessToken');
-    console.log('Access token:', accessToken);
-
     const formData = new FormData();
     formData.append('data', JSON.stringify({
         name: pet.name,
@@ -56,8 +53,6 @@ export const createPet = async (pet: Pet, image: Image): Promise<Pet> => {
         type: image.type,
         uri: image.uri,
     });
-
-    console.log('FormData:', formData);
 
     try {
         const response = await axios.post(`${API}/pet/create`, formData, {
@@ -114,7 +109,6 @@ export const updatePet = async (pet: Pet, id: string): Promise<Pet> => {
                 'Authorization': `Bearer ${accessToken}`
             }
         });
-        console.log('Response from server:', response.data);
         return response.data;
     } catch (error: any) {
         console.error('Error updating pet:', error.response?.data || error.message);
@@ -141,7 +135,6 @@ export const updatePetAvatar = async (petId: string, image: Image): Promise<Pet>
                 'Authorization': `Bearer ${accessToken}`
             }
         });
-        console.log('Response from server:', response.data);
         return response.data;
     } catch (error: any) {
         console.error('Error updating pet avatar:', error.response?.data || error.message);

@@ -13,6 +13,7 @@ import Splash from './src/SplashScreen';
 import ProductList from './src/products';
 import ProductDetailScreen from './src/productDetail';
 import CartScreen from './src/cart';
+import HistoryScreen from './src/history';
 import AddLog from './src/addLog';
 import AddSchedule from './src/addSchedule';
 import AddAppointment from './src/addAppointment';
@@ -43,6 +44,7 @@ const AppNavigator = () => {
                         <Stack.Screen name="ProductList" component={ProductList} />
                         <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
                         <Stack.Screen name="Cart" component={CartScreen} />
+                        <Stack.Screen name="History" component={HistoryScreen} />
                         <Stack.Screen name="AddLog" component={AddLog} />
                         <Stack.Screen name="AddSchedule" component={AddSchedule} />
                         <Stack.Screen name="AddAppointment" component={AddAppointment} />
