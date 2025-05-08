@@ -52,7 +52,7 @@ const Account = () => {
         {
             icon: 'settings',
             label: 'Cài đặt',
-            onPress: () => navigation.navigate('Settings')
+            onPress: () => navigation.navigate('Order')
         },
         {
             icon: 'chat',

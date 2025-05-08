@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { addToCart, getCart, getOrderHistory } from '../services/cartService';
-import { Cart } from '../models/models';
+import { addToCart, getCart, getOrderHistory, removeFromCart, createOrder, getOrdersByUser,getOrdersById} from '../services/cartService';
+import { Cart, Order, OrderDetail} from '../models/models';
 import { use } from 'react';
+
 
 export const useCart = () => {
     return useQuery<Cart[], Error>({
@@ -37,21 +38,34 @@ export const useAddToCart = () => {
     });
 };
 
-export const useUpdateCart = () => {
-    const queryClient = useQueryClient();
-    // Implement the update cart mutation here
+export const useRemoveFromCart = () => {
     return useMutation({
-        mutationFn: (variables: { cartId: string; quantity: number }) => 
-            addToCart(variables.cartId, variables.quantity),
-        onSuccess: () => {
-            // Invalidate the cart query to refetch the updated cart
-            queryClient.invalidateQueries({ queryKey: ['cart'] });
-        },
-        onError: (error) => {
-            console.error('Failed to update item in cart:', error);
-        }
+        mutationFn: (product_id: string) => removeFromCart(product_id),
     });
-}
+};
+
+export const useCreateOrder = () => {
+    return useMutation({
+        mutationFn: () => createOrder(),
+    });
+};
+
+
+export const useGetOrdersById = (id: string) => {
+    return useQuery<OrderDetail, Error>({
+        queryKey: ['ordersById', id],
+        queryFn:() => getOrdersById(id),
+        enabled: !!id,
+    });
+};
+
+export const useGetOrdersByUser = () => {
+    return useQuery<OrderDetail[], Error>({
+        queryKey: ['ordersByUser'],
+        queryFn: getOrdersByUser,
+    });
+};
+
 
 export const useOrderHistory = () => {
     const queryClient = useQueryClient();

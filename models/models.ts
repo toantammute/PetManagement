@@ -73,6 +73,7 @@ export interface Cart {
     product_name: string;
     unit_price: number;
     quantity: number;
+    total_price: number;
 }
 
 export interface Appointment{
@@ -154,6 +155,23 @@ export interface Service {
     category: string;
     notes: string;
     description: string;
+}
+
+export interface Order {
+    order_id: string;
+    total_amount: number;
+    payment_status: string;
+    order_date: string;
+}
+
+export interface OrderDetail {
+    id: string;
+    user_id: string;
+    total_amount: number;
+    payment_status: string;
+    order_date: string;
+    shipping_address: string;
+    cart_items: Cart[];
 }
 
 
