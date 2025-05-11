@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BreedDetector from '../component/BreedDetector';
 import { COLORS } from '../theme/color';
+import Header from '../component/header';
 
 // Simple icon components
 const PawIcon = ({ color }: { color: string }) => (
@@ -35,13 +36,9 @@ const BreedDetectionScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F5F5F7" />
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <Header title="Nhận diện giống" />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Breed Detector</Text>
-          <Text style={styles.subtitle}>Identify your pet's breed with AI</Text>
-        </View>
-
         <View style={styles.card}>
           <View style={styles.typeSelector}>
             <TouchableOpacity
@@ -116,21 +113,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 16,
   },
-  header: {
-    marginBottom: 20,
-    paddingVertical: 8,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#212121',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#757575',
-    marginBottom: 8,
-  },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -157,7 +139,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   selectedTypeButton: {
-    backgroundColor: '#6200EE',
+    backgroundColor: COLORS.button.choose,
   },
   typeButtonText: {
     fontWeight: '600',

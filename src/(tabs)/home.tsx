@@ -129,7 +129,7 @@ const Home = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Thú cưng của bạn</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Pets')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Pets', { initialTab: 'PROFILE' })}>
               <Text style={styles.seeAllText}>Xem tất cả</Text>
             </TouchableOpacity>
           </View>
@@ -156,7 +156,7 @@ const Home = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Mua sắm</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('AllProducts')}>
+            <TouchableOpacity onPress={() => navigation.navigate('ProductList')}>
               <Text style={styles.seeAllText}>Xem tất cả</Text>
             </TouchableOpacity>
           </View>
@@ -189,10 +189,10 @@ const Home = () => {
                 <Text style={styles.breedIdentifierSubtitle}>
                   Dùng công cụ nhận diện giống để xác định giống thú cưng của bạn
                 </Text>
-                <View style={styles.breedIdentifierButton}>
+                <TouchableOpacity  style={styles.breedIdentifierButton} onPress={() => navigation.navigate('BreedDetection')}>
                   <Text style={styles.breedIdentifierButtonText}>Nhận diện ngay</Text>
                   <Icon name="arrow-forward" size={16} color="#FFF" />
-                </View>
+                </TouchableOpacity>
               </View>
               <View style={styles.breedIdentifierIconContainer}>
                 <Icon name="pets" size={70} color={COLORS.background.mint} />
@@ -205,7 +205,7 @@ const Home = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Lịch hẹn sắp tới</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Appointments')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Pets', { initialTab: 'APPOINTMENT' })}>
               <Text style={styles.seeAllText}>Xem tất cả</Text>
             </TouchableOpacity>
           </View>
@@ -268,7 +268,7 @@ const Home = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Nhật ký gần đây</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('DiaryList')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Pets', { initialTab: 'DIARY' })}>
               <Text style={styles.seeAllText}>Xem tất cả</Text>
             </TouchableOpacity>
           </View>

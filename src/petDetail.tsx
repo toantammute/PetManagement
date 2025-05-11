@@ -307,8 +307,95 @@ const PetDetail = () => {
             case 'Overview':
                 return (
                     <View style={styles.tabContentContainer}>
-                        <Text style={styles.contentTitle}>Pet Overview</Text>
-                        {/* Thêm nội dung overview ở đây */}
+                        <Text style={styles.contentTitleLarge}>Thông tin chi tiết</Text>
+                        <View style={styles.overviewScrollView}>
+                            {/* Thông tin cơ bản */}
+                            <View style={[styles.vaccinationItem, {borderLeftColor: '#4ECDC4'}]}>
+                                <View style={styles.vaccinationHeader}>
+                                    <Text style={styles.vaccineName}>Thông tin cơ bản</Text>
+                                </View>
+                                
+                                <View style={styles.infoRow}>
+                                    <View style={styles.infoLabelContainer}>
+                                        <MaterialCommunityIcons name="dog" size={16} color="#4ECDC4" />
+                                        <Text style={styles.infoLabel}>Loại thú cưng</Text>
+                                    </View>
+                                    <Text style={styles.infoValue}>{pet?.type || 'Chưa có thông tin'}</Text>
+                                </View>
+                                
+                                <View style={styles.infoRow}>
+                                    <View style={styles.infoLabelContainer}>
+                                        <MaterialCommunityIcons name="paw" size={16} color="#4ECDC4" />
+                                        <Text style={styles.infoLabel}>Giống</Text>
+                                    </View>
+                                    <Text style={styles.infoValue}>{pet?.breed || 'Chưa có thông tin'}</Text>
+                                </View>
+                                
+                                <View style={styles.infoRow}>
+                                    <View style={styles.infoLabelContainer}>
+                                        <MaterialIcons name="person" size={16} color="#4ECDC4" />
+                                        <Text style={styles.infoLabel}>Giới tính</Text>
+                                    </View>
+                                    <Text style={styles.infoValue}>{pet?.gender || 'Chưa có thông tin'}</Text>
+                                </View>
+                                
+                                <View style={styles.infoRow}>
+                                    <View style={styles.infoLabelContainer}>
+                                        <MaterialIcons name="child-care" size={16} color="#4ECDC4" />
+                                        <Text style={styles.infoLabel}>Tuổi</Text>
+                                    </View>
+                                    <Text style={styles.infoValue}>{pet?.age ? `${pet.age} tuổi` : 'Chưa có thông tin'}</Text>
+                                </View>
+                            </View>
+                            
+                            {/* Thông tin sinh trắc học */}
+                            <View style={[styles.vaccinationItem, {borderLeftColor: '#FFD93D'}]}>
+                                <View style={styles.vaccinationHeader}>
+                                    <Text style={styles.vaccineName}>Thông tin sinh trắc học</Text>
+                                </View>
+                                
+                                <View style={styles.infoRow}>
+                                    <View style={styles.infoLabelContainer}>
+                                        <MaterialIcons name="calendar-today" size={16} color="#FFD93D" />
+                                        <Text style={styles.infoLabel}>Ngày sinh</Text>
+                                    </View>
+                                    <Text style={styles.infoValue}>
+                                        {pet?.birth_date ? new Date(pet.birth_date).toLocaleDateString('vi-VN') : 'Chưa có thông tin'}
+                                    </Text>
+                                </View>
+                                
+                                <View style={styles.infoRow}>
+                                    <View style={styles.infoLabelContainer}>
+                                        <MaterialCommunityIcons name="weight" size={16} color="#FFD93D" />
+                                        <Text style={styles.infoLabel}>Cân nặng</Text>
+                                    </View>
+                                    <Text style={styles.infoValue}>{pet?.weight ? `${pet.weight} kg` : 'Chưa có thông tin'}</Text>
+                                </View>
+                            </View>
+                            
+                            {/* Thông tin y tế */}
+                            <View style={[styles.vaccinationItem, {borderLeftColor: '#FF6B6B'}]}>
+                                <View style={styles.vaccinationHeader}>
+                                    <Text style={styles.vaccineName}>Thông tin y tế</Text>
+                                </View>
+                                
+                                <View style={styles.infoRow}>
+                                    <View style={styles.infoLabelContainer}>
+                                        <MaterialCommunityIcons name="chip" size={16} color="#FF6B6B" />
+                                        <Text style={styles.infoLabel}>Số microchip</Text>
+                                    </View>
+                                    <Text style={styles.infoValue}>{pet?.microchip_number || 'Chưa có thông tin'}</Text>
+                                </View>
+                                
+                                <View style={styles.infoRow}>
+                                    <View style={styles.infoLabelContainer}>
+                                        <MaterialIcons name="health-and-safety" size={16} color="#FF6B6B" />
+                                        <Text style={styles.infoLabel}>Ghi chú sức khỏe</Text>
+                                    </View>
+                                    <Text style={styles.infoValue}>{pet?.healthnotes || 'Không có ghi chú'}</Text>
+                                </View>
+                            </View>
+                        </View>
                     </View>
                 );
             case 'Vaccination':
@@ -542,125 +629,6 @@ const PetDetail = () => {
                     </View>
                 </Modal>
 
-                {/* Edit Pet Modal
-                <Modal
-                    visible={showEditModal}
-                    transparent={true}
-                    animationType="slide"
-                    onRequestClose={() => setShowEditModal(false)}>
-                    <SafeAreaView style={styles.editModalContainer}>
-                        <View style={styles.editModalHeader}>
-                            <TouchableOpacity onPress={() => setShowEditModal(false)} style={styles.closeButton}>
-                                <MaterialIcons name="close" size={24} color={COLORS.text.default} />
-                            </TouchableOpacity>
-                            <Text style={styles.editModalTitle}>Update Pet Information</Text>
-                            <TouchableOpacity onPress={handleUpdatePet} style={styles.saveButton} disabled={isUpdating}>
-                                {isUpdating ? (
-                                    <ActivityIndicator size="small" color={COLORS.text.control} />
-                                ) : (
-                                    <Text style={styles.saveButtonText}>Save</Text>
-                                )}
-                            </TouchableOpacity>
-                        </View>
-
-                        <ScrollView style={styles.editModalContent}>
-                            <View style={styles.avatarContainer}>
-                                <View style={styles.avatarEditWrapper}>
-                                    {image ? (
-                                        <RNImage source={{ uri: image.uri }} style={styles.avatarImage} />
-                                    ) : pet?.data_image ? (
-                                        <RNImage
-                                            source={{ uri: `data:image/jpeg;base64,${pet.data_image}` }}
-                                            style={styles.avatarImage}
-                                        />
-                                    ) : (
-                                        <View style={styles.placeholderAvatar}>
-                                            <MaterialIcons name="pets" size={50} color='#A2C1DA' />
-                                        </View>
-                                    )}
-                                    <TouchableOpacity
-                                        style={styles.editAvatarButton}
-                                        onPress={handleImagePress}
-                                    >
-                                        <MaterialIcons name="camera-alt" size={24} color={COLORS.text.default} />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-
-                            <View style={styles.form}>
-                                <Input
-                                    label="Pet Name"
-                                    placeholder="Enter your pet's name"
-                                    value={petName}
-                                    onChangeText={setPetName}
-                                />
-
-                                <Input
-                                    label="Species"
-                                    placeholder="Dog, cat, ..."
-                                    value={petType}
-                                    onChangeText={setPetType}
-                                />
-
-                                <Input
-                                    label="Breed"
-                                    placeholder="Pet breed"
-                                    value={petBreed}
-                                    onChangeText={setPetBreed}
-                                />
-
-                                <DatePicker
-                                    label="Birth Date"
-                                    value={birthDate}
-                                    onChange={handleBirthDateChange}
-                                />
-
-                                <View style={styles.row}>
-                                    <View style={styles.halfWidth}>
-                                        <Input
-                                            label="Age"
-                                            placeholder="Age"
-                                            value={petAge}
-                                            onChangeText={setPetAge}
-                                            editable={false} // Added this property to prevent direct editing
-                                        />
-                                    </View>
-
-                                    <View style={styles.halfWidth}>
-                                        <Input
-                                            label="Weight (kg)"
-                                            placeholder="Weight"
-                                            value={petWeight}
-                                            onChangeText={setPetWeight}
-                                        />
-                                    </View>
-                                </View>
-
-                                <Input
-                                    label="Gender"
-                                    placeholder="Enter pet gender"
-                                    value={petGender}
-                                    onChangeText={setPetGender}
-                                />
-
-                                <Input
-                                    label="Health Notes"
-                                    placeholder="Enter health notes"
-                                    value={petHealthNotes}
-                                    onChangeText={setPetHealthNotes}
-                                />
-
-                                <Input
-                                    label="Microchip Number"
-                                    placeholder="Enter microchip number"
-                                    value={petMicrochipNumber}
-                                    onChangeText={setPetMicrochipNumber}
-                                />
-                            </View>
-                        </ScrollView>
-                    </SafeAreaView>
-                </Modal> */}
-
             </SafeAreaView>
         </>
     );
@@ -716,7 +684,6 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 10,
         alignSelf: 'stretch',
-        marginTop: 10,
     },
 
     treatmentTabContainer: {
@@ -903,7 +870,7 @@ const styles = StyleSheet.create({
     },
 
     vaccineName: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: '600',
         color: COLORS.text.text,
         fontFamily: 'Poppins-Regular',
@@ -1153,6 +1120,115 @@ const styles = StyleSheet.create({
 
     halfWidth: {
         width: '48%',
+    },
+
+    overviewScrollView: {
+        // padding: 5,
+    },
+
+    overviewSection: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 1,
+    },
+
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F0F0F0',
+        paddingBottom: 8,
+    },
+
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: COLORS.text.text,
+        marginLeft: 8,
+    },
+
+    overviewItem: {
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        marginBottom: 12,
+        paddingHorizontal: 5,
+        flex: 1,
+    },
+
+    overviewLabel: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: COLORS.text.textDisable,
+        marginBottom: 5,
+    },
+
+    overviewValue: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: COLORS.text.text,
+    },
+
+    overviewPair: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+    },
+
+    fullWidthItem: {
+        flexDirection: 'column',
+        width: '100%',
+        marginBottom: 10,
+    },
+
+    labelContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 5,
+    },
+
+    infoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F0F0F0',
+    },
+    
+    infoLabelContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    
+    infoLabel: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: COLORS.text.text,
+        marginLeft: 8,
+    },
+    
+    infoValue: {
+        fontSize: 16, 
+        fontWeight: '600',
+        color: COLORS.text.text,
+        flex: 1,
+        textAlign: 'right',
+    },
+
+    contentTitleLarge: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: COLORS.text.text,
+        marginBottom: 10,
+        fontFamily: 'Poppins-Regular',
     },
 });
 

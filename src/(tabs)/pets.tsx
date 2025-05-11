@@ -11,10 +11,11 @@ import { useSchedulebyUser } from '../../hook/useSchedule';
 import ScheduleCard from '../../component/scheduleCard';
 import { useUpdateSchedule } from '../../hook/useSchedule';
 import { useAppointments } from '../../hook/useAppointment';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Toast from 'react-native-toast-message';
+import { useFocusEffect } from '@react-navigation/native';
 
 // Define the type for the navigation stack
 type RootStackParamList = {
@@ -26,13 +27,34 @@ type PetsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const Pets = () => {
     const navigation = useNavigation<PetsScreenNavigationProp>();
+    const route = useRoute();
+    const params = route.params as { initialTab?: string };
+    
     const { data: pets, isLoading: isPetsLoading, isError: isPetsError, error: petsError } = usePets();
     const { data: allDiaries, isLoading: isDiaryLoading, isError: isDiaryError, error: diaryError } = useDiarybyUser();
     const { data: allSchedules, isLoading: isScheduleLoading, isError: isScheduleError, error: scheduleError } = useSchedulebyUser();
     const { mutate: updateSchedule } = useUpdateSchedule();
     const { data: appointments, isLoading: isAppointmentsLoading, isError: isAppointmentsError, error: appointmentsError } = useAppointments();
-    const [activeTab, setActiveTab] = useState('PROFILE');
+    
+    // Set initial active tab based on navigation params
+    const [activeTab, setActiveTab] = useState<string>(params?.initialTab || 'PROFILE');
     const [selectedAvatars, setSelectedAvatars] = useState<string[]>(['all']);
+
+    // Use useFocusEffect to update the tab when screen comes into focus
+    useFocusEffect(
+        React.useCallback(() => {
+            if (params?.initialTab) {
+                setActiveTab(params.initialTab);
+                // Clear the initialTab parameter after setting the active tab
+                navigation.setParams({ initialTab: undefined });
+            }
+        }, [params?.initialTab, navigation])
+    );
+
+    // Handle tab change
+    const handleTabChange = (tab: string) => {
+        setActiveTab(tab);
+    };
 
     // Filter data based on selected pet
     const getFilteredData = () => {
@@ -218,8 +240,8 @@ const Pets = () => {
             ]}>
                 <TabBar 
                     type="pets" 
-                    initialTab="PROFILE" 
-                    onTabChange={setActiveTab} 
+                    initialTab={activeTab} 
+                    onTabChange={handleTabChange} 
                     pets={pets} 
                     isLoading={isPetsLoading}
                     selectedAvatars={selectedAvatars}
