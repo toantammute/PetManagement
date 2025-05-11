@@ -112,53 +112,55 @@ const Login = () => {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.header}>
-                    <Image 
+                    {/* <Image 
                         source={require('../assets/images/bus.png')} 
                         style={styles.logo}
-                    />
+                    /> */}
                     <Text style={styles.appName}>Pet Care</Text>
                 </View>
 
                 <View style={styles.titleContainer}>
-                    <Text style={styles.title}>Login</Text>
+                    <Text style={styles.title}>Đăng nhập</Text>
                     <Text style={styles.subtitle}>
-                        Welcome back! Please sign in to continue
+                        Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục
                     </Text>
                 </View>
 
                 <View style={styles.formContainer}>
                     <Input 
-                        label="Username" 
-                        placeholder="Enter your username" 
+                        label="Tên đăng nhập" 
+                        placeholder="Nhập tên đăng nhập" 
                         value={username} 
                         onChangeText={setusername}
+                        rightIcon={
+                            <Icon name="person" size={20} color="#BDBDBD" />
+                        }
                     />
                     
-                    <View style={styles.passwordContainer}>
-                        <Input 
-                            label="Password" 
-                            placeholder="Enter your password" 
-                            value={password} 
-                            onChangeText={setPassword}
-                            secureTextEntry={!showPassword}
-                        />
-                        <TouchableOpacity 
-                            style={styles.eyeIcon} 
-                            onPress={togglePasswordVisibility}
-                        >
-                            <Icon 
-                                name={showPassword ? 'visibility' : 'visibility-off'} 
-                                size={24} 
-                                color="#757575"
-                            />
-                        </TouchableOpacity>
-                    </View>
+                    <Input 
+                        label="Mật khẩu" 
+                        placeholder="Nhập mật khẩu" 
+                        value={password} 
+                        onChangeText={setPassword}
+                        secureTextEntry={!showPassword}
+                        rightIcon={
+                            <TouchableOpacity 
+                                onPress={togglePasswordVisibility}
+                            >
+                                <Icon 
+                                    name={showPassword ? 'visibility' : 'visibility-off'} 
+                                    size={22} 
+                                    color="#757575"
+                                />
+                            </TouchableOpacity>
+                        }
+                    />
 
                     <TouchableOpacity 
                         style={styles.forgotPassword} 
                         onPress={() => navigation.navigate('ForgotPassword')}
                     >
-                        <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+                        <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity 
@@ -166,35 +168,44 @@ const Login = () => {
                         onPress={handleLogin}
                         disabled={isLoading}
                     >
-                        <Text style={styles.loginButtonText}>
-                            {isLoading ? 'Signing in...' : 'Sign In'}
-                        </Text>
+                        {isLoading ? (
+                            <Text style={styles.loginButtonText}>Đang đăng nhập...</Text>
+                        ) : (
+                            <View style={styles.buttonContent}>
+                                <Text style={styles.loginButtonText}>Đăng nhập</Text>
+                                <Icon name="arrow-forward" size={20} color="#FFF" />
+                            </View>
+                        )}
                     </TouchableOpacity>
                 </View>
 
-                <View style={styles.footer}>
-                    <Text style={styles.noAccountText}>Don't have an account? </Text>
-                    <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                        <Text style={styles.signupText}>Sign up now</Text>
-                    </TouchableOpacity>
+                <View style={styles.divider}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.orText}>Hoặc đăng nhập với</Text>
+                    <View style={styles.dividerLine} />
                 </View>
 
                 <View style={styles.socialLoginContainer}>
-                    <Text style={styles.orText}>Or sign in with</Text>
-                    
                     <View style={styles.socialButtons}>
                         <TouchableOpacity style={styles.socialButton}>
                             <Icon name="facebook" size={24} color="#4267B2" />
                         </TouchableOpacity>
                         
-                        <TouchableOpacity style={styles.socialButton}>
-                            <Icon name="username" size={24} color="#DB4437" />
+                        <TouchableOpacity style={[styles.socialButton, {marginHorizontal: 20}]}>
+                            <Icon name="mail" size={24} color="#DB4437" />
                         </TouchableOpacity>
                         
                         <TouchableOpacity style={styles.socialButton}>
                             <Icon name="phone" size={24} color="#4CAF50" />
                         </TouchableOpacity>
                     </View>
+                </View>
+
+                <View style={styles.footer}>
+                    <Text style={styles.noAccountText}>Chưa có tài khoản? </Text>
+                    <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+                        <Text style={styles.signupText}>Đăng ký ngay</Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
             <Toast />
@@ -208,33 +219,41 @@ const styles = StyleSheet.create({
         backgroundColor: '#ffffff',
     },
     scrollContent: {
-        paddingHorizontal: 20,
-        paddingTop: Platform.OS === 'ios' ? 50 : 30,
+        paddingHorizontal: 24,
+        paddingTop: Platform.OS === 'ios' ? 60 : 40,
         paddingBottom: 40,
+        flexGrow: 1,
+        justifyContent: 'center',
     },
     header: {
         alignItems: 'center',
         marginBottom: 40,
     },
     logo: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 90,
+        height: 90,
+        borderRadius: 45,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
     },
     appName: {
-        marginTop: 10,
-        fontSize: 24,
+        marginTop: 12,
+        fontSize: 26,
         fontWeight: 'bold',
         color: '#4CAF50',
+        letterSpacing: 0.5,
     },
     titleContainer: {
-        marginBottom: 30,
+        marginBottom: 32,
     },
     title: {
-        fontSize: 28,
+        fontSize: 30,
         fontWeight: 'bold',
         color: '#333333',
-        marginBottom: 10,
+        marginBottom: 12,
     },
     subtitle: {
         fontSize: 16,
@@ -245,42 +264,88 @@ const styles = StyleSheet.create({
         marginBottom: 30,
     },
     passwordContainer: {
-        position: 'relative',
-    },
-    eyeIcon: {
-        position: 'absolute',
-        right: 10,
-        top: 45,
-        padding: 5,
+        marginBottom: 0,
     },
     forgotPassword: {
         alignSelf: 'flex-end',
-        marginTop: 10,
+        marginTop: 8,
         marginBottom: 25,
+        paddingVertical: 4,
     },
     forgotPasswordText: {
         color: '#4CAF50',
-        fontWeight: '500',
+        fontWeight: '600',
     },
     loginButton: {
         backgroundColor: '#4CAF50',
-        borderRadius: 10,
+        borderRadius: 12,
         paddingVertical: 16,
         alignItems: 'center',
-        marginTop: 10,
+        justifyContent: 'center',
+        marginTop: 15,
+        shadowColor: '#4CAF50',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 3,
+    },
+    buttonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     loginButtonDisabled: {
         backgroundColor: '#A5D6A7',
     },
     loginButtonText: {
         color: 'white',
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: 'bold',
+        marginRight: 8,
+    },
+    divider: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 20,
+    },
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: '#E0E0E0',
+    },
+    orText: {
+        color: '#9E9E9E',
+        fontSize: 14,
+        paddingHorizontal: 10,
+    },
+    socialLoginContainer: {
+        alignItems: 'center',
+        marginBottom: 30,
+    },
+    socialButtons: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 10,
+    },
+    socialButton: {
+        width: 55,
+        height: 55,
+        borderRadius: 28,
+        backgroundColor: '#F5F5F5',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#EEEEEE',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
     footer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginBottom: 30,
+        marginTop: 10,
     },
     noAccountText: {
         color: '#757575',
@@ -290,28 +355,6 @@ const styles = StyleSheet.create({
         color: '#4CAF50',
         fontWeight: 'bold',
         fontSize: 16,
-    },
-    socialLoginContainer: {
-        alignItems: 'center',
-    },
-    orText: {
-        color: '#757575',
-        fontSize: 14,
-        marginBottom: 20,
-    },
-    socialButtons: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-    },
-    socialButton: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        borderWidth: 1,
-        borderColor: '#E0E0E0',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginHorizontal: 10,
     },
 });
 

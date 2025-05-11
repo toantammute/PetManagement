@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import TabButton from './tabbtn';
 import { COLORS } from '../theme/color';
@@ -27,6 +27,13 @@ const TabBar: React.FC<TabBarProps> = ({
     onAvatarChange
 }) => {
     const [chosenTab, setChosenTab] = useState<string>(initialTab);
+    
+    // Update chosenTab when initialTab prop changes
+    useEffect(() => {
+        if (initialTab && initialTab !== chosenTab) {
+            setChosenTab(initialTab);
+        }
+    }, [initialTab]);
 
     const handleTabPress = (tabName: string) => {
         setChosenTab(tabName);

@@ -16,6 +16,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onToggle, petAvat
     const navigation = useNavigation<any>();
 
     const handlePress = () => {
+        console.log("Navigating to AddSchedule with schedule:", schedule);
         navigation.navigate('AddSchedule', { 
             schedule: schedule,
             isUpdate: true 

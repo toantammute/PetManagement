@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Text, View, TextInput, StyleSheet } from 'react-native';
 import { COLORS } from '../theme/color';
 
@@ -7,8 +7,10 @@ interface InputProps {
     placeholder: string;
     value: string;
     onChangeText: (text: string) => void;
-    secureTextEntry?: boolean; // Thêm thuộc tính này
+    secureTextEntry?: boolean;
     editable?: boolean;
+    rightIcon?: ReactNode;
+    inputStyle?: object;
 }
 
 const Input: React.FC<InputProps> = ({ 
@@ -17,56 +19,74 @@ const Input: React.FC<InputProps> = ({
     value, 
     onChangeText,
     secureTextEntry = false,
-    editable = true
+    editable = true,
+    rightIcon,
+    inputStyle
 }) => {
     return (
         <View style={styles.container}>
             <Text style={styles.label}>{label}</Text>
-            <TextInput 
-                style={styles.input}
-                placeholder={placeholder} 
-                value={value} 
-                onChangeText={onChangeText}
-                secureTextEntry={secureTextEntry}
-                editable={editable}
-            />
+            <View style={styles.inputContainer}>
+                <TextInput 
+                    style={[styles.input, rightIcon ? styles.inputWithIcon : undefined, inputStyle]}
+                    placeholder={placeholder} 
+                    value={value} 
+                    onChangeText={onChangeText}
+                    secureTextEntry={secureTextEntry}
+                    editable={editable}
+                />
+                {rightIcon && (
+                    <View style={styles.rightIconContainer}>
+                        {rightIcon}
+                    </View>
+                )}
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        // marginBottom: 16,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',
         alignSelf: 'stretch',
-        gap:6
-
+        gap: 6,
+        marginBottom: 10
     },
     label: {
         fontSize: 16,
         fontWeight: '500',
-        // marginBottom: 6,
         color: COLORS.text.textChoose,
         lineHeight: 20,
         letterSpacing: -0.28,
     },
-    input: {
+    inputContainer: {
+        position: 'relative',
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-        gap: 12,
-        flex:1,
+        flexDirection: 'row',
+        alignItems: 'center',
         alignSelf: 'stretch',
+    },
+    input: {
+        flex: 1,
+        height: 48,
         borderWidth: 1,
         borderColor: COLORS.border.input,
         borderRadius: 6,
         paddingHorizontal: 12,
-        // paddingVertical: 10,
         fontSize: 16,
         backgroundColor: '#fff',
+    },
+    inputWithIcon: {
+        paddingRight: 45,
+    },
+    rightIconContainer: {
+        position: 'absolute',
+        right: 0,
+        height: '100%',
+        justifyContent: 'center',
+        paddingHorizontal: 15,
     }
 });
 

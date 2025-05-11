@@ -126,14 +126,26 @@ export const updateSchedule = async (schedule: Schedule & { id: string }) => {
         }
     });
     
-    // Cập nhật lịch thông báo sau khi cập nhật schedule
-    if (response.data) {
-        const user_id = await AsyncStorage.getItem('userId');
+    const user = await AsyncStorage.getItem('user');
+    if (!user) {
+        throw new Error('Không tìm thấy thông tin người dùng');
+    }
+    const user_id = JSON.parse(user).user_id;
+    console.log("user_id", user_id);
+    // Lên lịch thông báo sau khi tạo schedule thành công
+    if (response.status === 200) {
+        console.log("Lên lịch thông báo");
+        console.log("user_id", user_id);
+        console.log("scheduleid", response.data.data.id);
         if (user_id) {
             try {
-                await scheduleNotification(schedule, user_id);
+                console.log("vào try của createSchedule");
+                await scheduleNotification(
+                    response.data.data,
+                    user_id
+                );
             } catch (error) {
-                console.error("Không thể cập nhật lịch thông báo:", error);
+                console.error("Không thể lên lịch thông báo:", error);
             }
         }
     }

@@ -120,10 +120,10 @@ function CustomTabBar({
 
         <TouchableOpacity
           style={styles.tabItem}
-          onPress={() => navigation.navigate('ProductList')}
+          onPress={() => navigation.navigate('Appointments')}
         >
           <FontAwesome
-            name="shopping-cart"
+            name="calendar"
             size={SIZES.icon.medium}
             color={state.index === 3 ? COLORS.button.choose : COLORS.button.default}
           />

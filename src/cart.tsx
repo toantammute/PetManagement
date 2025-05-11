@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useCart } from '../hook/useCart';
+import { useCart, useAddToCart, useRemoveFromCart,useCreateOrder } from '../hook/useCart';
 import { useProductById } from '../hook/useProduct';
 import { Cart } from '../models/models';
 import { COLORS } from '../theme/color';
@@ -20,33 +20,36 @@ import Toast from 'react-native-toast-message';
 
 const CartScreen = () => {
     const { data: cartItems, isLoading, isError, error } = useCart();
+    const { mutate: addToCart } = useAddToCart();
     const navigation = useNavigation();
-    // const { mutate: updateCartItem } = useUpdateCartItem();
-    // const { mutate: removeFromCart } = useRemoveFromCart();
-    // const { mutate: clearCart } = useClearCart();
-
+    const { mutate: removeFromCart } = useRemoveFromCart();
+    const { mutate: createOrder } = useCreateOrder();
+    
     const calculateTotal = () => {
         if (!cartItems) return 0;
         return cartItems.reduce((total, item) => total + (item.unit_price * item.quantity), 0);
     };
 
-    const handleQuantityChange = (itemId: string, newQuantity: number) => {
-        // updateCartItem({ id: itemId, quantity: newQuantity }, {
-        //     onSuccess: () => {
-        //         Toast.show({
-        //             type: 'success',
-        //             text1: 'Cart Updated',
-        //             text2: 'Quantity updated successfully'
-        //         });
-        //     },
-        //     onError: (error) => {
-        //         Toast.show({
-        //             type: 'error',
-        //             text1: 'Error',
-        //             text2: 'Failed to update quantity'
-        //         });
-        //     }
-        // });
+    const handleQuantityChange = async (productId: string, newQuantity: number) => {
+        await addToCart(
+            { productId: productId, quantity: newQuantity },
+            {
+                onSuccess: () => {
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Cart Updated',
+                        text2: 'Item added to cart successfully'
+                    });
+                },
+                onError: () => {
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Error',
+                        text2: 'Failed to add item to cart'
+                    });
+                }
+            }
+        );
     };
 
     const handleRemoveItem = (itemId: string) => {
@@ -55,22 +58,22 @@ const CartScreen = () => {
             text1: 'Remove Item',
             text2: 'Are you sure you want to remove this item?',
             onPress: () => {
-                // removeFromCart(itemId, {
-                //     onSuccess: () => {
-                //         Toast.show({
-                //             type: 'success',
-                //             text1: 'Item Removed',
-                //             text2: 'Item removed from cart'
-                //         });
-                //     },
-                //     onError: () => {
-                //         Toast.show({
-                //             type: 'error',
-                //             text1: 'Error',
-                //             text2: 'Failed to remove item'
-                //         });
-                //     }
-                // });
+                removeFromCart(itemId, {
+                    onSuccess: () => {
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Item Removed',
+                            text2: 'Item removed from cart'
+                        });
+                    },
+                    onError: () => {
+                        Toast.show({
+                            type: 'error',
+                            text1: 'Error',
+                            text2: 'Failed to remove item'
+                        });
+                    }
+                });
             }
         });
     };
@@ -101,15 +104,27 @@ const CartScreen = () => {
         });
     };
 
-    const handleCheckout = () => {
-        Toast.show({
-            type: 'success',
-            text1: 'Checkout',
-            text2: 'Proceeding to checkout...'
-        });
-        // TODO: Implement actual checkout process
-    };
+    
 
+    const handleCheckout = () => {
+        createOrder(undefined, {
+            onSuccess: () => {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Order Created',
+                    text2: 'Order created successfully'
+                });
+            },
+            onError: () => {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Error',
+                    text2: 'Failed to create order'
+                });
+            }
+        });
+    };
+                    
     const CartItem = ({ item }: { item: Cart }) => {
         const { data: product, isLoading: isLoadingProduct } = useProductById(item.product_id);
 
@@ -140,7 +155,7 @@ const CartScreen = () => {
                     <View style={styles.quantityContainer}>
                         <TouchableOpacity 
                             style={styles.quantityButton}
-                            onPress={() => handleQuantityChange(item.id, item.quantity - 1)}
+                            onPress={() => handleQuantityChange(item.product_id, - 1)}
                             disabled={item.quantity <= 1}
                         >
                             <Icon name="remove" size={20} color={item.quantity <= 1 ? "#BDBDBD" : "#333"} />
@@ -148,7 +163,7 @@ const CartScreen = () => {
                         <Text style={styles.quantityText}>{item.quantity}</Text>
                         <TouchableOpacity 
                             style={styles.quantityButton}
-                            onPress={() => handleQuantityChange(item.id, item.quantity + 1)}
+                            onPress={() => handleQuantityChange(item.product_id, 1)}
                         >
                             <Icon name="add" size={20} color="#333" />
                         </TouchableOpacity>

@@ -40,6 +40,7 @@ export const getDoctorTimeSlots = async (doctorId: string, date: string): Promis
             date: date // format: YYYY-MM-DD
         }
     });
+
     return response.data.data;
 }
 
@@ -86,3 +87,4 @@ export const getHistoryAppointmentsByPetID = async (petId: string): Promise<Appo
         return []; // Return an empty array instead of throwing an error
     }
 }
+

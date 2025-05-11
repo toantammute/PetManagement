@@ -24,6 +24,10 @@ import DiaryDetail from './src/diaryDetail';
 import ResetPassword from './src/resetPassword';
 import ForgotPassword from './src/forgotPass';
 import Profile from './src/Profile';
+import OrderScreen from './src/order';
+import OrderDetailScreen from './src/orderDetail';
+import OTP from './src/otp';
+import Pets from './src/(tabs)/pets';
 // import PetDetail from './src/(tabs)/pets';
 // import AddPet from './src/addPet';
 
@@ -55,12 +59,16 @@ const AppNavigator = () => {
                         <Stack.Screen name="Splash" component={Splash} />
                         <Stack.Screen name="ResetPassword" component={ResetPassword} />
                         <Stack.Screen name="Profile" component={Profile} />
+                        <Stack.Screen name="Order" component={OrderScreen} />
+                        <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
+                        <Stack.Screen name="Pets" component={Pets} />
                     </>
                 ) : (
                     <>
                         <Stack.Screen name="Login" component={Login} />
                         <Stack.Screen name="SignUp" component={SignUp} />
                         <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+                        <Stack.Screen name="OTP" component={OTP} />
                     </>
                 )}
             </Stack.Navigator>

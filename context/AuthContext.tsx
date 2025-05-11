@@ -1,10 +1,11 @@
 import { API } from "@env";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {User} from "../models/models";
+import {User, Image} from "../models/models";
 import { createContext, useContext, useEffect, useState } from "react";
-import { Alert } from "react-native";
+import { Alert} from "react-native";
 import messaging from "@react-native-firebase/messaging";
+import { useNavigation } from "@react-navigation/native";
 
 interface AuthContextType {
     user: User | null;
@@ -12,8 +13,10 @@ interface AuthContextType {
     accessToken: string | null;
     login: (username: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
-    register: (username: string, password: string, email: string) => Promise<void>;
+    register: (username: string, password: string, email: string, image: Image, full_name: string, phone_number: string, address: string) => Promise<void>;
     isLoggedIn: () => Promise<void>;
+    verifyEmail: (email: string) => Promise<void>;
+    resendOTP: (username: string) => Promise<void>;
 
 }
 
@@ -28,6 +31,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({children}: {children: React.ReactNode}) => {
+    // const navigation = useNavigation<any>();
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -108,15 +112,38 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
         }
     };
 
-    const register = async (username: string, password: string, email: string) => {
+    const register = async (username: string, password: string, email: string, image: Image, full_name: string, phone_number: string, address: string) => {
         try {
-            const response = await axios.post(`${API}/user/register`, {
-                username,
-                password,
-                email,
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            formData.append('email', email);
+            formData.append('full_name', full_name);
+            formData.append('phone_number', phone_number);
+            formData.append('address', address);
+            formData.append('image', {
+                name: image.name,
+                type: image.type,
+                uri: image.uri,
             });
-            console.log("Register response: ", response.data);
+            formData.append('role', 'user');
+            console.log("Register formData: ", formData);
+
+            const response = await axios.post(`${API}/user/create`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Accept': 'application/json',
+                },
+            });
+            console.log("Register response: ", response.data.message);
+            if (response.status === 200) {
+                Alert.alert("Đăng ký thành công", "Vui lòng kiểm tra email để xác thực tài khoản");
+                await verifyEmail(email);
+                return response.data;
+                // navigation.navigate('OTP', {email: email});
+            }
         } catch (error) {
+
             console.error("Register error: ", error);
         }
     };
@@ -142,12 +169,21 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
         }
     }
 
+    const verifyEmail = async (email: string) => {
+        const response = await axios.post(`${API}/user/verify_email`, {email});
+        return response.data;
+    }
+    const resendOTP = async (username: string) => {
+        const response = await axios.post(`${API}/user/resend_otp/${username}`);
+        return response.data;
+    }
+
     useEffect(() => {
         isLoggedIn();
     }, []);
 
     return (
-        <AuthContext.Provider value={{user, isLoading, accessToken, login, logout, register, isLoggedIn}}>
+        <AuthContext.Provider value={{user, isLoading, accessToken, login, logout, register, isLoggedIn, verifyEmail, resendOTP}}>
             {children}
         </AuthContext.Provider>
     );
