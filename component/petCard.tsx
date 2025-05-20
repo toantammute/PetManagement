@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS, SIZES } from '../theme/color';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Fontisto from 'react-native-vector-icons/Fontisto';
 import AvaBtn from './avabtn';
 import FuncBtn from './funcbtn';
 import { useNavigation } from '@react-navigation/native';
@@ -39,24 +41,34 @@ const PetCard: React.FC<PetCardProps> = ({ pet }) => {
                     </View>
                 </View>
                 <View style={styles.bottomInfo}>
-                    <Text style={styles.bottomInfoText}>{pet.birth_date ? pet.birth_date : 'N/A'}</Text>
+                    <Text style={styles.bottomInfoText}>
+                        {pet.birth_date 
+                            ? new Date(pet.birth_date).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })
+                            : 'N/A'
+                        }
+                    </Text>
                     <Text style={styles.bottomInfoText}>Allergies: None</Text>
                 </View>
 
             </View>
             {/* Bottom */}
             <View style={styles.bottomContainer}>
-                <TouchableOpacity style={styles.buttonContainer} onPress={() => {}}>
-                    <MaterialIcons name="schedule" size={28} color={COLORS.button.choose} />
-                    <Text style={styles.text}>Schedule</Text>
+                <TouchableOpacity style={styles.buttonContainer} onPress={() => navigation.navigate('AddVaccination', { petId: pet.petid })}>
+                    <Fontisto name="injection-syringe" size={28} color={COLORS.button.choose} />
+                    <Text style={styles.text}>Add Vaccination</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer} onPress={() => navigation.navigate('PetDetail', { petId: pet.petid })}>
                     <Ionicons name="paw-outline" size={28} color={COLORS.button.choose} />
                     <Text style={styles.text}>View Profile</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonContainer} onPress={() => {}}>
-                    <Ionicons name="calendar-outline" size={28} color={COLORS.button.choose} />
-                    <Text style={styles.text}>Appointment</Text>
+                <TouchableOpacity style={styles.buttonContainer} onPress={() => navigation.navigate('PetWeights', { petId: pet.petid })}>
+                    {/* <Ionicons name="calendar-outline" size={28} color={COLORS.button.choose} /> */}
+                    <MaterialCommunityIcons name="chart-line" size={28} color={COLORS.button.choose} />
+                    <Text style={styles.text}>Pet Weight</Text>
                 </TouchableOpacity>
 
             </View>

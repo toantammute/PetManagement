@@ -5,6 +5,8 @@ import { Schedule } from '../models/models';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AvaBtn from './avabtn';
 import { useNavigation } from '@react-navigation/native';
+import { useToggleSchedule } from '../hook/useSchedule';
+import Toast from 'react-native-toast-message';
 
 interface ScheduleCardProps {
     schedule: Schedule;
@@ -14,6 +16,7 @@ interface ScheduleCardProps {
 
 const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onToggle, petAvatar }) => {
     const navigation = useNavigation<any>();
+    const { mutate: toggleScheduleActive, isPending } = useToggleSchedule();
 
     const handlePress = () => {
         console.log("Navigating to AddSchedule with schedule:", schedule);
@@ -24,14 +27,59 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onToggle, petAvat
     };
 
     const handleToggle = (value: boolean) => {
-        if (schedule.id) {
-            onToggle(parseInt(schedule.id), value);
-        }
+        if (!schedule.id) return;
+        
+        const scheduleId = schedule.id.toString();
+        
+        // Gọi onToggle cho tương thích ngược với component cha
+        onToggle(parseInt(scheduleId), value);
+        
+        // Thêm một setTimeout để đảm bảo UI được cập nhật trước
+        setTimeout(() => {
+            console.log('Đang gọi API để cập nhật trạng thái cho Schedule ID:', scheduleId);
+            
+            // Gọi API để cập nhật trạng thái với ID dạng string
+            toggleScheduleActive(
+                { id: scheduleId, isActive: value },
+                {
+                    onSuccess: (data) => {
+                        console.log('Cập nhật trạng thái thành công:', data);
+                        console.log('Trạng thái mới:', value ? 'Đã kích hoạt' : 'Đã vô hiệu hóa');
+                        
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Thành công',
+                            text2: value ? 'Đã kích hoạt lịch nhắc nhở' : 'Đã vô hiệu hóa lịch nhắc nhở',
+                            position: 'bottom'
+                        });
+                        
+                        // Force refresh the schedule list
+                        if (onToggle) {
+                            onToggle(parseInt(scheduleId), value);
+                        }
+                    },
+                    onError: (error) => {
+                        console.error('Lỗi khi cập nhật trạng thái:', error);
+                        // Đã thất bại, cần khôi phục trạng thái toggle
+                        if (onToggle) {
+                            onToggle(parseInt(scheduleId), !value); // Đảo ngược lại
+                        }
+                        
+                        Toast.show({
+                            type: 'error',
+                            text1: 'Lỗi',
+                            text2: 'Không thể cập nhật trạng thái. Vui lòng thử lại sau.',
+                            position: 'bottom'
+                        });
+                    }
+                }
+            );
+        }, 0);
     };
 
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleTimeString('vi-VN', {
+        return date.toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false,
@@ -41,7 +89,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onToggle, petAvat
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('vi-VN', {
+        return date.toLocaleDateString('en-US', {
             weekday: 'long',
             day: 'numeric',
             month: 'long',
@@ -53,13 +101,13 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onToggle, petAvat
     const getRepeatText = (repeat: string) => {
         switch (repeat) {
             case 'daily':
-                return 'Hàng ngày';
+                return 'Daily';
             case 'weekly':
-                return 'Hàng tuần';
+                return 'Weekly';
             case 'monthly':
-                return 'Hàng tháng';
+                return 'Monthly';
             default:
-                return 'Không lặp lại';
+                return 'None';
         }
     };
 
@@ -92,7 +140,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, onToggle, petAvat
                             <View style={styles.detailRow}>
                                 <MaterialIcons name="event" size={20} color={COLORS.text.textDisable} />
                                 <Text style={styles.detailText}>
-                                    Kết thúc: {new Date(schedule.end_date).toLocaleDateString('vi-VN', {
+                                    End: {new Date(schedule.end_date).toLocaleDateString('en-US', {
                                         day: 'numeric',
                                         month: 'long',
                                         year: 'numeric',

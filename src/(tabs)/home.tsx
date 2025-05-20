@@ -36,7 +36,7 @@ const PetAvatarItem: React.FC<PetAvatarItemProps> = ({ petId }) => {
         imageUrl={getImageSource(pet?.data_image)}
         petName={pet?.name || ''}
         size={60}
-        onPress={() => navigation.navigate('PetDetail', { id: petId })}
+        onPress={() => navigation.navigate('PetDetail', { petId: petId })}
       />
     </View>
   );
@@ -97,10 +97,10 @@ const Home = () => {
 
   // Danh sách các danh mục sản phẩm
   const productCategories = [
-    { id: 1, name: 'Thú cưng', icon: 'pets', color: '#FF6B6B', screen: 'PetProducts' },
-    { id: 2, name: 'Phụ kiện', icon: 'shopping-bag', color: '#4ECDC4', screen: 'AccessoryList' },
-    { id: 3, name: 'Thức ăn', icon: 'restaurant', color: '#FFD93D', screen: 'FoodList' },
-    { id: 4, name: 'Dịch vụ', icon: 'spa', color: '#95E1D3', screen: 'ServiceList' }
+    { id: 1, name: 'Products', icon: 'pets', color: '#FF6B6B', screen: 'ProductList' },
+    // { id: 2, name: 'Phụ kiện', icon: 'shopping-bag', color: '#4ECDC4', screen: 'AccessoryList' },
+    // { id: 3, name: 'Thức ăn', icon: 'restaurant', color: '#FFD93D', screen: 'FoodList' },
+    { id: 4, name: 'Services', icon: 'spa', color: '#95E1D3', screen: 'ClinicServices' }
   ];
   
   return (
@@ -108,8 +108,8 @@ const Home = () => {
       {/* Header với welcome và cart */}
       <View style={styles.header}>
         <View style={styles.welcomeContainer}>
-          <Text style={styles.welcomeText}>Xin chào!</Text>
-          <Text style={styles.welcomeSubText}>Chào mừng bạn đến với PetShop</Text>
+          <Text style={styles.welcomeText}>Welcome back!</Text>
+          <Text style={styles.welcomeSubText}>Welcome to Pet Management App</Text>
         </View>
         <TouchableOpacity 
           style={styles.cartButton}
@@ -128,14 +128,14 @@ const Home = () => {
         {/* Phần hiển thị thú cưng */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Thú cưng của bạn</Text>
+            <Text style={styles.sectionTitle}>Your Pets</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Pets', { initialTab: 'PROFILE' })}>
-              <Text style={styles.seeAllText}>Xem tất cả</Text>
+              <Text style={styles.seeAllText}>See All</Text>
             </TouchableOpacity>
           </View>
           
           {isLoadingPets ? (
-            <Text style={styles.loadingText}>Đang tải...</Text>
+            <Text style={styles.loadingText}>Loading...</Text>
           ) : (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.petList}>
               <TouchableOpacity 
@@ -143,11 +143,21 @@ const Home = () => {
                 onPress={() => navigation.navigate('AddPet')}
               >
                 <Icon name="add" size={30} color={COLORS.background.mint} />
-                <Text style={styles.addPetText}>Thêm</Text>
+                <Text style={styles.addPetText}>Add</Text>
               </TouchableOpacity>
               {limitedPets?.map(pet => (
                 pet.petid ? <PetAvatarItem key={pet.petid} petId={pet.petid} /> : null
               ))}
+              {pets && pets.length > 4 && (
+                <View style={styles.petItem}>
+                  <TouchableOpacity 
+                    style={styles.moreOverlayButton}
+                    onPress={() => navigation.navigate('Pets', { initialTab: 'PROFILE' })}
+                  >
+                    <Text style={styles.moreOverlayText}>+{pets.length - 4}</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </ScrollView>
           )}
         </View>
@@ -155,25 +165,40 @@ const Home = () => {
         {/* Phần hiển thị danh mục sản phẩm */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Mua sắm</Text>
+            <Text style={styles.sectionTitle}>Clinic Services</Text>
             <TouchableOpacity onPress={() => navigation.navigate('ProductList')}>
-              <Text style={styles.seeAllText}>Xem tất cả</Text>
+              <Text style={styles.seeAllText}>See All</Text>
             </TouchableOpacity>
           </View>
           
-          <View style={styles.categoryContainer}>
-            {productCategories.map(category => (
+          <View style={styles.servicesContainer}>
+            <View style={styles.servicesRow}>
               <TouchableOpacity 
-                key={category.id}
-                style={styles.categoryItem}
-                onPress={() => navigation.navigate(category.screen)}
+                style={styles.serviceCard}
+                onPress={() => navigation.navigate('ProductList')}
               >
-                <View style={[styles.categoryIcon, { backgroundColor: `${category.color}15` }]}>
-                  <Icon name={category.icon} size={32} color={category.color} />
+                <View style={[styles.serviceIcon, { backgroundColor: '#FF6B6B15' }]}>
+                  <Icon name="shopping-bag" size={24} color="#FF6B6B" />
                 </View>
-                <Text style={styles.categoryName}>{category.name}</Text>
+                <View style={styles.cardContent}>
+                  <Text style={styles.serviceName}>Products</Text>
+                  <Text style={styles.serviceDescription}>Pet food, toys & accessories</Text>
+                </View>
               </TouchableOpacity>
-            ))}
+
+              <TouchableOpacity 
+                style={styles.serviceCard}
+                onPress={() => navigation.navigate('ClinicServices')}
+              >
+                <View style={[styles.serviceIcon, { backgroundColor: '#95E1D315' }]}>
+                  <Icon name="medical-services" size={24} color="#95E1D3" />
+                </View>
+                <View style={styles.cardContent}>
+                  <Text style={styles.serviceName}>Services</Text>
+                  <Text style={styles.serviceDescription}>Medical care & grooming</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -185,12 +210,12 @@ const Home = () => {
           >
             <View style={styles.breedIdentifierContent}>
               <View style={styles.breedIdentifierTextContainer}>
-                <Text style={styles.breedIdentifierTitle}>Không biết giống thú cưng của bạn?</Text>
+                <Text style={styles.breedIdentifierTitle}>Don't know your pet's breed?</Text>
                 <Text style={styles.breedIdentifierSubtitle}>
-                  Dùng công cụ nhận diện giống để xác định giống thú cưng của bạn
+                  Use our breed identification tool to determine your pet's breed
                 </Text>
-                <TouchableOpacity  style={styles.breedIdentifierButton} onPress={() => navigation.navigate('BreedDetection')}>
-                  <Text style={styles.breedIdentifierButtonText}>Nhận diện ngay</Text>
+                <TouchableOpacity style={styles.breedIdentifierButton} onPress={() => navigation.navigate('BreedDetection')}>
+                  <Text style={styles.breedIdentifierButtonText}>Identify Now</Text>
                   <Icon name="arrow-forward" size={16} color="#FFF" />
                 </TouchableOpacity>
               </View>
@@ -204,14 +229,14 @@ const Home = () => {
         {/* Phần hiển thị lịch hẹn sắp tới */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Lịch hẹn sắp tới</Text>
+            <Text style={styles.sectionTitle}>Upcoming Appointments</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Pets', { initialTab: 'APPOINTMENT' })}>
-              <Text style={styles.seeAllText}>Xem tất cả</Text>
+              <Text style={styles.seeAllText}>See All</Text>
             </TouchableOpacity>
           </View>
           
           {isLoadingAppointments ? (
-            <Text style={styles.loadingText}>Đang tải...</Text>
+            <Text style={styles.loadingText}>Loading...</Text>
           ) : upcomingAppointments.length > 0 ? (
             <View>
               {upcomingAppointments.map(appointment => (
@@ -253,12 +278,12 @@ const Home = () => {
           ) : (
             <View style={styles.emptyState}>
               <Icon name="event-busy" size={40} color={COLORS.text.textDisable} />
-              <Text style={styles.emptyStateText}>Không có lịch hẹn sắp tới</Text>
+              <Text style={styles.emptyStateText}>No upcoming appointments</Text>
               <TouchableOpacity 
                 style={styles.addButton}
                 onPress={() => navigation.navigate('AddAppointment')}
               >
-                <Text style={styles.addButtonText}>Đặt lịch hẹn</Text>
+                <Text style={styles.addButtonText}>Book an appointment</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -267,14 +292,14 @@ const Home = () => {
         {/* Phần hiển thị nhật ký mới nhất */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Nhật ký gần đây</Text>
+            <Text style={styles.sectionTitle}>Recent Diary</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Pets', { initialTab: 'DIARY' })}>
-              <Text style={styles.seeAllText}>Xem tất cả</Text>
+              <Text style={styles.seeAllText}>See All</Text>
             </TouchableOpacity>
           </View>
           
           {isLoadingDiaries ? (
-            <Text style={styles.loadingText}>Đang tải...</Text>
+            <Text style={styles.loadingText}>Loading...</Text>
           ) : latestDiaries.length > 0 ? (
             <View>
               {latestDiaries.map(diary => (
@@ -424,32 +449,53 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   // Shopping categories styles
-  categoryContainer: {
+  servicesContainer: {
+    // marginVertical: 8,
+  },
+  servicesRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 4,
-    paddingVertical: 4,
-  },
-  categoryItem: {
-    width: '23%',
     alignItems: 'center',
-    marginBottom: 8,
+    gap: 12,
   },
-  categoryIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 20,
+  serviceCard: {
+    gap: 12,
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  serviceIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 6,
-    borderWidth: 1,
-    borderColor: '#F0F0F0',
   },
-  categoryName: {
-    fontSize: 13,
-    textAlign: 'center',
+  cardContent: {
+    // marginLeft: 12,
+    flex: 1,
+  },
+  serviceName: {
+    fontSize: 15,
+    fontWeight: '600',
     color: COLORS.text.text,
-    fontWeight: '500',
+    marginBottom: 4,
+  },
+  serviceDescription: {
+    fontSize: 12,
+    color: COLORS.text.default,
+    lineHeight: 16,
   },
   // Appointment styles
   appointmentCard: {
@@ -684,6 +730,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.text.textDisable,
     marginLeft: 4,
+  },
+  moreOverlayButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  moreOverlayText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
 

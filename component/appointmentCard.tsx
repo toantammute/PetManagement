@@ -47,7 +47,7 @@ const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
                         {/* <Text style={styles.status}>PENDING CONFIRMATION</Text> */}
                         <Text style={[
                             styles.status,
-                            { backgroundColor: appointment.state === 'CANCELLED' ? '#FF3B30' : '#f8941A' }
+                            { backgroundColor: appointment.state.toLowerCase() === 'cancelled' ? COLORS.appointment.cancel : appointment.state.toLowerCase() === 'in progress' ? COLORS.appointment.inprogress : appointment.state.toLowerCase() === 'checked in' ? COLORS.appointment.checkin : appointment.state.toLowerCase() === 'completed' ? COLORS.appointment.completed : COLORS.appointment.pending }
                         ]}>
                             {appointment.state.toUpperCase()}
                         </Text>

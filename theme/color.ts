@@ -1,4 +1,11 @@
 export const COLORS = {
+    appointment: {
+        completed: '#388E3C',
+        pending: '#F8941A',
+        cancel: '#C62828',
+        inprogress: '#2DCAE9',
+        checkin: '#2DCAE9',     
+    },
 
     //button color
     button: {
@@ -6,6 +13,10 @@ export const COLORS = {
         choose: '#6071E3',
         disable: '#8E8E93',
         icon: '#A2C1DA'
+    },
+
+    header: {
+        text: '#4F46E5',
     },
 
     //text color

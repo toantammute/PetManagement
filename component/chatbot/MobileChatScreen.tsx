@@ -590,6 +590,12 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <MaterialIcons name="arrow-back" size={22} color="#4F46E5" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Trợ lý ảo</Text>
         <TouchableOpacity 
           style={styles.historyButton}
@@ -713,10 +719,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
+  backButton: {
+    padding: 5,
+  },
   headerTitle: {
+    flex: 1,
     fontSize: 18,
     fontWeight: 'bold',
     color: '#4F46E5',
+    textAlign: 'center',
   },
   historyButton: {
     padding: 5,

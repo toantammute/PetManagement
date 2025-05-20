@@ -196,6 +196,12 @@ const ConversationListScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <MaterialIcons name="arrow-back" size={22} color="#4F46E5" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Cuộc trò chuyện của tôi</Text>
         <TouchableOpacity
           style={styles.newButton}
@@ -239,9 +245,11 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   headerTitle: {
+    flex: 1,
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    color: '#4F46E5',
+    textAlign: 'center',
   },
   newButton: {
     flexDirection: 'row',
@@ -315,6 +323,9 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '500',
+  },
+  backButton: {
+    padding: 8,
   },
 });
 

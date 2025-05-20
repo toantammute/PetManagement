@@ -24,23 +24,11 @@ import messaging from '@react-native-firebase/messaging';
 import PushNotification from 'react-native-push-notification';
 import AppNavigator from './AppNavigator';
 import Toast from 'react-native-toast-message';
+import { usePermissions } from './hook/usePermissions';
 
 const App = () => {
-  async function requestUserPermission() {
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  usePermissions();
 
-    if (enabled) {
-      console.log('Authorization status:', authStatus);
-      getToken();
-    }
-  }
-  const getToken = async () => {
-    const token = await messaging().getToken();
-    console.log('FCM Token:', token);
-  }
   useEffect(() => {
     PushNotification.createChannel(
       {
@@ -57,8 +45,6 @@ const App = () => {
 
   // Foreground Notification Handling
   useEffect(() => {
-    requestUserPermission();
-
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       console.log('Notification received in foreground:', remoteMessage);
 
@@ -66,8 +52,8 @@ const App = () => {
         channelId: 'default-channel-id',
         title: remoteMessage.notification?.title || 'Notification',
         message: remoteMessage.notification?.body || 'New message',
-        playSound: true, // Play default sound
-        soundName: 'default', // Ensure sound is set
+        playSound: true,
+        soundName: 'default',
         importance: 'high',
         vibrate: true,
       });
@@ -85,11 +71,10 @@ const App = () => {
   enableScreens();
   const queryClient = new QueryClient();
 
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
-      <StatusBar
+        <StatusBar
           barStyle={isDarkMode ? 'light-content' : 'dark-content'}
           backgroundColor={backgroundStyle.backgroundColor}
         />

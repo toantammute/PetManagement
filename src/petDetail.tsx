@@ -26,10 +26,10 @@ const PetDetail = () => {
     const petId = (route.params as any).petId;
     const { data: pet, isLoading, isError, error } = usePetById(petId);
     const { data: vaccinations, isLoading: isLoadingVaccinations } = useVaccinations(petId);
-    
+
     const { mutate: deletePet, isPending } = useDeletePet();
     const { data: PetDetail } = usePetById(petId);
-    
+
     const { mutate: updatePetAvatar, isPending: isUpdatingAvatar } = useUpdatePetAvatar();
 
     const [activeTab, setActiveTab] = useState<string>('Overview');
@@ -39,9 +39,9 @@ const PetDetail = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
-   
 
-    
+
+
     type ImageFile = {
         uri: string;
         name: string;
@@ -253,11 +253,11 @@ const PetDetail = () => {
                     onPress={() => setActiveTab('Overview')}
                 >
                     <Ionicons
-                        name="document-text-outline" 
-                        size={28} 
-                        color={activeTab === 'Overview' ? COLORS.button.choose : COLORS.text.default} 
+                        name="document-text-outline"
+                        size={28}
+                        color={activeTab === 'Overview' ? COLORS.button.choose : COLORS.text.default}
                     />
-                     <Text style={[
+                    <Text style={[
                         styles.text,
                         activeTab === 'Overview' && styles.activeText
                     ]}>Overview</Text>
@@ -285,13 +285,13 @@ const PetDetail = () => {
                     style={[
                         styles.buttonContainer,
                         activeTab === 'Treatment' && styles.activeTab
-                    ]} 
+                    ]}
                     onPress={() => setActiveTab('Treatment')}
                 >
-                    <Ionicons 
-                        name="calendar-outline" 
-                        size={28} 
-                        color={activeTab === 'Treatment' ? COLORS.button.choose : COLORS.text.default} 
+                    <Ionicons
+                        name="calendar-outline"
+                        size={28}
+                        color={activeTab === 'Treatment' ? COLORS.button.choose : COLORS.text.default}
                     />
                     <Text style={[
                         styles.text,
@@ -310,11 +310,11 @@ const PetDetail = () => {
                         <Text style={styles.contentTitleLarge}>Thông tin chi tiết</Text>
                         <View style={styles.overviewScrollView}>
                             {/* Thông tin cơ bản */}
-                            <View style={[styles.vaccinationItem, {borderLeftColor: '#4ECDC4'}]}>
+                            <View style={[styles.vaccinationItem, { borderLeftColor: '#4ECDC4' }]}>
                                 <View style={styles.vaccinationHeader}>
                                     <Text style={styles.vaccineName}>Thông tin cơ bản</Text>
                                 </View>
-                                
+
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialCommunityIcons name="dog" size={16} color="#4ECDC4" />
@@ -322,7 +322,7 @@ const PetDetail = () => {
                                     </View>
                                     <Text style={styles.infoValue}>{pet?.type || 'Chưa có thông tin'}</Text>
                                 </View>
-                                
+
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialCommunityIcons name="paw" size={16} color="#4ECDC4" />
@@ -330,7 +330,7 @@ const PetDetail = () => {
                                     </View>
                                     <Text style={styles.infoValue}>{pet?.breed || 'Chưa có thông tin'}</Text>
                                 </View>
-                                
+
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialIcons name="person" size={16} color="#4ECDC4" />
@@ -338,7 +338,7 @@ const PetDetail = () => {
                                     </View>
                                     <Text style={styles.infoValue}>{pet?.gender || 'Chưa có thông tin'}</Text>
                                 </View>
-                                
+
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialIcons name="child-care" size={16} color="#4ECDC4" />
@@ -347,13 +347,13 @@ const PetDetail = () => {
                                     <Text style={styles.infoValue}>{pet?.age ? `${pet.age} tuổi` : 'Chưa có thông tin'}</Text>
                                 </View>
                             </View>
-                            
+
                             {/* Thông tin sinh trắc học */}
-                            <View style={[styles.vaccinationItem, {borderLeftColor: '#FFD93D'}]}>
+                            <View style={[styles.vaccinationItem, { borderLeftColor: '#FFD93D' }]}>
                                 <View style={styles.vaccinationHeader}>
                                     <Text style={styles.vaccineName}>Thông tin sinh trắc học</Text>
                                 </View>
-                                
+
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialIcons name="calendar-today" size={16} color="#FFD93D" />
@@ -363,7 +363,7 @@ const PetDetail = () => {
                                         {pet?.birth_date ? new Date(pet.birth_date).toLocaleDateString('vi-VN') : 'Chưa có thông tin'}
                                     </Text>
                                 </View>
-                                
+
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialCommunityIcons name="weight" size={16} color="#FFD93D" />
@@ -372,13 +372,13 @@ const PetDetail = () => {
                                     <Text style={styles.infoValue}>{pet?.weight ? `${pet.weight} kg` : 'Chưa có thông tin'}</Text>
                                 </View>
                             </View>
-                            
+
                             {/* Thông tin y tế */}
-                            <View style={[styles.vaccinationItem, {borderLeftColor: '#FF6B6B'}]}>
+                            <View style={[styles.vaccinationItem, { borderLeftColor: '#FF6B6B' }]}>
                                 <View style={styles.vaccinationHeader}>
                                     <Text style={styles.vaccineName}>Thông tin y tế</Text>
                                 </View>
-                                
+
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialCommunityIcons name="chip" size={16} color="#FF6B6B" />
@@ -386,7 +386,7 @@ const PetDetail = () => {
                                     </View>
                                     <Text style={styles.infoValue}>{pet?.microchip_number || 'Chưa có thông tin'}</Text>
                                 </View>
-                                
+
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialIcons name="health-and-safety" size={16} color="#FF6B6B" />
@@ -426,7 +426,16 @@ const PetDetail = () => {
                                 </View>
                             ))
                         ) : (
-                            <Text style={styles.emptyText}>No vaccination records found</Text>
+                            <View style={styles.emptyContainer}>
+                                <Text style={styles.emptyText}>No vaccination records found</Text>
+                                <TouchableOpacity
+                                    style={styles.addVaccineButton}
+                                    onPress={() => navigation.navigate('AddVaccination', { petId: petId })}
+                                >
+                                    <MaterialIcons name="add" size={20} color="#fff" />
+                                    <Text style={styles.addVaccineButtonText}>Add Vaccination</Text>
+                                </TouchableOpacity>
+                            </View>
                         )}
                     </View>
                 );
@@ -693,6 +702,29 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignSelf: 'stretch',
         marginTop: 10,
+    },
+
+    emptyContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20,
+    },
+
+    addVaccineButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.button.choose,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 8,
+        marginTop: 15,
+    },
+
+    addVaccineButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '500',
+        marginLeft: 8,
     },
 
     contentTitle: {
@@ -1201,22 +1233,22 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#F0F0F0',
     },
-    
+
     infoLabelContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         flex: 1,
     },
-    
+
     infoLabel: {
         fontSize: 16,
         fontWeight: '500',
         color: COLORS.text.text,
         marginLeft: 8,
     },
-    
+
     infoValue: {
-        fontSize: 16, 
+        fontSize: 16,
         fontWeight: '600',
         color: COLORS.text.text,
         flex: 1,

@@ -141,3 +141,15 @@ export const updatePetAvatar = async (petId: string, image: Image): Promise<Pet>
         throw error;
     }
 }
+
+export const petWeightHistory = async (petId: string)=>{
+    const accessToken = await AsyncStorage.getItem('accessToken');
+    const response = await axios.get(`${API}/pet/${petId}/weights`, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+        }
+    });
+    return response.data;
+}

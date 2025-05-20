@@ -29,7 +29,7 @@ const Header: React.FC<HeaderProps> = ({ title, variant = 'default', onSave, onT
                         <MaterialCommunityIcons 
                             name='dots-vertical' 
                             size={25} 
-                            color={COLORS.text.textDisable} 
+                            color={COLORS.header.text} 
                             style={{
                                 paddingHorizontal: 4,
                             }}
@@ -58,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ title, variant = 'default', onSave, onT
                     navigation.goBack();
                 }}
             >
-                <Feather name='chevron-left' size={25} color={COLORS.text.textDisable}/>
+                <Feather name='chevron-left' size={25} color={COLORS.header.text}/>
             </TouchableOpacity>
             {/*Middle*/}
             <Text style={styles.headerText}>{title}</Text>
@@ -77,11 +77,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     headerText: {
-        fontSize: 20,
-        fontWeight: '500',
-        color: COLORS.text.textDisable,
-        fontFamily: 'Poppins-Regular',
-        fontStyle: 'normal',
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#4F46E5',
+        // fontFamily: 'Poppins-Regular',
+        // fontStyle: 'normal',
         flex: 1,
         textAlign: 'center',
     },
@@ -94,6 +94,8 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 20,
         backgroundColor: 'white',
+        borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10,
     },
 
     saveButton: {

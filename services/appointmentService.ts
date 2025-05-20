@@ -13,6 +13,7 @@ export const getAppointments = async (): Promise<Appointment[]> => {
             'Accept': 'application/json'
         }
     });
+    console.log('getAppointments', response.data);
     return response.data.data;
 }
 

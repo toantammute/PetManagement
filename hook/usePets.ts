@@ -1,4 +1,4 @@
-import { getPets, getPetById, createPet, deletePet, updatePet, updatePetAvatar } from "../services/petService";
+import { getPets, getPetById, createPet, deletePet, updatePet, updatePetAvatar, petWeightHistory } from "../services/petService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pet, Image } from "../models/models";
 import { queryClient } from "../utils/queryClient";
@@ -77,6 +77,30 @@ export const useUpdatePetAvatar = () => {
     });
 }
 
+interface WeightRecord {
+    id: number;
+    pet_id: number;
+    weight_kg: number;
+    weight_lb: number;
+    recorded_at: string;
+    created_at: string;
+}
+
+interface WeightHistory {
+    pet_id: number;
+    pet_name: string;
+    current_weight: WeightRecord;
+    weight_history: WeightRecord[];
+    total_records: number;
+    default_unit_type: string;
+}
+
+export const usePetWeightHistory = (petId: string) => {
+    return useQuery<WeightHistory, Error>({
+        queryKey: ['petWeightHistory', petId],
+        queryFn: () => petWeightHistory(petId),
+    });
+}
 
 
 

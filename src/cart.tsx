@@ -8,7 +8,9 @@ import {
     Image,
     StatusBar,
     Dimensions,
-    ActivityIndicator
+    ActivityIndicator,
+    SafeAreaView,
+    Platform
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -17,6 +19,7 @@ import { useProductById } from '../hook/useProduct';
 import { Cart } from '../models/models';
 import { COLORS } from '../theme/color';
 import Toast from 'react-native-toast-message';
+import Header from '../component/header';
 
 const CartScreen = () => {
     const { data: cartItems, isLoading, isError, error } = useCart();
@@ -200,29 +203,18 @@ const CartScreen = () => {
     }
 
     return (
-        <View style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+        <>
+            <StatusBar
+                barStyle="dark-content"
+                backgroundColor={COLORS.background.gray}
+            />
+            <SafeAreaView style={[
+                styles.container,
+                Platform.OS === 'android' && styles.androidSafeArea
+            ]}>
             
             {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity 
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Icon name="arrow-back" size={24} color="#333" />
-                </TouchableOpacity>
-                
-                <Text style={styles.headerTitle}>Cart</Text>
-                
-                <View style={styles.headerRight}>
-                    <TouchableOpacity 
-                        style={styles.clearButton}
-                        onPress={handleClearCart}
-                    >
-                        <Text style={styles.clearButtonText}>Clear all</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+            <Header title="Cart" />
             
             {cartItems && cartItems.length > 0 ? (
                 <>
@@ -262,16 +254,21 @@ const CartScreen = () => {
                     </TouchableOpacity>
                 </View>
             )}
-        </View>
+            </SafeAreaView>
+        </>
     );
 };
 
 const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
+    androidSafeArea: {
+        paddingTop: StatusBar.currentHeight,
+    },
     container: {
         flex: 1,
         backgroundColor: '#FFFFFF',
+
     },
     loadingContainer: {
         flex: 1,

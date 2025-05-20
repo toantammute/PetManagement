@@ -28,6 +28,9 @@ import OrderScreen from './src/order';
 import OrderDetailScreen from './src/orderDetail';
 import OTP from './src/otp';
 import Pets from './src/(tabs)/pets';
+import AddVaccination from './src/addVaccination';
+import PetWeights from './src/petWeights';
+import ClinicServicesScreen from './src/clinicServices';
 // import PetDetail from './src/(tabs)/pets';
 // import AddPet from './src/addPet';
 
@@ -62,6 +65,9 @@ const AppNavigator = () => {
                         <Stack.Screen name="Order" component={OrderScreen} />
                         <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
                         <Stack.Screen name="Pets" component={Pets} />
+                        <Stack.Screen name="AddVaccination" component={AddVaccination} />
+                        <Stack.Screen name="PetWeights" component={PetWeights} />
+                        <Stack.Screen name="ClinicServices" component={ClinicServicesScreen} />
                     </>
                 ) : (
                     <>

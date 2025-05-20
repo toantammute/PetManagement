@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API, PUSH_NOTI} from "@env";
+import { API, PUSH_NOTI } from "@env";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Schedule } from '../models/models';
 
@@ -9,12 +9,12 @@ export const scheduleNotification = async (schedule: Schedule, user_id: string) 
     console.log("schedule", schedule);
     console.log("api push notification", `${PUSH_NOTI}/scheduleNotification`);
     try {
-        
+
         const title = schedule.title;
         const body = schedule.notes || "Bạn có một lịch trình cần thực hiện";
         const cronExpression = generateCronExpression(schedule);
         const schedule_id = schedule.id;
-        
+
         // Thêm thông tin về thời gian kết thúc
         const end_date = schedule.end_type && schedule.end_date ? schedule.end_date : null;
 
@@ -34,6 +34,22 @@ export const scheduleNotification = async (schedule: Schedule, user_id: string) 
     }
 };
 
+export const cancelScheduleNotification = async (schedule_id: string, user_id: string) => {
+    try {
+        const response = await axios.delete(`${PUSH_NOTI}/cancelScheduleNotification`, {
+            data: {
+                user_id,
+                schedule_id
+            }
+        });
+        console.log("Đã hủy lịch thông báo:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Lỗi khi hủy lịch thông báo:", error);
+        throw error;
+    }
+}
+
 // Hàm chuyển đổi thời gian thành biểu thức cron
 const generateCronExpression = (schedule: Schedule) => {
     console.log("generateCronExpression");
@@ -42,10 +58,10 @@ const generateCronExpression = (schedule: Schedule) => {
     const hour = reminderDate.getHours();
     const dayOfMonth = reminderDate.getDate();
     const month = reminderDate.getMonth() + 1;
-    
+
     // Mặc định là chạy một lần
     let cronExpression = `${minute} ${hour} ${dayOfMonth} ${month} *`;
-    
+
     // Nếu có lặp lại
     if (schedule.event_repeat !== "none") {
         switch (schedule.event_repeat) {
@@ -65,7 +81,7 @@ const generateCronExpression = (schedule: Schedule) => {
     }
 
     console.log(cronExpression);
-    
+
     return cronExpression;
 };
 
@@ -114,7 +130,7 @@ export const createSchedule = async (schedule: Schedule) => {
             }
         }
     }
-    
+
     return response.data;
 }
 
@@ -125,7 +141,7 @@ export const updateSchedule = async (schedule: Schedule & { id: string }) => {
             'Authorization': `Bearer ${accessToken}`
         }
     });
-    
+
     const user = await AsyncStorage.getItem('user');
     if (!user) {
         throw new Error('Không tìm thấy thông tin người dùng');
@@ -149,18 +165,63 @@ export const updateSchedule = async (schedule: Schedule & { id: string }) => {
             }
         }
     }
-    
+
     return response.data;
 }
 
-export const deleteSchedule = async (id: string) => {
+export const deleteSchedule = async (schedule_id: string) => {
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.delete(`${API}/schedules/${id}`, {
+    const user = await AsyncStorage.getItem('user');
+    if (!user) {
+        throw new Error('Không tìm thấy thông tin người dùng');
+    }
+    const user_id = JSON.parse(user).user_id;
+    const response = await axios.delete(`${API}/schedules/${schedule_id}`, {
         headers: {
             'Authorization': `Bearer ${accessToken}`
         }
     });
+    if (response.status === 200) {
+        console.log("Hủy lịch thông báo");
+        await cancelScheduleNotification(schedule_id, user_id);
+        return response.data;
+    }
     return response.data;
 }
 
+export const toggleSchedule = async (schedule_id: string, is_active: boolean) => {
+    console.log("toggleSchedule", schedule_id, is_active);
+    const accessToken = await AsyncStorage.getItem('accessToken');
+    const user = await AsyncStorage.getItem('user');
+    if (!user) {
+        throw new Error('Không tìm thấy thông tin người dùng');
+    }
+    const user_id = JSON.parse(user).user_id;
 
+    const response = await axios.put(
+        `${API}/schedules/${schedule_id}/activate`,
+        { is_active },
+        {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        }
+    );
+
+    if (response.status === 200) {
+        try {
+            if (is_active) {
+                // Nếu kích hoạt schedule, lên lịch thông báo mới
+                await scheduleNotification(response.data.data, user_id);
+            } else {
+                // Nếu vô hiệu hóa schedule, hủy thông báo
+                await cancelScheduleNotification(schedule_id, user_id);
+            }
+        } catch (error) {
+            console.error("Lỗi khi xử lý thông báo:", error);
+        }
+    }
+
+    return response.data;
+}

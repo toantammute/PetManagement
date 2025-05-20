@@ -6,7 +6,7 @@ export const useAppointments = () => {
     return useQuery<Appointment[], Error>({
         queryKey: ['appointments'],
         queryFn: getAppointments,
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
         gcTime: 30 * 60 * 1000,
         refetchOnWindowFocus: true,
         retry: 3,

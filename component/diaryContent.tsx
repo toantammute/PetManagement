@@ -29,14 +29,14 @@ const DiaryContent: React.FC<DiaryContentProps> = ({title, description, date, on
         navigation.navigate('DiaryDetail', { diaryId });
     };
 
-    const formattedDate = new Date(date).toLocaleDateString('vi-VN', {
+    const formattedDate = new Date(date).toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric',
     });
 
-    const formattedTime = new Date(date).toLocaleTimeString('vi-VN', {
+    const formattedTime = new Date(date).toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false,
