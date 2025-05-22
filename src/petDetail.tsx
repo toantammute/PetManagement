@@ -307,92 +307,92 @@ const PetDetail = () => {
             case 'Overview':
                 return (
                     <View style={styles.tabContentContainer}>
-                        <Text style={styles.contentTitleLarge}>Thông tin chi tiết</Text>
+                        <Text style={styles.contentTitleLarge}>Detailed Information</Text>
                         <View style={styles.overviewScrollView}>
-                            {/* Thông tin cơ bản */}
+                            {/* Basic Information */}
                             <View style={[styles.vaccinationItem, { borderLeftColor: '#4ECDC4' }]}>
                                 <View style={styles.vaccinationHeader}>
-                                    <Text style={styles.vaccineName}>Thông tin cơ bản</Text>
+                                    <Text style={styles.vaccineName}>Basic Information</Text>
                                 </View>
 
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialCommunityIcons name="dog" size={16} color="#4ECDC4" />
-                                        <Text style={styles.infoLabel}>Loại thú cưng</Text>
+                                        <Text style={styles.infoLabel}>Pet Type</Text>
                                     </View>
-                                    <Text style={styles.infoValue}>{pet?.type || 'Chưa có thông tin'}</Text>
+                                    <Text style={styles.infoValue}>{pet?.type || 'No information'}</Text>
                                 </View>
 
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialCommunityIcons name="paw" size={16} color="#4ECDC4" />
-                                        <Text style={styles.infoLabel}>Giống</Text>
+                                        <Text style={styles.infoLabel}>Breed</Text>
                                     </View>
-                                    <Text style={styles.infoValue}>{pet?.breed || 'Chưa có thông tin'}</Text>
+                                    <Text style={styles.infoValue}>{pet?.breed || 'No information'}</Text>
                                 </View>
 
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialIcons name="person" size={16} color="#4ECDC4" />
-                                        <Text style={styles.infoLabel}>Giới tính</Text>
+                                        <Text style={styles.infoLabel}>Gender</Text>
                                     </View>
-                                    <Text style={styles.infoValue}>{pet?.gender || 'Chưa có thông tin'}</Text>
+                                    <Text style={styles.infoValue}>{pet?.gender || 'No information'}</Text>
                                 </View>
 
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialIcons name="child-care" size={16} color="#4ECDC4" />
-                                        <Text style={styles.infoLabel}>Tuổi</Text>
+                                        <Text style={styles.infoLabel}>Age</Text>
                                     </View>
-                                    <Text style={styles.infoValue}>{pet?.age ? `${pet.age} tuổi` : 'Chưa có thông tin'}</Text>
+                                    <Text style={styles.infoValue}>{pet?.age !== undefined ? `${pet.age} years` : 'No information'}</Text>
                                 </View>
                             </View>
 
-                            {/* Thông tin sinh trắc học */}
+                            {/* Biometric Information */}
                             <View style={[styles.vaccinationItem, { borderLeftColor: '#FFD93D' }]}>
                                 <View style={styles.vaccinationHeader}>
-                                    <Text style={styles.vaccineName}>Thông tin sinh trắc học</Text>
+                                    <Text style={styles.vaccineName}>Biometric Information</Text>
                                 </View>
 
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialIcons name="calendar-today" size={16} color="#FFD93D" />
-                                        <Text style={styles.infoLabel}>Ngày sinh</Text>
+                                        <Text style={styles.infoLabel}>Date of Birth</Text>
                                     </View>
                                     <Text style={styles.infoValue}>
-                                        {pet?.birth_date ? new Date(pet.birth_date).toLocaleDateString('vi-VN') : 'Chưa có thông tin'}
+                                        {pet?.birth_date ? new Date(pet.birth_date).toLocaleDateString('en-US') : 'No information'}
                                     </Text>
                                 </View>
 
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialCommunityIcons name="weight" size={16} color="#FFD93D" />
-                                        <Text style={styles.infoLabel}>Cân nặng</Text>
+                                        <Text style={styles.infoLabel}>Weight</Text>
                                     </View>
-                                    <Text style={styles.infoValue}>{pet?.weight ? `${pet.weight} kg` : 'Chưa có thông tin'}</Text>
+                                    <Text style={styles.infoValue}>{pet?.weight ? `${pet.weight} kg` : 'No information'}</Text>
                                 </View>
                             </View>
 
-                            {/* Thông tin y tế */}
+                            {/* Medical Information */}
                             <View style={[styles.vaccinationItem, { borderLeftColor: '#FF6B6B' }]}>
                                 <View style={styles.vaccinationHeader}>
-                                    <Text style={styles.vaccineName}>Thông tin y tế</Text>
+                                    <Text style={styles.vaccineName}>Medical Information</Text>
                                 </View>
 
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialCommunityIcons name="chip" size={16} color="#FF6B6B" />
-                                        <Text style={styles.infoLabel}>Số microchip</Text>
+                                        <Text style={styles.infoLabel}>Microchip Number</Text>
                                     </View>
-                                    <Text style={styles.infoValue}>{pet?.microchip_number || 'Chưa có thông tin'}</Text>
+                                    <Text style={styles.infoValue}>{pet?.microchip_number || 'No information'}</Text>
                                 </View>
 
                                 <View style={styles.infoRow}>
                                     <View style={styles.infoLabelContainer}>
                                         <MaterialIcons name="health-and-safety" size={16} color="#FF6B6B" />
-                                        <Text style={styles.infoLabel}>Ghi chú sức khỏe</Text>
+                                        <Text style={styles.infoLabel}>Health Notes</Text>
                                     </View>
-                                    <Text style={styles.infoValue}>{pet?.healthnotes || 'Không có ghi chú'}</Text>
+                                    <Text style={styles.infoValue}>{pet?.healthnotes || 'No notes'}</Text>
                                 </View>
                             </View>
                         </View>
@@ -523,7 +523,7 @@ const PetDetail = () => {
                             </View>
                             <View style={styles.genderContainer}>
                                 <Text style={styles.genderText}>Age</Text>
-                                <Text style={styles.valueText}>{PetDetail?.age || 'Unknown'} years</Text>
+                                <Text style={styles.valueText}>{PetDetail?.age !== undefined ? `${PetDetail.age} years` : 'Unknown'}</Text>
                             </View>
 
                         </View>

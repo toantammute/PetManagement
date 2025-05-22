@@ -37,7 +37,7 @@ const BreedDetectionScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <Header title="Nhận diện giống" />
+      <Header title="Breed Detection" />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.card}>
           <View style={styles.typeSelector}>

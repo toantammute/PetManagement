@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { API_URL } from '@env';
 import Toast from 'react-native-toast-message';
+import { COLORS } from '../theme/color';
 
 const Login = () => {
     const navigation = useNavigation<any>();
@@ -43,14 +44,11 @@ const Login = () => {
         } catch (error: any) {
             console.error('Login error:', error);
             
-            // Enhanced error handling with more specific messages
             if (error.response) {
-                // The server responded with a status code outside the 2xx range
                 const statusCode = error.response.status;
                 const errorData = error.response.data;
                 
                 if (statusCode === 400) {
-                    // Handle specific 400 Bad Request errors
                     const message = errorData?.message || 'Invalid login information';
                     Toast.show({
                         type: 'error',
@@ -81,7 +79,6 @@ const Login = () => {
                     });
                 }
             } else if (error.request) {
-                // The request was made but no response was received
                 Toast.show({
                     type: 'error',
                     text1: 'Connection Error',
@@ -89,7 +86,6 @@ const Login = () => {
                     position: 'bottom'
                 });
             } else {
-                // Something happened in setting up the request
                 Toast.show({
                     type: 'error',
                     text1: 'Login Error',
@@ -112,24 +108,21 @@ const Login = () => {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.header}>
-                    {/* <Image 
-                        source={require('../assets/images/bus.png')} 
-                        style={styles.logo}
-                    /> */}
                     <Text style={styles.appName}>Pet Care</Text>
+                    <Text style={styles.appTagline}>Your Pet's Health Companion</Text>
                 </View>
 
                 <View style={styles.titleContainer}>
-                    <Text style={styles.title}>Đăng nhập</Text>
+                    <Text style={styles.title}>Welcome Back!</Text>
                     <Text style={styles.subtitle}>
-                        Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục
+                        Sign in to continue caring for your pets
                     </Text>
                 </View>
 
                 <View style={styles.formContainer}>
                     <Input 
-                        label="Tên đăng nhập" 
-                        placeholder="Nhập tên đăng nhập" 
+                        label="Username" 
+                        placeholder="Enter your username" 
                         value={username} 
                         onChangeText={setusername}
                         rightIcon={
@@ -138,8 +131,8 @@ const Login = () => {
                     />
                     
                     <Input 
-                        label="Mật khẩu" 
-                        placeholder="Nhập mật khẩu" 
+                        label="Password" 
+                        placeholder="Enter your password" 
                         value={password} 
                         onChangeText={setPassword}
                         secureTextEntry={!showPassword}
@@ -160,7 +153,7 @@ const Login = () => {
                         style={styles.forgotPassword} 
                         onPress={() => navigation.navigate('ForgotPassword')}
                     >
-                        <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
+                        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity 
@@ -169,42 +162,20 @@ const Login = () => {
                         disabled={isLoading}
                     >
                         {isLoading ? (
-                            <Text style={styles.loginButtonText}>Đang đăng nhập...</Text>
+                            <Text style={styles.loginButtonText}>Logging in...</Text>
                         ) : (
                             <View style={styles.buttonContent}>
-                                <Text style={styles.loginButtonText}>Đăng nhập</Text>
+                                <Text style={styles.loginButtonText}>Sign In</Text>
                                 <Icon name="arrow-forward" size={20} color="#FFF" />
                             </View>
                         )}
                     </TouchableOpacity>
                 </View>
 
-                <View style={styles.divider}>
-                    <View style={styles.dividerLine} />
-                    <Text style={styles.orText}>Hoặc đăng nhập với</Text>
-                    <View style={styles.dividerLine} />
-                </View>
-
-                <View style={styles.socialLoginContainer}>
-                    <View style={styles.socialButtons}>
-                        <TouchableOpacity style={styles.socialButton}>
-                            <Icon name="facebook" size={24} color="#4267B2" />
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity style={[styles.socialButton, {marginHorizontal: 20}]}>
-                            <Icon name="mail" size={24} color="#DB4437" />
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity style={styles.socialButton}>
-                            <Icon name="phone" size={24} color="#4CAF50" />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
                 <View style={styles.footer}>
-                    <Text style={styles.noAccountText}>Chưa có tài khoản? </Text>
+                    <Text style={styles.noAccountText}>New to Pet Care? </Text>
                     <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                        <Text style={styles.signupText}>Đăng ký ngay</Text>
+                        <Text style={styles.signupText}>Create Account</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -229,28 +200,23 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 40,
     },
-    logo: {
-        width: 90,
-        height: 90,
-        borderRadius: 45,
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-    },
     appName: {
-        marginTop: 12,
-        fontSize: 26,
+        fontSize: 32,
         fontWeight: 'bold',
-        color: '#4CAF50',
+        color: COLORS.background.mint,
         letterSpacing: 0.5,
+    },
+    appTagline: {
+        fontSize: 16,
+        color: '#757575',
+        marginTop: 8,
+        letterSpacing: 0.3,
     },
     titleContainer: {
         marginBottom: 32,
     },
     title: {
-        fontSize: 30,
+        fontSize: 28,
         fontWeight: 'bold',
         color: '#333333',
         marginBottom: 12,
@@ -263,9 +229,6 @@ const styles = StyleSheet.create({
     formContainer: {
         marginBottom: 30,
     },
-    passwordContainer: {
-        marginBottom: 0,
-    },
     forgotPassword: {
         alignSelf: 'flex-end',
         marginTop: 8,
@@ -273,17 +236,18 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
     },
     forgotPasswordText: {
-        color: '#4CAF50',
+        color: COLORS.background.mint,
         fontWeight: '600',
+        fontSize: 15,
     },
     loginButton: {
-        backgroundColor: '#4CAF50',
-        borderRadius: 12,
+        backgroundColor: COLORS.background.mint,
+        borderRadius: 16,
         paddingVertical: 16,
         alignItems: 'center',
         justifyContent: 'center',
         marginTop: 15,
-        shadowColor: '#4CAF50',
+        shadowColor: COLORS.background.mint,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
         shadowRadius: 8,
@@ -295,64 +259,26 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     loginButtonDisabled: {
-        backgroundColor: '#A5D6A7',
+        backgroundColor: '#B2DFDB',
     },
     loginButtonText: {
         color: 'white',
-        fontSize: 17,
+        fontSize: 18,
         fontWeight: 'bold',
         marginRight: 8,
-    },
-    divider: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 20,
-    },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: '#E0E0E0',
-    },
-    orText: {
-        color: '#9E9E9E',
-        fontSize: 14,
-        paddingHorizontal: 10,
-    },
-    socialLoginContainer: {
-        alignItems: 'center',
-        marginBottom: 30,
-    },
-    socialButtons: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 10,
-    },
-    socialButton: {
-        width: 55,
-        height: 55,
-        borderRadius: 28,
-        backgroundColor: '#F5F5F5',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#EEEEEE',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
     },
     footer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 10,
+        marginTop: 20,
+        paddingVertical: 10,
     },
     noAccountText: {
         color: '#757575',
         fontSize: 16,
     },
     signupText: {
-        color: '#4CAF50',
+        color: COLORS.background.mint,
         fontWeight: 'bold',
         fontSize: 16,
     },

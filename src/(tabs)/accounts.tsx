@@ -31,7 +31,7 @@ const Account = () => {
     const menuItems = [
         {
             icon: 'lock-reset',
-            label: 'Đổi mật khẩu',
+            label: 'Change Password',
             onPress: () => navigation.navigate('ResetPassword')
         },
         {
@@ -41,17 +41,17 @@ const Account = () => {
         },
         {
             icon: 'notifications',
-            label: 'Thông báo',
+            label: 'Notification',
             onPress: () => navigation.navigate('Notifications')
         },
         {
             icon: 'history',
-            label: 'Lịch sử',
+            label: 'History',
             onPress: () => navigation.navigate('History')
         },
         {
-            icon: 'settings',
-            label: 'Cài đặt',
+            icon: 'history',
+            label: 'Orders',
             onPress: () => navigation.navigate('Order')
         },
         {
@@ -61,17 +61,17 @@ const Account = () => {
         },
         {    
             icon: 'pets',
-            label: 'Dự đoán giống',
+            label: 'Breed Prediction',
             onPress: () => navigation.navigate('BreedDetection')
         },
         {
             icon: 'star-rate',
-            label: 'Đánh giá',
+            label: 'Rate',
             onPress: () => navigation.navigate('Rate')
         },
         {
             icon: 'logout',
-            label: 'Đăng xuất',
+            label: 'Logout',
             onPress: () => {
                 logout();
             }

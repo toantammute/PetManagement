@@ -9,7 +9,9 @@ import {
     TextInput,
     StatusBar,
     ActivityIndicator,
-    Dimensions
+    Dimensions,
+    SafeAreaView,
+    Platform
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -19,6 +21,8 @@ import { addToCart } from '../services/cartService';
 import { Product } from '../models/models';
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from '@tanstack/react-query';
+import { COLORS } from '../theme/color';
+import Header from '../component/header';
 
 const ProductList = () => {
     const { data: products, isLoading, isError, error } = useProducts();
@@ -31,8 +35,6 @@ const ProductList = () => {
     const { mutate: addToCart } = useAddToCart();
 
     const navigation = useNavigation<any>();
-
-
 
     const categories = [
         { id: 'All', name: 'All' },
@@ -160,108 +162,105 @@ const ProductList = () => {
     if (isLoading) {
         return (
             <View style={styles.loaderContainer}>
-                <ActivityIndicator size="large" color="#4CAF50" />
+                <ActivityIndicator size="large" color={COLORS.button.choose} />
                 <Text style={styles.loaderText}>Loading products...</Text>
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+        <>
+            <StatusBar
+                barStyle="dark-content"
+                backgroundColor={COLORS.background.gray}
+            />
+            <SafeAreaView style={[
+                styles.container,
+                Platform.OS === 'android' && styles.androidSafeArea
+            ]}>
+                <Header
+                    title="Pet Products"
+                    variant="cart"
+                    onCartPress={navigateToCart}
+                    cartItemsCount={cartItems?.length || 0}
+                />
+                <View style={styles.body}>
+                    <View style={styles.searchContainer}>
+                        <Icon name="search" size={20} color="#757575" style={styles.searchIcon} />
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Search pet products..."
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                        />
+                        {searchQuery.length > 0 && (
+                            <TouchableOpacity
+                                style={styles.clearButton}
+                                onPress={() => setSearchQuery('')}
+                            >
+                                <Icon name="clear" size={18} color="#757575" />
+                            </TouchableOpacity>
+                        )}
+                    </View>
 
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Icon name="arrow-back" size={24} color="#333" />
-                </TouchableOpacity>
+                    <View style={styles.categoriesContainer}>
+                        <FlatList
+                            data={categories}
+                            renderItem={renderCategoryItem}
+                            keyExtractor={item => item.id}
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.categoriesList}
+                        />
+                    </View>
 
-                <Text style={styles.title}>Pet Products</Text>
+                    <View style={styles.sortContainer}>
+                        <Text style={styles.resultCount}>{filteredProducts.length} products</Text>
 
-                <TouchableOpacity
-                    style={styles.cartButton}
-                    onPress={navigateToCart}
-                >
-                    <Icon name="shopping-cart" size={24} color="#333" />
-                    {cartItems && cartItems.length > 0 && (
-                        <View style={styles.cartBadge}>
-                            <Text style={styles.cartBadgeText}>{cartItems.length}</Text>
+                        <View style={styles.sortOptions}>
+                            <Text style={styles.sortLabel}>Sort by:</Text>
+
+                            <TouchableOpacity
+                                style={[styles.sortButton, sortBy === 'price_low' && styles.activeSortButton]}
+                                onPress={() => handleSortPress('price_low')}
+                            >
+                                <Text style={styles.sortButtonText}>Price ↑</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.sortButton, sortBy === 'price_high' && styles.activeSortButton]}
+                                onPress={() => handleSortPress('price_high')}
+                            >
+                                <Text style={styles.sortButtonText}>Price ↓</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {filteredProducts.length === 0 ? (
+                        <View style={styles.emptyContainer}>
+                            <Icon name="search-off" size={60} color="#CCCCCC" />
+                            <Text style={styles.emptyText}>No products found</Text>
+                            <Text style={styles.emptySubText}>Try searching with different keywords</Text>
+                        </View>
+                    ) : (
+                        <View style={styles.productListContainer}>
+                            <FlatList
+                                data={filteredProducts}
+                                renderItem={renderProductItem}
+                                keyExtractor={item => item.product_id}
+                                numColumns={2}
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={styles.productList}
+                            />
                         </View>
                     )}
-                </TouchableOpacity>
-            </View>
-
-            <View style={styles.searchContainer}>
-                <Icon name="search" size={20} color="#757575" style={styles.searchIcon} />
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search pet products..."
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                />
-                {searchQuery.length > 0 && (
-                    <TouchableOpacity
-                        style={styles.clearButton}
-                        onPress={() => setSearchQuery('')}
-                    >
-                        <Icon name="clear" size={18} color="#757575" />
-                    </TouchableOpacity>
-                )}
-            </View>
-
-            <View style={styles.categoriesContainer}>
-                <FlatList
-                    data={categories}
-                    renderItem={renderCategoryItem}
-                    keyExtractor={item => item.id}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.categoriesList}
-                />
-            </View>
-
-            <View style={styles.sortContainer}>
-                <Text style={styles.resultCount}>{filteredProducts.length} products</Text>
-
-                <View style={styles.sortOptions}>
-                    <Text style={styles.sortLabel}>Sort by:</Text>
-
-                    <TouchableOpacity
-                        style={[styles.sortButton, sortBy === 'price_low' && styles.activeSortButton]}
-                        onPress={() => handleSortPress('price_low')}
-                    >
-                        <Text style={styles.sortButtonText}>Price ↑</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.sortButton, sortBy === 'price_high' && styles.activeSortButton]}
-                        onPress={() => handleSortPress('price_high')}
-                    >
-                        <Text style={styles.sortButtonText}>Price ↓</Text>
-                    </TouchableOpacity>
                 </View>
-            </View>
 
-            {filteredProducts.length === 0 ? (
-                <View style={styles.emptyContainer}>
-                    <Icon name="search-off" size={60} color="#CCCCCC" />
-                    <Text style={styles.emptyText}>No products found</Text>
-                    <Text style={styles.emptySubText}>Try searching with different keywords</Text>
-                </View>
-            ) : (
-                <View style={styles.productListContainer}>
-                    <FlatList
-                        data={filteredProducts}
-                        renderItem={renderProductItem}
-                        keyExtractor={item => item.product_id}
-                        numColumns={2}
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={styles.productList}
-                    />
-                </View>
-            )}
-        </View>
+
+
+            </SafeAreaView>
+
+        </>
+
     );
 };
 
@@ -271,77 +270,45 @@ const productWidth = (width - 40 - 10) / 2; // 40 is padding, 10 is the gap betw
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
-        paddingHorizontal: 15,
+        backgroundColor: COLORS.background.gray,
     },
     productListContainer: {
         flex: 1,
+    },
+    body: {
+        flex: 1,
+        padding: 15,
+        
     },
     loaderContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: COLORS.background.white,
+    },
+    androidSafeArea: {
+        paddingTop: StatusBar.currentHeight,
     },
     loaderText: {
         marginTop: 10,
         fontSize: 16,
-        color: '#757575',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 15,
-        paddingVertical: 15,
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 1,
-        borderBottomColor: '#EEEEEE',
-    },
-    backButton: {
-        padding: 5,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333333',
-    },
-    cartButton: {
-        padding: 5,
-        position: 'relative',
-    },
-    cartBadge: {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        backgroundColor: '#FF5252',
-        borderRadius: 10,
-        minWidth: 18,
-        height: 18,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    cartBadgeText: {
-        color: '#FFFFFF',
-        fontSize: 10,
-        fontWeight: 'bold',
+        color: COLORS.text.default,
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        marginTop: 10,
-        marginBottom: 0,
+        backgroundColor: COLORS.background.white,
         paddingHorizontal: 15,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#EEEEEE',
+        borderColor: COLORS.border.avatar,
     },
     searchIcon: {},
     searchInput: {
         flex: 1,
         height: 45,
         fontSize: 14,
+        color: COLORS.text.text,
     },
     clearButton: {
         padding: 5,
@@ -354,21 +321,21 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 8,
         borderRadius: 20,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: COLORS.background.white,
         marginRight: 8,
         borderWidth: 1,
-        borderColor: '#EEEEEE',
+        borderColor: COLORS.border.avatar,
     },
     selectedCategoryButton: {
-        backgroundColor: '#4CAF50',
-        borderColor: '#4CAF50',
+        backgroundColor: COLORS.background.mint,
+        borderColor: COLORS.background.mint,
     },
     categoryText: {
         fontSize: 14,
-        color: '#757575',
+        color: COLORS.text.default,
     },
     selectedCategoryText: {
-        color: '#FFFFFF',
+        color: COLORS.background.white,
         fontWeight: '500',
     },
     sortContainer: {
@@ -377,15 +344,15 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 15,
         paddingVertical: 10,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: COLORS.background.white,
         borderTopWidth: 1,
         borderBottomWidth: 1,
-        borderColor: '#EEEEEE',
+        borderColor: COLORS.border.avatar,
         borderRadius: 8,
     },
     resultCount: {
         fontSize: 14,
-        color: '#757575',
+        color: COLORS.text.default,
     },
     sortOptions: {
         flexDirection: 'row',
@@ -394,7 +361,7 @@ const styles = StyleSheet.create({
     },
     sortLabel: {
         fontSize: 14,
-        color: '#757575',
+        color: COLORS.text.default,
         marginRight: 5,
     },
     sortButton: {
@@ -404,11 +371,11 @@ const styles = StyleSheet.create({
         borderRadius: 4,
     },
     activeSortButton: {
-        backgroundColor: '#E8F5E9',
+        backgroundColor: COLORS.background.lightBlue,
     },
     sortButtonText: {
         fontSize: 12,
-        color: '#424242',
+        color: COLORS.text.text,
     },
     productList: {
         paddingTop: 10,
@@ -417,20 +384,20 @@ const styles = StyleSheet.create({
     },
     productCard: {
         flex: 1,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: COLORS.background.white,
         borderRadius: 8,
         marginBottom: 10,
         marginRight: 5,
         marginLeft: 5,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: '#EEEEEE',
+        borderColor: COLORS.border.avatar,
         maxWidth: productWidth,
     },
     imageContainer: {
         width: '100%',
         height: 150,
-        backgroundColor: '#F5F5F5',
+        backgroundColor: COLORS.background.gray,
     },
     productImage: {
         width: '100%',
@@ -444,20 +411,20 @@ const styles = StyleSheet.create({
     productName: {
         fontSize: 14,
         fontWeight: '500',
-        color: '#333333',
+        color: COLORS.text.text,
         marginBottom: 5,
         height: 40,
     },
     productPrice: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#4CAF50',
+        color: COLORS.background.mint,
     },
     addToCartButton: {
         position: 'absolute',
         bottom: 7,
         right: 10,
-        backgroundColor: '#4CAF50',
+        backgroundColor: COLORS.background.mint,
         width: 30,
         height: 30,
         borderRadius: 15,
@@ -473,12 +440,12 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#757575',
+        color: COLORS.text.default,
         marginTop: 15,
     },
     emptySubText: {
         fontSize: 14,
-        color: '#9E9E9E',
+        color: COLORS.text.default,
         marginTop: 5,
         textAlign: 'center',
     },

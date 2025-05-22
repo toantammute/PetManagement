@@ -49,11 +49,11 @@ interface MobileChatScreenProps {
 
 // Quick reply suggestions for Pet Assistant
 const QUICK_REPLIES = [
-  'Các loại bệnh phổ biến ở chó',
-  'Lịch tiêm phòng cho mèo',
-  'Cách chăm sóc thú cưng',
-  'Dinh dưỡng cho thú cưng',
-  'Các loại vaccine cần thiết',
+  'Common dog diseases',
+  'Cat vaccination schedule',
+  'Pet care tips',
+  'Pet nutrition',
+  'Essential vaccines',
 ];
 
 const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route }) => {
@@ -128,22 +128,22 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
       if (error.message && (
           error.message.includes('403') || 
           error.message.includes('unauthorized') || 
-          error.message.includes('Phiên đăng nhập đã hết hạn')
+          error.message.includes('Session expired')
         )) {
         
         // Try to handle expired auth gracefully
         Alert.alert(
-          'Phiên đăng nhập đã hết hạn',
-          'Phiên đăng nhập của bạn đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.',
+          'Session Expired',
+          'Your session has expired or is invalid. Please log in again.',
           [
             { 
-              text: 'Đăng nhập lại', 
+              text: 'Login Again', 
               onPress: () => {
                 // Clear conversation ID
                 setConversationId(null);
                 // Clear any auth tokens
                 AsyncStorage.removeItem('accessToken');
-                // Navigate to login (you may need to adjust this based on your navigation setup)
+                // Navigate to login
                 navigation.dispatch(
                   CommonActions.reset({
                     index: 0,
@@ -153,14 +153,14 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
               }
             },
             { 
-              text: 'Bỏ qua', 
+              text: 'Skip', 
               style: 'cancel',
               onPress: () => {
                 // Set empty state for a new conversation
                 setConversationId(null);
                 const welcomeMessage: ChatMessage = {
                   id: 'welcome',
-                  text: `Xin chào! Tôi là Trợ lý Thú cưng. Tôi có thể giúp gì cho bạn?`,
+                  text: `Hello! I'm your Pet Assistant. How can I help you today?`,
                   sender: 'bot',
                   timestamp: new Date().toISOString(),
                 };
@@ -172,8 +172,8 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
       } else {
         // For other errors, just show a simple alert
         Alert.alert(
-          'Lỗi',
-          'Không thể tải lịch sử cuộc trò chuyện. Vui lòng thử lại sau.',
+          'Error',
+          'Unable to load conversation history. Please try again later.',
           [{ text: 'OK' }]
         );
       }
@@ -188,7 +188,7 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
     if (!conversationId && messages.length === 0) {
       const welcomeMessage: ChatMessage = {
         id: 'welcome',
-        text: `Xin chào! Tôi là Trợ lý Thú cưng. Tôi có thể giúp gì cho bạn?`,
+        text: `Hello! I'm your Pet Assistant. How can I help you today?`,
         sender: 'bot',
         timestamp: new Date().toISOString(),
       };
@@ -407,8 +407,8 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
       // Handle different types of errors with appropriate feedback
       if (errorMessage.includes('network') || errorMessage.includes('connection')) {
         Alert.alert(
-          'Lỗi kết nối',
-          'Vui lòng kiểm tra kết nối internet và thử lại.',
+          'Network Error',
+          'Please check your internet connection and try again.',
           [{ text: 'OK' }]
         );
       } else if (errorMessage.includes('Unauthorized') || errorMessage.includes('unauthorized') || errorMessage.includes('payload not found')) {
@@ -426,23 +426,23 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
     let contextSuggestions: string[] = [];
     
     // Check for questions in the bot's response to suggest follow-up questions
-    if (lowercaseResponse.includes('bạn có muốn biết thêm')) {
-      contextSuggestions.push('Có, hãy cho tôi biết thêm');
+    if (lowercaseResponse.includes('would you like to know more')) {
+      contextSuggestions.push('Yes, please tell me more');
     }
     
-    if (lowercaseResponse.includes('tác dụng phụ')) {
-      contextSuggestions.push('Những tác dụng phụ này có phổ biến không?');
-      contextSuggestions.push('Cách xử lý tác dụng phụ?');
+    if (lowercaseResponse.includes('side effects')) {
+      contextSuggestions.push('Are these side effects common?');
+      contextSuggestions.push('How to handle side effects?');
     }
     
-    if (lowercaseResponse.includes('thuốc') || lowercaseResponse.includes('dược phẩm')) {
-      contextSuggestions.push('Tác dụng phụ là gì?');
-      contextSuggestions.push('Liều lượng chính xác là bao nhiêu?');
+    if (lowercaseResponse.includes('medicine') || lowercaseResponse.includes('medication')) {
+      contextSuggestions.push('What are the side effects?');
+      contextSuggestions.push('What is the correct dosage?');
     }
     
-    if (lowercaseResponse.includes('tiêm phòng') || lowercaseResponse.includes('vaccine')) {
-      contextSuggestions.push('Khi nào cần tiêm mũi tiếp theo?');
-      contextSuggestions.push('Có tác dụng phụ nào không?');
+    if (lowercaseResponse.includes('vaccination') || lowercaseResponse.includes('vaccine')) {
+      contextSuggestions.push('When is the next dose due?');
+      contextSuggestions.push('Are there any side effects?');
     }
     
     // If we have context-aware suggestions, use those, otherwise use defaults
@@ -474,7 +474,7 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
     }
     
     // Fallback for any other error type
-    return 'Đã xảy ra lỗi. Vui lòng thử lại.';
+    return 'An error occurred. Please try again.';
   };
   
   // Determine sentiment from response text
@@ -483,24 +483,24 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
     
     // Check for positive indicators
     if (
-      lowercaseText.includes('tin tốt') ||
-      lowercaseText.includes('tích cực') ||
-      lowercaseText.includes('có lợi') ||
-      lowercaseText.includes('khuyến nghị') ||
-      lowercaseText.includes('an toàn')
+      lowercaseText.includes('good news') ||
+      lowercaseText.includes('positive') ||
+      lowercaseText.includes('beneficial') ||
+      lowercaseText.includes('recommendation') ||
+      lowercaseText.includes('safe')
     ) {
       return 'positive';
     }
     
     // Check for negative indicators
     if (
-      lowercaseText.includes('cảnh báo') ||
-      lowercaseText.includes('thận trọng') ||
-      lowercaseText.includes('bất lợi') ||
-      lowercaseText.includes('có hại') ||
-      lowercaseText.includes('tiêu cực') ||
-      lowercaseText.includes('độc hại') ||
-      lowercaseText.includes('nguy hiểm')
+      lowercaseText.includes('warning') ||
+      lowercaseText.includes('caution') ||
+      lowercaseText.includes('disadvantage') ||
+      lowercaseText.includes('harmful') ||
+      lowercaseText.includes('negative') ||
+      lowercaseText.includes('toxic') ||
+      lowercaseText.includes('dangerous')
     ) {
       return 'negative';
     }
@@ -567,7 +567,7 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
       // Reset messages to just the welcome message
       const welcomeMessage: ChatMessage = {
         id: 'welcome',
-        text: `Xin chào! Tôi là Trợ lý Thú cưng. Tôi có thể giúp gì cho bạn?`,
+        text: `Hello! I'm your Pet Assistant. How can I help you today?`,
         sender: 'bot',
         timestamp: new Date().toISOString(),
       };
@@ -577,8 +577,8 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
       
       // Provide feedback that conversation was reset
       Alert.alert(
-        'Cuộc trò chuyện mới',
-        'Cuộc trò chuyện của bạn đã được đặt lại.',
+        'New Conversation',
+        'Your conversation has been reset.',
         [{ text: 'OK' }]
       );
       
@@ -596,7 +596,7 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
         >
           <MaterialIcons name="arrow-back" size={22} color="#4F46E5" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Trợ lý ảo</Text>
+        <Text style={styles.headerTitle}>Virtual Assistant</Text>
         <TouchableOpacity 
           style={styles.historyButton}
           onPress={() => navigation.navigate('ConversationList')}
@@ -645,7 +645,7 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
               style={styles.input}
               value={inputText}
               onChangeText={setInputText}
-              placeholder="Hãy đặt câu hỏi về thú cưng của bạn..."
+              placeholder="Ask a question about your pet..."
               placeholderTextColor="#9CA3AF"
               multiline
               returnKeyType="send"
@@ -695,7 +695,7 @@ const MobileChatScreen: React.FC<MobileChatScreenProps> = ({ userId = '', route 
               onPress={resetConversation}
             >
               <MaterialIcons name="refresh" size={16} color="#9CA3AF" />
-              <Text style={styles.resetButtonText}>Cuộc hội thoại mới</Text>
+              <Text style={styles.resetButtonText}>New Conversation</Text>
             </TouchableOpacity>
           )}
         </View>

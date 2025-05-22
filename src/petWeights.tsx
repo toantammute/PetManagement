@@ -7,6 +7,7 @@ import {
     ScrollView,
     SafeAreaView,
     StatusBar,
+    Platform,
 } from 'react-native';
 import { COLORS } from '../theme/color';
 import { LineChart } from 'react-native-chart-kit';
@@ -85,8 +86,15 @@ const PetWeightsScreen = () => {
 
     return (
         <>
-        <StatusBar barStyle="dark-content" />
-        <SafeAreaView style={styles.container}>
+         <StatusBar
+                barStyle="dark-content"
+                backgroundColor={COLORS.background.gray}
+            />
+            <SafeAreaView style={[
+                styles.container,
+                Platform.OS === 'android' && styles.androidSafeArea
+            ]}>
+
             <Header title="Weight History" />
             <ScrollView style={styles.content}>
                 <View style={styles.chartCard}>
@@ -149,6 +157,9 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         padding: 20,
+    },
+    androidSafeArea: {
+        paddingTop: StatusBar.currentHeight,
     },
     loadingContainer: {
         flex: 1,

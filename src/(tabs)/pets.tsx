@@ -135,7 +135,9 @@ const Pets = () => {
                             </ScrollView>
                         ) : (
                             <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>No pets found</Text>
+                                <Icon name="paw" size={50} color={COLORS.background.mint} style={styles.emptyIcon} />
+                                <Text style={styles.emptyText}>You haven't added any pets yet</Text>
+                                <Text style={styles.emptySubText}>Add your first pet to start tracking their health and care</Text>
                             </View>
                         )}
                     </View>
@@ -313,10 +315,23 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        paddingHorizontal: 20,
+    },
+    emptyIcon: {
+        marginBottom: 15,
     },
     emptyText: {
-        fontSize: 16,
+        fontSize: 18,
+        fontWeight: '600',
+        color: COLORS.text.text,
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    emptySubText: {
+        fontSize: 14,
         color: COLORS.text.textDisable,
+        textAlign: 'center',
+        lineHeight: 20,
     },
     scrollView: {
         flex: 1,

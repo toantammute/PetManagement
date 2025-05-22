@@ -32,8 +32,8 @@ const ResetPassword = () => {
         if (!oldPassword) {
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi',
-                text2: 'Vui lòng nhập mật khẩu cũ',
+                text1: 'Error',
+                text2: 'Please enter your old password',
                 position: 'bottom'
             });
             return;
@@ -42,8 +42,8 @@ const ResetPassword = () => {
         if (!newPassword) {
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi',
-                text2: 'Vui lòng nhập mật khẩu mới',
+                text1: 'Error',
+                text2: 'Please enter your new password',
                 position: 'bottom'
             });
             return;
@@ -52,8 +52,8 @@ const ResetPassword = () => {
         if (newPassword.length < 6) {
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi',
-                text2: 'Mật khẩu phải có ít nhất 6 ký tự',
+                text1: 'Error',
+                text2: 'Password must be at least 6 characters long',
                 position: 'bottom'
             });
             return;
@@ -62,8 +62,8 @@ const ResetPassword = () => {
         if (newPassword !== confirmPassword) {
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi',
-                text2: 'Mật khẩu xác nhận không khớp',
+                text1: 'Error',
+                text2: 'Confirm password does not match',
                 position: 'bottom'
             });
             return;
@@ -76,8 +76,8 @@ const ResetPassword = () => {
             setTimeout(() => {
                 Toast.show({
                     type: 'success',
-                    text1: 'Thành công',
-                    text2: 'Mật khẩu của bạn đã được cập nhật',
+                    text1: 'Success',
+                    text2: 'Your password has been updated',
                     position: 'bottom'
                 });
                 navigation.goBack();
@@ -86,8 +86,8 @@ const ResetPassword = () => {
         } catch (error) {
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi',
-                text2: 'Không thể cập nhật mật khẩu. Vui lòng thử lại.',
+                text1: 'Error',
+                text2: 'Unable to update password. Please try again.',
                 position: 'bottom'
             });
             setLoading(false);
@@ -104,7 +104,7 @@ const ResetPassword = () => {
                 styles.container,
                 Platform.OS === 'android' && styles.androidSafeArea
             ]}>
-                <Header title="Đổi mật khẩu" />
+                <Header title="Change Password" />
                 
                 <KeyboardAvoidingView 
                     style={styles.keyboardView}
@@ -116,10 +116,10 @@ const ResetPassword = () => {
                         showsVerticalScrollIndicator={false}
                     >
                         <View style={styles.formContainer}>
-                            {/* Mật khẩu cũ */}
+                            {/* Old Password */}
                             <Input 
-                                label="Mật khẩu cũ" 
-                                placeholder="Nhập mật khẩu cũ"
+                                label="Old Password" 
+                                placeholder="Enter your old password"
                                 value={oldPassword} 
                                 onChangeText={setOldPassword}
                                 secureTextEntry={!showOldPassword}
@@ -134,10 +134,10 @@ const ResetPassword = () => {
                                 }
                             />
                             
-                            {/* Mật khẩu mới */}
+                            {/* New Password */}
                             <Input 
-                                label="Mật khẩu mới" 
-                                placeholder="Nhập mật khẩu mới" 
+                                label="New Password" 
+                                placeholder="Enter your new password" 
                                 value={newPassword} 
                                 onChangeText={setNewPassword}
                                 secureTextEntry={!showNewPassword}
@@ -152,10 +152,10 @@ const ResetPassword = () => {
                                 }
                             />
 
-                            {/* Xác nhận mật khẩu mới */}
+                            {/* Confirm New Password */}
                             <Input 
-                                label="Xác nhận mật khẩu mới" 
-                                placeholder="Nhập lại mật khẩu mới" 
+                                label="Confirm New Password" 
+                                placeholder="Re-enter your new password" 
                                 value={confirmPassword} 
                                 onChangeText={setConfirmPassword}
                                 secureTextEntry={!showConfirmPassword}
@@ -173,7 +173,7 @@ const ResetPassword = () => {
                             <View style={styles.passwordInfo}>
                                 <Icon name="info-outline" size={16} color="#757575" />
                                 <Text style={styles.infoText}>
-                                    Mật khẩu phải có ít nhất 6 ký tự và nên bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
+                                    Password must be at least 6 characters long and should include uppercase, lowercase, numbers, and special characters.
                                 </Text>
                             </View>
 
@@ -183,7 +183,7 @@ const ResetPassword = () => {
                                 disabled={loading}
                             >
                                 <Text style={styles.resetButtonText}>
-                                    {loading ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
+                                    {loading ? 'Updating...' : 'Update Password'}
                                 </Text>
                             </TouchableOpacity>
                         </View>

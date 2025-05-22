@@ -36,6 +36,7 @@ export const getPetById = async (id: string): Promise<Pet> => {
 
 export const createPet = async (pet: Pet, image: Image): Promise<Pet> => {
     const accessToken = await AsyncStorage.getItem('accessToken');
+    console.log('createPettoken', accessToken);
     const formData = new FormData();
     formData.append('data', JSON.stringify({
         name: pet.name,

@@ -8,7 +8,8 @@ import {
     Image, 
     KeyboardAvoidingView, 
     Platform,
-    StatusBar
+    StatusBar,
+    SafeAreaView
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
@@ -17,6 +18,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import * as ImagePicker from 'react-native-image-picker';
 import { useAuth } from '../context/AuthContext';
 import { Image as ImageModel } from '../models/models';
+import { COLORS } from '../theme/color';
 
 const Signup = () => {
     const navigation = useNavigation<any>();
@@ -56,8 +58,8 @@ const Signup = () => {
                 console.log('Camera Error: ', response.errorMessage);
                 Toast.show({
                     type: 'error',
-                    text1: 'Lỗi',
-                    text2: 'Không thể chụp ảnh',
+                    text1: 'Error',
+                    text2: 'Unable to take photo',
                     position: 'bottom'
                 });
             } else if (response.assets && response.assets.length > 0) {
@@ -83,8 +85,8 @@ const Signup = () => {
                 console.log('ImagePicker Error: ', response.errorMessage);
                 Toast.show({
                     type: 'error',
-                    text1: 'Lỗi',
-                    text2: 'Không thể chọn ảnh',
+                    text1: 'Error',
+                    text2: 'Unable to select image',
                     position: 'bottom'
                 });
             } else if (response.assets && response.assets.length > 0) {
@@ -101,8 +103,8 @@ const Signup = () => {
         if (!fullName.trim()) {
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi',
-                text2: 'Vui lòng nhập họ tên của bạn',
+                text1: 'Error',
+                text2: 'Please enter your full name',
                 position: 'bottom'
             });
             return;
@@ -111,8 +113,8 @@ const Signup = () => {
         if (!email.trim()) {
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi',
-                text2: 'Vui lòng nhập email của bạn',
+                text1: 'Error',
+                text2: 'Please enter your email',
                 position: 'bottom'
             });
             return;
@@ -121,8 +123,8 @@ const Signup = () => {
         if (!phone.trim()) {
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi',
-                text2: 'Vui lòng nhập số điện thoại của bạn',
+                text1: 'Error',
+                text2: 'Please enter your phone number',
                 position: 'bottom'
             });
             return;
@@ -131,8 +133,8 @@ const Signup = () => {
         if (!username.trim()) {
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi',
-                text2: 'Vui lòng nhập tên người dùng của bạn',
+                text1: 'Error',
+                text2: 'Please enter your username',
                 position: 'bottom'
             });
             return;
@@ -141,8 +143,8 @@ const Signup = () => {
         if (!address.trim()) {
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi',
-                text2: 'Vui lòng nhập địa chỉ của bạn',
+                text1: 'Error',
+                text2: 'Please enter your address',
                 position: 'bottom'
             });
             return;
@@ -151,8 +153,8 @@ const Signup = () => {
         if (!password) {
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi',
-                text2: 'Vui lòng nhập mật khẩu của bạn',
+                text1: 'Error',
+                text2: 'Please enter your password',
                 position: 'bottom'
             });
             return;
@@ -161,8 +163,8 @@ const Signup = () => {
         if (password !== confirmPassword) {
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi',
-                text2: 'Mật khẩu không khớp',
+                text1: 'Error',
+                text2: 'Passwords do not match',
                 position: 'bottom'
             });
             return;
@@ -172,8 +174,8 @@ const Signup = () => {
         if (!avatar) {
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi',
-                text2: 'Vui lòng chọn ảnh đại diện',
+                text1: 'Error',
+                text2: 'Please select a profile picture',
                 position: 'bottom'
             });
             return;
@@ -220,22 +222,22 @@ const Signup = () => {
                 
                 Toast.show({
                     type: 'error',
-                    text1: 'Lỗi đăng ký',
-                    text2: errorData?.message || `Lỗi máy chủ (${statusCode})`,
+                    text1: 'Registration Error',
+                    text2: errorData?.message || `Server error (${statusCode})`,
                     position: 'bottom'
                 });
             } else if (error.request) {
                 Toast.show({
                     type: 'error',
-                    text1: 'Lỗi kết nối',
-                    text2: 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.',
+                    text1: 'Connection Error',
+                    text2: 'Unable to connect to the server. Please check your network connection and try again.',
                     position: 'bottom'
                 });
             } else {
                 Toast.show({
                     type: 'error',
-                    text1: 'Lỗi đăng ký',
-                    text2: error.message || 'Đăng ký thất bại',
+                    text1: 'Registration Error',
+                    text2: error.message || 'Registration failed',
                     position: 'bottom'
                 });
             }
@@ -261,7 +263,14 @@ const Signup = () => {
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
         >
-            <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+            <StatusBar
+                barStyle="dark-content"
+                backgroundColor={COLORS.background.gray}
+            />
+            <SafeAreaView style={[
+                styles.container,
+                Platform.OS === 'android' && styles.androidSafeArea
+            ]}>
             
             <ScrollView 
                 contentContainerStyle={styles.scrollContent}
@@ -275,9 +284,9 @@ const Signup = () => {
                     <Icon name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
 
-                <View style={styles.header}>
+                 {/* <View style={styles.header}>
                     <Text style={styles.appName}>Pet Care</Text>
-                </View>
+                </View> */}
 
                 <View style={styles.titleContainer}>
                     <Text style={styles.title}>Create Account</Text>
@@ -299,33 +308,33 @@ const Signup = () => {
                             <Icon name="camera-alt" size={16} color="#fff" />
                         </View>
                     </TouchableOpacity>
-                    <Text style={styles.avatarText}>Chọn ảnh đại diện</Text>
+                    <Text style={styles.avatarText}>Select Profile Picture</Text>
                 </View>
 
                 {/* Image selection options */}
                 {showImageOptions && (
                     <View style={styles.optionsContainer}>
                         <View style={styles.optionsBox}>
-                            <Text style={styles.optionsTitle}>Chọn ảnh đại diện</Text>
+                            <Text style={styles.optionsTitle}>Select Profile Picture</Text>
                             <TouchableOpacity 
                                 style={styles.optionButton} 
                                 onPress={takePhoto}
                             >
-                                <Icon name="camera-alt" size={20} color="#4CAF50" style={styles.optionIcon} />
-                                <Text style={styles.optionText}>Chụp ảnh</Text>
+                                <Icon name="camera-alt" size={20} color={COLORS.background.mint} style={styles.optionIcon} />
+                                <Text style={styles.optionText}>Take Photo</Text>
                             </TouchableOpacity>
                             <TouchableOpacity 
                                 style={styles.optionButton} 
                                 onPress={chooseFromLibrary}
                             >
-                                <Icon name="photo-library" size={20} color="#4CAF50" style={styles.optionIcon} />
-                                <Text style={styles.optionText}>Chọn từ thư viện</Text>
+                                <Icon name="photo-library" size={20} color={COLORS.background.mint} style={styles.optionIcon} />
+                                <Text style={styles.optionText}>Choose from Library</Text>
                             </TouchableOpacity>
                             <TouchableOpacity 
                                 style={[styles.optionButton, styles.cancelButton]} 
                                 onPress={cancelImageSelection}
                             >
-                                <Text style={styles.cancelText}>Hủy</Text>
+                                <Text style={styles.cancelText}>Cancel</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -429,11 +438,16 @@ const Signup = () => {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+            </SafeAreaView>
+            
         </KeyboardAvoidingView>
     );
 };
 
 const styles = StyleSheet.create({
+    androidSafeArea: {
+        paddingTop: StatusBar.currentHeight,
+    },
     container: {
         flex: 1,
         backgroundColor: '#ffffff',
@@ -461,7 +475,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         fontSize: 22,
         fontWeight: 'bold',
-        color: '#4CAF50',
+        color: COLORS.background.mint,
     },
     titleContainer: {
         marginBottom: 25,
@@ -508,7 +522,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         right: 0,
-        backgroundColor: '#4CAF50',
+        backgroundColor: COLORS.background.mint,
         width: 30,
         height: 30,
         borderRadius: 15,
@@ -519,7 +533,7 @@ const styles = StyleSheet.create({
     },
     avatarText: {
         fontSize: 14,
-        color: '#4CAF50',
+        color: COLORS.background.mint,
         fontWeight: '500',
     },
     formContainer: {
@@ -539,14 +553,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     signupButton: {
-        backgroundColor: '#4CAF50',
+        backgroundColor: COLORS.background.mint,
         borderRadius: 10,
         paddingVertical: 16,
         alignItems: 'center',
         marginTop: 15,
     },
     signupButtonDisabled: {
-        backgroundColor: '#A5D6A7',
+        backgroundColor: '#B2DFDB',
     },
     signupButtonText: {
         color: 'white',
@@ -563,7 +577,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     loginText: {
-        color: '#4CAF50',
+        color: COLORS.background.mint,
         fontWeight: 'bold',
         fontSize: 16,
     },
@@ -602,6 +616,7 @@ const styles = StyleSheet.create({
     },
     optionIcon: {
         marginRight: 15,
+        color: COLORS.background.mint,
     },
     optionText: {
         fontSize: 16,

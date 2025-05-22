@@ -3,19 +3,28 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS } from '../theme/color';
 import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
-type HeaderVariant = 'default' | 'three-dot' | 'save';
+type HeaderVariant = 'default' | 'three-dot' | 'save' | 'cart';
 
 interface HeaderProps {
     title: string;
     variant?: HeaderVariant;
     onSave?: () => void;
     onThreeDotPress?: () => void;
+    onCartPress?: () => void;
+    cartItemsCount?: number;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, variant = 'default', onSave, onThreeDotPress }) => {
-
+const Header: React.FC<HeaderProps> = ({ 
+    title, 
+    variant = 'default', 
+    onSave, 
+    onThreeDotPress,
+    onCartPress,
+    cartItemsCount = 0 
+}) => {
     const navigation = useNavigation<any>();
 
     const renderRightComponent = () => {
@@ -34,6 +43,26 @@ const Header: React.FC<HeaderProps> = ({ title, variant = 'default', onSave, onT
                                 paddingHorizontal: 4,
                             }}
                         />
+                    </TouchableOpacity>
+                );
+            case 'cart':
+                return (
+                    <TouchableOpacity 
+                        style={styles.headerButton}
+                        onPress={onCartPress}
+                    >
+                        <View style={styles.cartContainer}>
+                            <Icon 
+                                name='shopping-cart' 
+                                size={24} 
+                                color={COLORS.button.disable}
+                            />
+                            {cartItemsCount > 0 && (
+                                <View style={styles.cartBadge}>
+                                    <Text style={styles.cartBadgeText}>{cartItemsCount}</Text>
+                                </View>
+                            )}
+                        </View>
                     </TouchableOpacity>
                 );
             case 'save':
@@ -110,6 +139,27 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         color: COLORS.button.choose,
         fontFamily: 'Poppins-Regular',
+    },
+
+    cartContainer: {
+        position: 'relative',
+        padding: 5,
+    },
+    cartBadge: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        backgroundColor: COLORS.background.mint,
+        borderRadius: 10,
+        minWidth: 18,
+        height: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    cartBadgeText: {
+        color: COLORS.background.white,
+        fontSize: 10,
+        fontWeight: 'bold',
     },
 });
 

@@ -42,8 +42,8 @@ const ConversationListScreen = () => {
     } catch (error) {
       console.error('Error loading conversations:', error);
       Alert.alert(
-        'Lỗi',
-        'Không thể tải danh sách cuộc trò chuyện. Vui lòng thử lại sau.',
+        'Error',
+        'Unable to load conversation list. Please try again later.',
         [{ text: 'OK' }]
       );
     } finally {
@@ -59,12 +59,12 @@ const ConversationListScreen = () => {
 
   const handleDeleteConversation = async (conversationId: string) => {
     Alert.alert(
-      'Xóa cuộc trò chuyện',
-      'Bạn có chắc chắn muốn xóa cuộc trò chuyện này?',
+      'Delete Conversation',
+      'Are you sure you want to delete this conversation?',
       [
-        { text: 'Hủy', style: 'cancel' },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Xóa',
+          text: 'Delete',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -78,8 +78,8 @@ const ConversationListScreen = () => {
             } catch (error) {
               console.error('Error deleting conversation:', error);
               Alert.alert(
-                'Lỗi',
-                'Không thể xóa cuộc trò chuyện. Vui lòng thử lại sau.',
+                'Error',
+                'Unable to delete conversation. Please try again later.',
                 [{ text: 'OK' }]
               );
             }
@@ -103,14 +103,14 @@ const ConversationListScreen = () => {
     const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
     
     if (diffInDays === 0) {
-      return 'Hôm nay ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return 'Today ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } else if (diffInDays === 1) {
-      return 'Hôm qua ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return 'Yesterday ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } else if (diffInDays < 7) {
-      const days = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       return days[date.getDay()] + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } else {
-      return date.toLocaleDateString('vi-VN', { 
+      return date.toLocaleDateString('en-US', { 
         day: '2-digit', 
         month: '2-digit', 
         year: 'numeric', 
@@ -123,7 +123,7 @@ const ConversationListScreen = () => {
   // Get a preview of the conversation
   const getConversationPreview = (conversation: ConversationState) => {
     if (!conversation.messages || conversation.messages.length === 0) {
-      return 'Không có tin nhắn';
+      return 'No messages';
     }
     
     // Find the last message from the bot
@@ -174,7 +174,7 @@ const ConversationListScreen = () => {
       return (
         <View style={styles.emptyContainer}>
           <ActivityIndicator size="large" color="#4F46E5" />
-          <Text style={styles.emptyText}>Đang tải cuộc trò chuyện...</Text>
+          <Text style={styles.emptyText}>Loading conversations...</Text>
         </View>
       );
     }
@@ -182,12 +182,12 @@ const ConversationListScreen = () => {
     return (
       <View style={styles.emptyContainer}>
         <MaterialIcons name="chat-bubble-outline" size={60} color="#9CA3AF" />
-        <Text style={styles.emptyText}>Không có cuộc trò chuyện nào</Text>
+        <Text style={styles.emptyText}>No conversations yet</Text>
         <TouchableOpacity
           style={styles.newChatButton}
           onPress={() => navigation.navigate('Chatbot')}
         >
-          <Text style={styles.newChatButtonText}>Bắt đầu cuộc trò chuyện mới</Text>
+          <Text style={styles.newChatButtonText}>Start New Conversation</Text>
         </TouchableOpacity>
       </View>
     );
@@ -202,13 +202,13 @@ const ConversationListScreen = () => {
         >
           <MaterialIcons name="arrow-back" size={22} color="#4F46E5" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Cuộc trò chuyện của tôi</Text>
+        <Text style={styles.headerTitle}>Our Conversations</Text>
         <TouchableOpacity
           style={styles.newButton}
           onPress={() => navigation.navigate('Chatbot')}
         >
           <MaterialIcons name="add" size={24} color="#4F46E5" />
-          <Text style={styles.newButtonText}>Mới</Text>
+          <Text style={styles.newButtonText}>New</Text>
         </TouchableOpacity>
       </View>
       

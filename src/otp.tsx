@@ -8,11 +8,13 @@ import {
     KeyboardAvoidingView, 
     Platform,
     StatusBar,
-    ActivityIndicator 
+    ActivityIndicator,
+    SafeAreaView
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
+import { COLORS } from '../theme/color';
 
 const OTP = () => {
     const [otp, setOtp] = useState(['', '', '', '']);
@@ -139,66 +141,73 @@ const OTP = () => {
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-            <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-
-            <TouchableOpacity
-                style={styles.backButton}
-                onPress={handleGoBack}
-            >
-                <Icon name="arrow-back" size={24} color="#333" />
-            </TouchableOpacity>
-
-            <View style={styles.content}>
-                <View style={styles.header}>
-                    <Icon name="mark-email-read" size={70} color="#4CAF50" />
-                    <Text style={styles.title}>OTP Verification</Text>
-                    <Text style={styles.subtitle}>
-                        A verification code has been sent to{'\n'}
-                        <Text style={styles.contactText}>{maskedContact}</Text>
-                    </Text>
-                </View>
-
-                <View style={styles.otpContainer}>
-                    {otp.map((digit, index) => (
-                        <TextInput
-                            key={index}
-                            ref={(ref) => {
-                                inputRefs.current[index] = ref;
-                            }}
-                            style={styles.otpInput}
-                            value={digit}
-                            onChangeText={(text) => handleChangeOtp(text, index)}
-                            onKeyPress={(e) => handleKeyPress(e, index)}
-                            maxLength={1}
-                            keyboardType="numeric"
-                            autoFocus={index === 0}
-                        />
-                    ))}
-                </View>
-
+            <StatusBar 
+                barStyle="dark-content" 
+                backgroundColor={COLORS.background.gray}
+            />
+            <SafeAreaView style={[
+                styles.container,
+                Platform.OS === 'android' && styles.androidSafeArea
+            ]}>
                 <TouchableOpacity
-                    style={[styles.verifyButton, loading && styles.verifyButtonDisabled]}
-                    onPress={handleVerify}
-                    disabled={loading}
+                    style={styles.backButton}
+                    onPress={handleGoBack}
                 >
-                    {loading ? (
-                        <ActivityIndicator color="#fff" size="small" />
-                    ) : (
-                        <Text style={styles.verifyButtonText}>Verify</Text>
-                    )}
+                    <Icon name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
 
-                <View style={styles.resendContainer}>
-                    <Text style={styles.resendText}>
-                        Didn't receive the code? {resendDisabled ? `Resend after (${timer}s)` : ''}
-                    </Text>
-                    {!resendDisabled && (
-                        <TouchableOpacity onPress={handleResendOTP}>
-                            <Text style={styles.resendButtonText}>Resend Code</Text>
-                        </TouchableOpacity>
-                    )}
+                <View style={styles.content}>
+                    <View style={styles.header}>
+                        <Icon name="mark-email-read" size={70} color={COLORS.background.mint} />
+                        <Text style={styles.title}>OTP Verification</Text>
+                        <Text style={styles.subtitle}>
+                            A verification code has been sent to{'\n'}
+                            <Text style={styles.contactText}>{maskedContact}</Text>
+                        </Text>
+                    </View>
+
+                    <View style={styles.otpContainer}>
+                        {otp.map((digit, index) => (
+                            <TextInput
+                                key={index}
+                                ref={(ref) => {
+                                    inputRefs.current[index] = ref;
+                                }}
+                                style={styles.otpInput}
+                                value={digit}
+                                onChangeText={(text) => handleChangeOtp(text, index)}
+                                onKeyPress={(e) => handleKeyPress(e, index)}
+                                maxLength={1}
+                                keyboardType="numeric"
+                                autoFocus={index === 0}
+                            />
+                        ))}
+                    </View>
+
+                    <TouchableOpacity
+                        style={[styles.verifyButton, loading && styles.verifyButtonDisabled]}
+                        onPress={handleVerify}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <ActivityIndicator color="#fff" size="small" />
+                        ) : (
+                            <Text style={styles.verifyButtonText}>Verify</Text>
+                        )}
+                    </TouchableOpacity>
+
+                    <View style={styles.resendContainer}>
+                        <Text style={styles.resendText}>
+                            Didn't receive the code? {resendDisabled ? `Resend after (${timer}s)` : ''}
+                        </Text>
+                        {!resendDisabled && (
+                            <TouchableOpacity onPress={handleResendOTP}>
+                                <Text style={styles.resendButtonText}>Resend Code</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
-            </View>
+            </SafeAreaView>
         </KeyboardAvoidingView>
     );
 };
@@ -208,8 +217,11 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#ffffff',
     },
+    androidSafeArea: {
+        paddingTop: StatusBar.currentHeight,
+    },
     backButton: {
-        marginTop: Platform.OS === 'ios' ? 50 : 20,
+        marginTop: Platform.OS === 'ios' ? 20 : 10,
         marginLeft: 20,
         alignSelf: 'flex-start',
         padding: 5,
@@ -257,14 +269,19 @@ const styles = StyleSheet.create({
         backgroundColor: '#F9F9F9',
     },
     verifyButton: {
-        backgroundColor: '#4CAF50',
+        backgroundColor: COLORS.background.mint,
         borderRadius: 10,
         paddingVertical: 16,
         alignItems: 'center',
         marginBottom: 25,
+        shadowColor: COLORS.background.mint,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 3,
     },
     verifyButtonDisabled: {
-        backgroundColor: '#A5D6A7',
+        backgroundColor: '#B2DFDB',
     },
     verifyButtonText: {
         color: 'white',
@@ -279,7 +296,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     resendButtonText: {
-        color: '#4CAF50',
+        color: COLORS.background.mint,
         fontWeight: 'bold',
         fontSize: 16,
     }
