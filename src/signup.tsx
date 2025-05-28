@@ -196,13 +196,7 @@ const Signup = () => {
             
             // Gọi hàm register từ AuthContext
             const response = await register(
-                username, 
-                password, 
-                email, 
-                imageObj, 
-                fullName, 
-                phone, 
-                address
+                username,password,email,imageObj,fullName,phone,address
             );
             console.log("Register response: ", response);
             

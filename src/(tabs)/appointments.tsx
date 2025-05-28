@@ -20,8 +20,9 @@ const Appointments = () => {
     const filteredAppointments = useMemo(() => {
         if (!appointments) return [];
         
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const currentTime = now.getHours() * 60 + now.getMinutes(); // Convert current time to minutes
 
         // Lọc theo thú cưng được chọn
         let filteredByPet = appointments;
@@ -34,29 +35,51 @@ const Appointments = () => {
         // Lọc theo trạng thái tab
         return filteredByPet.filter(appointment => {
             const appointmentDate = new Date(appointment.date);
-            appointmentDate.setHours(0, 0, 0, 0);
+            const appointmentDay = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate());
+            
+            // Convert appointment time to minutes for comparison
+            const [hours, minutes] = appointment.time_slot.start_time.split(':').map(Number);
+            const appointmentTime = hours * 60 + minutes;
 
             switch (activeTab) {
                 case 'UPCOMING':
-                    return appointmentDate >= today && appointment.state !== 'CANCELLED';
+                    if (appointment.state === 'CANCELLED') return false;
+                    // Nếu là ngày hôm nay, kiểm tra thời gian
+                    if (appointmentDay.getTime() === today.getTime()) {
+                        return appointmentTime > currentTime;
+                    }
+                    // Nếu là ngày trong tương lai
+                    return appointmentDay > today;
                 case 'PAST':
-                    return appointmentDate < today && appointment.state !== 'CANCELLED';
+                    if (appointment.state === 'CANCELLED') return false;
+                    // Nếu là ngày hôm nay, kiểm tra thời gian
+                    if (appointmentDay.getTime() === today.getTime()) {
+                        return appointmentTime <= currentTime;
+                    }
+                    // Nếu là ngày trong quá khứ
+                    return appointmentDay < today;
                 case 'CANCELLED':
                     return appointment.state === 'CANCELLED';
                 default:
                     return false;
             }
         }).sort((a, b) => {
-            // Sắp xếp theo ngày
+            // Sắp xếp theo ngày và thời gian
             const dateA = new Date(a.date);
             const dateB = new Date(b.date);
+            const timeA = a.time_slot.start_time.split(':').map(Number);
+            const timeB = b.time_slot.start_time.split(':').map(Number);
+            
+            // Convert to timestamps for comparison
+            const timestampA = dateA.getTime() + (timeA[0] * 60 + timeA[1]) * 60 * 1000;
+            const timestampB = dateB.getTime() + (timeB[0] * 60 + timeB[1]) * 60 * 1000;
             
             if (activeTab === 'UPCOMING') {
                 // Sắp xếp tăng dần cho upcoming (gần nhất lên trên)
-                return dateA.getTime() - dateB.getTime();
+                return timestampA - timestampB;
             } else {
                 // Sắp xếp giảm dần cho past (gần đây nhất lên trên)
-                return dateB.getTime() - dateA.getTime();
+                return timestampB - timestampA;
             }
         });
     }, [appointments, activeTab, selectedAvatars]);

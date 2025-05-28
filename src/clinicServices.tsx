@@ -30,7 +30,7 @@ const ServiceCard = ({ service, onPress }: { service: Service; onPress: () => vo
                 </View>
             </View>
             <View style={styles.priceTag}>
-                <Text style={styles.priceText}>${service.cost}</Text>
+                <Text style={styles.priceText}>{service.cost.toLocaleString('vi-VN')} VND</Text>
             </View>
         </View>
         

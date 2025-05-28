@@ -15,17 +15,20 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
 import { COLORS } from '../theme/color';
+import { useAuth } from '../context/AuthContext';
 
 const OTP = () => {
-    const [otp, setOtp] = useState(['', '', '', '']);
+    const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const [timer, setTimer] = useState(60);
     const [loading, setLoading] = useState(false);
     const [resendDisabled, setResendDisabled] = useState(true);
+    const { verifyEmail, resendOTP } = useAuth();
 
-    const inputRefs = useRef<Array<TextInput | null>>([null, null, null, null]);
+    const inputRefs = useRef<Array<TextInput | null>>([null, null, null, null, null, null]);
     const navigation = useNavigation();
     const route = useRoute();
-    const params = route.params as { email?: string; phone?: string; forgotPassword?: boolean };
+    const params = route.params as { email?: string; username?: string };
+    const { email, username } = params;
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -47,7 +50,7 @@ const OTP = () => {
         newOtp[index] = text.replace(/[^0-9]/g, '');
         setOtp(newOtp);
 
-        if (text && index < 3) {
+        if (text && index < 5) {
             inputRefs.current[index + 1]?.focus();
         }
     };
@@ -61,11 +64,11 @@ const OTP = () => {
     const handleVerify = async () => {
         const otpValue = otp.join('');
 
-        if (otpValue.length !== 4) {
+        if (otpValue.length !== 6) {
             Toast.show({
                 type: 'error',
                 text1: 'Error',
-                text2: 'Please enter the complete verification code',
+                text2: 'Please enter the complete 6-digit verification code',
                 position: 'bottom'
             });
             return;
@@ -74,67 +77,81 @@ const OTP = () => {
         setLoading(true);
 
         try {
-            // Simulate OTP verification
-            setTimeout(() => {
-                setLoading(false);
+            if (!username) {
+                throw new Error('Username is required');
+            }
 
-                if (params.forgotPassword) {
-                    navigation.navigate('ResetPassword' as never);
-                } else {
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Success',
-                        text2: 'Your account has been verified',
-                        position: 'bottom'
-                    });
-                    navigation.navigate('Login' as never);
-                }
-            }, 2000);
-        } catch (error) {
+            await verifyEmail(username, otpValue);
+            setLoading(false);
+
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'Your account has been verified',
+                position: 'bottom'
+            });
+            navigation.navigate('Login' as never);
+        } catch (error: any) {
             console.error('OTP verification error:', error);
-            setLoading(false); // Ensure loading is set to false on error
+            setLoading(false);
             Toast.show({
                 type: 'error',
                 text1: 'Error',
-                text2: 'Failed to verify the code. Please try again.',
+                text2: error.message || 'Failed to verify the code. Please try again.',
                 position: 'bottom'
             });
         }
     };
 
-    const handleResendOTP = () => {
-        setTimer(60);
-        setResendDisabled(true);
+    const handleResendOTP = async () => {
+        if (!username) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Username is required to resend OTP',
+                position: 'bottom'
+            });
+            return;
+        }
 
-        // Simulate resending OTP
-        setTimeout(() => {
+        try {
+            setResendDisabled(true);
+            setTimer(60);
+            await resendOTP(username);
+            
             Toast.show({
                 type: 'success',
                 text1: 'Success',
                 text2: 'A new verification code has been sent',
                 position: 'bottom'
             });
-        }, 1500); // Simulate network delay
 
-        const interval = setInterval(() => {
-            setTimer((prevTimer) => {
-                if (prevTimer <= 1) {
-                    clearInterval(interval);
-                    setResendDisabled(false);
-                    return 0;
-                }
-                return prevTimer - 1;
+            const interval = setInterval(() => {
+                setTimer((prevTimer) => {
+                    if (prevTimer <= 1) {
+                        clearInterval(interval);
+                        setResendDisabled(false);
+                        return 0;
+                    }
+                    return prevTimer - 1;
+                });
+            }, 1000);
+        } catch (error: any) {
+            setResendDisabled(false);
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: error.message || 'Failed to resend verification code',
+                position: 'bottom'
             });
-        }, 1000);
+        }
     };
 
     const handleGoBack = () => {
         navigation.goBack();
     };
 
-    const maskedContact = params.email
-        ? params.email.replace(/(\w{3})[\w.-]+@([\w.]+\w)/, '$1***@$2')
-        : params.phone?.replace(/(\d{3})\d{4}(\d{3})/, '$1****$2');
+    const maskedEmail = email ? email.replace(/(\w{3})[\w.-]+@([\w.]+\w)/, '$1***@$2') : '';
 
     return (
         <KeyboardAvoidingView
@@ -162,7 +179,7 @@ const OTP = () => {
                         <Text style={styles.title}>OTP Verification</Text>
                         <Text style={styles.subtitle}>
                             A verification code has been sent to{'\n'}
-                            <Text style={styles.contactText}>{maskedContact}</Text>
+                            <Text style={styles.contactText}>{maskedEmail}</Text>
                         </Text>
                     </View>
 
@@ -256,9 +273,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 40,
+        paddingHorizontal: 10,
     },
     otpInput: {
-        width: 65,
+        width: 50,
         height: 65,
         borderWidth: 1.5,
         borderColor: '#DDDDDD',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView, StatusBar, Platform } from 'react-native';
 import { COLORS } from '../theme/color';
 import { useDiaryDetail } from "../hook/useDiary";
 import { useDeleteDiary } from '../hook/useDiary';
@@ -67,12 +67,15 @@ const DiaryDetail = () => {
     });
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <>
             <StatusBar barStyle="dark-content" backgroundColor={COLORS.background.white} />
-            <View style={styles.container}>
+            <SafeAreaView style={[
+                styles.container,
+                Platform.OS === 'android' && styles.androidSafeArea
+            ]}>
                 <Header title="Diary Details" />
 
-                <ScrollView 
+                <ScrollView
                     style={styles.scrollView}
                     showsVerticalScrollIndicator={false}
                 >
@@ -82,7 +85,7 @@ const DiaryDetail = () => {
                             variant={pet?.data_image ? "default" : "noava"}
                             imageUrl={pet?.data_image ? `data:image/jpeg;base64,${pet.data_image}` : undefined}
                             size={50}
-                            onPress={() => {}}
+                            onPress={() => { }}
                         />
                         <View style={styles.petInfo}>
                             <Text style={styles.petName}>{pet?.name || 'No name'}</Text>
@@ -109,7 +112,7 @@ const DiaryDetail = () => {
 
                     {/* Action Buttons */}
                     <View style={styles.actionButtons}>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={[styles.actionButton, styles.editButton]}
                             onPress={() => {
                                 navigation.navigate('AddLog' as never, {
@@ -122,7 +125,7 @@ const DiaryDetail = () => {
                             <Feather name="edit-2" size={20} color={COLORS.background.white} />
                             <Text style={styles.buttonText}>Edit</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={[styles.actionButton, styles.deleteButton]}
                             onPress={handleDelete}
                         >
@@ -131,8 +134,9 @@ const DiaryDetail = () => {
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
-            </View>
-        </SafeAreaView>
+            </SafeAreaView>
+        </>
+
     );
 };
 
@@ -140,6 +144,9 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: COLORS.background.white,
+    },
+    androidSafeArea: {
+        paddingTop: StatusBar.currentHeight,
     },
     container: {
         flex: 1,

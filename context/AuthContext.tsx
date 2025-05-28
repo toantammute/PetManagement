@@ -1,9 +1,9 @@
 import { API } from "@env";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {User, Image} from "../models/models";
+import { User, Image } from "../models/models";
 import { createContext, useContext, useEffect, useState } from "react";
-import { Alert} from "react-native";
+import { Alert } from "react-native";
 import messaging from "@react-native-firebase/messaging";
 import { useNavigation } from "@react-navigation/native";
 
@@ -15,7 +15,7 @@ interface AuthContextType {
     logout: () => Promise<void>;
     register: (username: string, password: string, email: string, image: Image, full_name: string, phone_number: string, address: string) => Promise<void>;
     isLoggedIn: () => Promise<void>;
-    verifyEmail: (email: string) => Promise<void>;
+    verifyEmail: (username: string, secretCode: string) => Promise<void>;
     resendOTP: (username: string) => Promise<void>;
 
 }
@@ -30,7 +30,7 @@ export const useAuth = () => {
     return context;
 };
 
-export const AuthProvider = ({children}: {children: React.ReactNode}) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // const navigation = useNavigation<any>();
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +42,7 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
         try {
             setIsLoading(true);
             console.log("Attempting login with API URL:", API);
-            
+
             const response = await axios.post(`${API}/user/login`, {
                 username,
                 password,
@@ -64,7 +64,7 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
                 console.log("Login access_token2:", tokenData.access_token);
                 setUser(userData);
                 setRefreshToken(tokenData.refresh_token);
-                
+
                 await AsyncStorage.multiSet([
                     ['user', JSON.stringify(userData)],
                     ['accessToken', tokenData.access_token],
@@ -115,18 +115,27 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
     const register = async (username: string, password: string, email: string, image: Image, full_name: string, phone_number: string, address: string) => {
         try {
             const formData = new FormData();
-            formData.append('username', username);
-            formData.append('password', password);
-            formData.append('email', email);
-            formData.append('full_name', full_name);
-            formData.append('phone_number', phone_number);
-            formData.append('address', address);
+            formData.append('data', JSON.stringify({
+                username,
+                password,
+                email,
+                full_name,
+                phone_number,
+                address,
+                role: 'user'
+            }));
+            // formData.append('username', username);
+            // formData.append('password', password);
+            // formData.append('email', email);
+            // formData.append('full_name', full_name);
+            // formData.append('phone_number', phone_number);
+            // formData.append('address', address);
             formData.append('image', {
                 name: image.name,
                 type: image.type,
                 uri: image.uri,
             });
-            formData.append('role', 'user');
+            //formData.append('role', 'user');
             console.log("Register formData: ", formData);
 
             const response = await axios.post(`${API}/user/create`, formData, {
@@ -135,10 +144,12 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
                     'Accept': 'application/json',
                 },
             });
-            console.log("Register response: ", response.data.message);
+            console.log("Register response: ", response.data);
             if (response.status === 200) {
+                console.log("Register response: ", response.data);
+                console.log("Register response.data.data: ", response.data.data);
                 Alert.alert("Đăng ký thành công", "Vui lòng kiểm tra email để xác thực tài khoản");
-                await verifyEmail(email);
+                // await verifyEmail(username, response.data.data.secret_code);
                 return response.data;
                 // navigation.navigate('OTP', {email: email});
             }
@@ -147,6 +158,38 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
             console.error("Register error: ", error);
         }
     };
+
+    const verifyEmail = async (username: string, secretCode: string) => {
+        try {
+            console.log("Verify email username: ", username);
+            console.log("Verify email secretCode: ", secretCode);
+            const response = await axios.post(`${API}/user/verify_email`,
+                {
+                    username,
+                    secret_code: secretCode
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                }
+            );
+            console.log("Verify email response: ", response.data);
+            return response.data;
+        } catch (error: any) {
+            if (error.response) {
+                // Server trả về response với status code nằm ngoài range 2xx
+                throw new Error(error.response.data.error || 'Failed to verify email');
+            } else if (error.request) {
+                // Request được gửi nhưng không nhận được response
+                throw new Error('No response from server');
+            } else {
+                // Có lỗi khi setting up request
+                throw new Error('Error setting up request');
+            }
+        }
+    }
 
     const isLoggedIn = async () => {
         try {
@@ -168,14 +211,28 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
             setIsLoading(false);
         }
     }
-
-    const verifyEmail = async (email: string) => {
-        const response = await axios.post(`${API}/user/verify_email`, {email});
-        return response.data;
-    }
     const resendOTP = async (username: string) => {
-        const response = await axios.post(`${API}/user/resend_otp/${username}`);
-        return response.data;
+        try {
+            const response = await axios.post(`${API}/user/resend_otp/${username}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+            });
+            console.log("Resend OTP response: ", response.data);
+            return response.data;
+        } catch (error: any) {
+            if (error.response) {
+                // Server trả về response với status code nằm ngoài range 2xx
+                throw new Error(error.response.data.error || 'Failed to resend OTP');
+            } else if (error.request) {
+                // Request được gửi nhưng không nhận được response
+                throw new Error('No response from server');
+            } else {
+                // Có lỗi khi setting up request
+                throw new Error('Error setting up request');
+            }
+        }
     }
 
     useEffect(() => {
@@ -183,9 +240,9 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{user, isLoading, accessToken, login, logout, register, isLoggedIn, verifyEmail, resendOTP}}>
+        <AuthContext.Provider value={{ user, isLoading, accessToken, login, logout, register, isLoggedIn, verifyEmail, resendOTP }}>
             {children}
         </AuthContext.Provider>
     );
 };
-    
+

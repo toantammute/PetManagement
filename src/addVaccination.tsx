@@ -6,6 +6,8 @@ import {
     StyleSheet,
     ScrollView,
     SafeAreaView,
+    StatusBar,
+    Platform,
 } from 'react-native';
 import { useCreateVaccination } from '../hook/useVaccination';
 import Input from '../component/input';
@@ -48,7 +50,15 @@ const AddVaccinationScreen = () => {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <>
+            <StatusBar
+                barStyle="dark-content"
+                backgroundColor={COLORS.background.gray}
+            />
+            <SafeAreaView style={[
+                styles.container,
+                Platform.OS === 'android' && styles.androidSafeArea
+            ]}>
             <Header 
                 title="Add Vaccination" 
                 variant="save"
@@ -89,7 +99,10 @@ const AddVaccinationScreen = () => {
                     />
                 </View>
             </ScrollView>
-        </SafeAreaView>
+            </SafeAreaView>
+
+        </>
+        
     );
 };
 
@@ -103,10 +116,14 @@ const styles = StyleSheet.create({
     },
     content: {
         padding: 20,
+        gap: 6,
     },
     textArea: {
         height: 100,
         textAlignVertical: 'top',
+    },
+    androidSafeArea: {
+        paddingTop: StatusBar.currentHeight,
     },
 });
 
