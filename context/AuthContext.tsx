@@ -17,6 +17,8 @@ interface AuthContextType {
     isLoggedIn: () => Promise<void>;
     verifyEmail: (username: string, secretCode: string) => Promise<void>;
     resendOTP: (username: string) => Promise<void>;
+    forgotPassword: (email: string) => Promise<void>;
+    changePassword: (password: string, old_password: string) => Promise<void>;
 
 }
 
@@ -85,6 +87,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setIsLoading(false);
         }
     };
+
+    const changePassword = async (password: string, old_password: string) => {
+        try {
+            const response = await axios.put(`${API}/user/change-password`, {
+                password,
+                old_password
+            },{
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+            });
+            console.log("Change password response: ", response.data);
+            return response.data;
+        } catch (error: any) {
+            console.error("Change password error: ", error);
+        }
+    }
 
     const logout = async () => {
         setIsLoading(true);
@@ -158,6 +179,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             console.error("Register error: ", error);
         }
     };
+    const forgotPassword = async (email: string) => {
+        try {
+            const response = await axios.put(`${API}/user/reset-password`, {
+                email
+            });
+            console.log("Forgot password response: ", response.data);
+            return response.data;
+        } catch (error: any) {
+            console.error("Forgot password error: ", error);
+        }
+    }
 
     const verifyEmail = async (username: string, secretCode: string) => {
         try {
@@ -240,7 +272,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, accessToken, login, logout, register, isLoggedIn, verifyEmail, resendOTP }}>
+        <AuthContext.Provider value={{ user, isLoading, accessToken, login, logout, register, isLoggedIn, verifyEmail, resendOTP, forgotPassword, changePassword }}>
             {children}
         </AuthContext.Provider>
     );

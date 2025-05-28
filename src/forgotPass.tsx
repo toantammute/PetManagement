@@ -14,11 +14,13 @@ import { useNavigation } from '@react-navigation/native';
 import Input from '../component/input';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
+import { useAuth } from '../context/AuthContext';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
-    
+    const { forgotPassword } = useAuth();
+
     const navigation = useNavigation();
 
     const handleSubmit = async () => {
@@ -36,10 +38,9 @@ const ForgotPassword = () => {
         
         try {
             // Simulate API call
-            setTimeout(() => {
-                navigation.navigate('OTP' as never);
-                setLoading(false);
-            }, 1500);
+            await forgotPassword(email);
+            navigation.navigate('Login' as never);
+            setLoading(false);
         } catch (error) {
             Toast.show({
                 type: 'error',

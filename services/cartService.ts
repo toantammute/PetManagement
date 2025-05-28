@@ -4,33 +4,33 @@ import { Cart } from '../models/models';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const getCart = async (): Promise<Cart[]> => {
+    const accessToken = await AsyncStorage.getItem('accessToken');
+    if (!accessToken) {
+        throw new Error('No access token found');
+    }
+    console.log('accessToken', accessToken);
     
-        const accessToken = await AsyncStorage.getItem('accessToken');
-        if (!accessToken) {
-            throw new Error('No access token found');
+    console.log('get to cart request:', {
+        url: `${API}/cart`
+    });
+            
+    const response = await axios.get(`${API}/cart`, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
         }
-        console.log('accessToken', accessToken);
-        
-        console.log('get to cart request:', {
-            url: `${API}/cart`
-        });
-                
-        const response = await axios.get(`${API}/cart`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-                
-        // Check if the response has the expected structure
-        if (!response.data || !response.data.data) {
-            console.error('Invalid cart response structure:', response.data);
-            throw new Error('Invalid response structure from server');
-        }
-        console.log('response', response);
-        console.log('response.data.data', response.data.data);
-        
+    });
+    console.log('response', response);
+    console.log('response.data.data', response.data.data);
+    console.log('response.data', response.data);
+            
+    // Return empty array if data is null
+    if (!response.data || !response.data.data) {
+        console.log('Cart is empty or invalid response structure');
+        return [];
+    }
+    
     return response.data.data;
 };
 
@@ -77,23 +77,26 @@ export const removeFromCart = async (product_id: string) => {
 }
 
 export const createOrder = async () => {
+    console.log('create order request:', {
+        url: `${API}/order/`
+    });
     const accessToken = await AsyncStorage.getItem('accessToken');
     if (!accessToken) {
         throw new Error('No access token found');
     }
-    console.log('create order request:', {
-        url: `${API}/order`
-    });
-    const response = await axios.post(`${API}/order`, {
-        headers: {
+    console.log('accessToken trong cart', accessToken);
+    try {
+        const response = await axios.post(`${API}/order/`, {
+            headers: {
+            'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-        }
-    }); 
-
-    console.log('create order response:', response.data);
-    return response.data;
+            }
+        });
+        return response.data;
+    } catch (error: any) {
+        throw error;
+    }
 }
 
 export const getOrdersById = async (order_id: string) => {

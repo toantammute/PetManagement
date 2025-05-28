@@ -34,15 +34,15 @@ const AddVaccinationScreen = () => {
             return;
         }
 
-        const vaccinationData = {
-            petId,
-            vaccineName,
-            vaccineDate: vaccineDate.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }),
-            nextDueDate: nextDueDate.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }),
-            notes,
+        const data = {
+            pet_id: petId,
+            vaccine_name: vaccineName,
+            date_administered: vaccineDate.toISOString(),
+            next_due_date: nextDueDate.toISOString(),
+            notes: notes,
         };
 
-        createVaccinationMutation.mutate(vaccinationData, {
+        createVaccinationMutation.mutate(data, {
             onSuccess: () => {
                 navigation.goBack();
             },

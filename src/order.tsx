@@ -64,7 +64,7 @@ const OrderScreen = () => {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={COLORS.background.mint} />
-                <Text style={styles.loadingText}>Đang tải đơn hàng...</Text>
+                <Text style={styles.loadingText}>Loading orders...</Text>
             </View>
         );
     }
@@ -73,7 +73,7 @@ const OrderScreen = () => {
         return (
             <View style={styles.errorContainer}>
                 <Icon name="error-outline" size={80} color="#FF5252" />
-                <Text style={styles.errorText}>Không thể tải danh sách đơn hàng</Text>
+                <Text style={styles.errorText}>Unable to load orders</Text>
                 <Text style={styles.errorSubText}>{error?.message}</Text>
             </View>
         );
@@ -91,7 +91,7 @@ const OrderScreen = () => {
                 >
                     <Icon name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
+                <Text style={styles.headerTitle}>My Orders</Text>
                 <View style={styles.headerRight} />
             </View>
 
@@ -106,8 +106,8 @@ const OrderScreen = () => {
             ) : (
                 <View style={styles.emptyContainer}>
                     <Icon name="receipt" size={80} color="#CCCCCC" />
-                    <Text style={styles.emptyText}>Chưa có đơn hàng nào</Text>
-                    <Text style={styles.emptySubText}>Lịch sử đơn hàng của bạn sẽ xuất hiện ở đây</Text>
+                    <Text style={styles.emptyText}>No orders yet</Text>
+                    <Text style={styles.emptySubText}>Your order history will appear here</Text>
                 </View>
             )}
         </View>

@@ -109,23 +109,9 @@ const CartScreen = () => {
 
     
 
-    const handleCheckout = () => {
-        createOrder(undefined, {
-            onSuccess: () => {
-                Toast.show({
-                    type: 'success',
-                    text1: 'Order Created',
-                    text2: 'Order created successfully'
-                });
-            },
-            onError: () => {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Error',
-                    text2: 'Failed to create order'
-                });
-            }
-        });
+    const handleCheckout = async () => {
+        console.log('create order');
+        createOrder();
     };
                     
     const CartItem = ({ item }: { item: Cart }) => {
@@ -248,7 +234,7 @@ const CartScreen = () => {
                     <Text style={styles.emptySubText}>Please add products to your cart</Text>
                     <TouchableOpacity 
                         style={styles.continueShoppingButton}
-                        onPress={() => navigation.navigate('Products' as never)}
+                        onPress={() => navigation.navigate('ProductList' as never)}
                     >
                         <Text style={styles.continueShoppingText}>Continue shopping</Text>
                     </TouchableOpacity>

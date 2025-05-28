@@ -22,8 +22,8 @@ const OrderDetailScreen = () => {
     const { data: orderDetail, isLoading, isError, error } = useGetOrdersById(orderId);
 
     const handlePayment = () => {
-        // TODO: Xử lý thanh toán
-        console.log('Thanh toán đơn hàng:', orderId);
+        // TODO: Handle payment
+        console.log('Processing payment for order:', orderId);
     };
 
     const formatDate = (dateString: string) => {
@@ -41,7 +41,7 @@ const OrderDetailScreen = () => {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={COLORS.background.mint} />
-                <Text style={styles.loadingText}>Đang tải chi tiết đơn hàng...</Text>
+                <Text style={styles.loadingText}>Loading order details...</Text>
             </View>
         );
     }
@@ -50,7 +50,7 @@ const OrderDetailScreen = () => {
         return (
             <View style={styles.errorContainer}>
                 <Icon name="error-outline" size={80} color="#FF5252" />
-                <Text style={styles.errorText}>Không thể tải chi tiết đơn hàng</Text>
+                <Text style={styles.errorText}>Unable to load order details</Text>
                 <Text style={styles.errorSubText}>{error?.message}</Text>
             </View>
         );
@@ -72,7 +72,7 @@ const OrderDetailScreen = () => {
                 <View style={styles.productInfo}>
                     <Text style={styles.productName}>{item.product_name}</Text>
                     <Text style={styles.productPrice}>{item.unit_price.toLocaleString()}đ</Text>
-                    <Text style={styles.quantity}>Số lượng: {item.quantity}</Text>
+                    <Text style={styles.quantity}>Quantity: {item.quantity}</Text>
                 </View>
             </View>
         );
@@ -90,24 +90,24 @@ const OrderDetailScreen = () => {
                 >
                     <Icon name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Chi tiết đơn hàng</Text>
+                <Text style={styles.headerTitle}>Order Details</Text>
                 <View style={styles.headerRight} />
             </View>
 
             <ScrollView style={styles.content}>
-                {/* Thông tin đơn hàng */}
+                {/* Order Information */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Thông tin đơn hàng</Text>
+                    <Text style={styles.sectionTitle}>Order Information</Text>
                     <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>Mã đơn hàng:</Text>
+                        <Text style={styles.infoLabel}>Order ID:</Text>
                         <Text style={styles.infoValue}>#{orderDetail.id}</Text>
                     </View>
                     <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>Ngày đặt:</Text>
+                        <Text style={styles.infoLabel}>Order Date:</Text>
                         <Text style={styles.infoValue}>{formatDate(orderDetail.order_date)}</Text>
                     </View>
                     <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>Trạng thái:</Text>
+                        <Text style={styles.infoLabel}>Status:</Text>
                         <Text style={[
                             styles.infoValue,
                             { color: orderDetail.payment_status === 'paid' ? COLORS.background.mint : '#FF5252' }
@@ -117,41 +117,41 @@ const OrderDetailScreen = () => {
                     </View>
                 </View>
 
-                {/* Danh sách sản phẩm */}
+                {/* Product List */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Sản phẩm</Text>
+                    <Text style={styles.sectionTitle}>Products</Text>
                     {cartItems.length > 0 ? (
                         cartItems.map((item) => (
                             <ProductItem key={item.id} item={item} />
                         ))
                     ) : (
-                        <Text style={styles.emptyText}>Không có sản phẩm trong đơn hàng</Text>
+                        <Text style={styles.emptyText}>No products in this order</Text>
                     )}
                 </View>
 
-                {/* Tổng tiền */}
+                {/* Total Amount */}
                 <View style={styles.section}>
                     <View style={styles.totalContainer}>
-                        <Text style={styles.totalLabel}>Tổng tiền:</Text>
+                        <Text style={styles.totalLabel}>Total Amount:</Text>
                         <Text style={styles.totalAmount}>{orderDetail.total_amount.toLocaleString()}đ</Text>
                     </View>
                 </View>
 
-                {/* Địa chỉ giao hàng */}
+                {/* Shipping Address */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Địa chỉ giao hàng</Text>
+                    <Text style={styles.sectionTitle}>Shipping Address</Text>
                     <Text style={styles.shippingAddress}>{orderDetail.shipping_address}</Text>
                 </View>
             </ScrollView>
 
-            {/* Nút thanh toán */}
+            {/* Payment Button */}
             {isUnpaid && (
                 <View style={styles.paymentContainer}>
                     <TouchableOpacity 
                         style={styles.paymentButton}
                         onPress={handlePayment}
                     >
-                        <Text style={styles.paymentButtonText}>Thanh toán ngay</Text>
+                        <Text style={styles.paymentButtonText}>Pay Now</Text>
                     </TouchableOpacity>
                 </View>
             )}
