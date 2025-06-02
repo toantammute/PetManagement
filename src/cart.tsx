@@ -13,6 +13,7 @@ import {
     Platform
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useCart, useAddToCart, useRemoveFromCart,useCreateOrder } from '../hook/useCart';
 import { useProductById } from '../hook/useProduct';
@@ -21,10 +22,18 @@ import { COLORS } from '../theme/color';
 import Toast from 'react-native-toast-message';
 import Header from '../component/header';
 
+type RootStackParamList = {
+    OrderDetail: { orderId: string };
+    ProductList: undefined;
+    // Add other screens as needed
+};
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 const CartScreen = () => {
     const { data: cartItems, isLoading, isError, error } = useCart();
     const { mutate: addToCart } = useAddToCart();
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp>();
     const { mutate: removeFromCart } = useRemoveFromCart();
     const { mutate: createOrder } = useCreateOrder();
     
@@ -111,7 +120,25 @@ const CartScreen = () => {
 
     const handleCheckout = async () => {
         console.log('create order');
-        createOrder();
+        createOrder(undefined, {
+            onSuccess: (data) => {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Success',
+                    text2: 'Order created successfully'
+                });
+                // Navigate to order detail with the new order ID
+                navigation.navigate('OrderDetail', { orderId: data.order_id });
+            },
+            onError: (error: any) => {
+                const errorMessage = error?.response?.data?.message || 'Failed to create order';
+                Toast.show({
+                    type: 'error',
+                    text1: 'Error',
+                    text2: errorMessage
+                });
+            }
+        });
     };
                     
     const CartItem = ({ item }: { item: Cart }) => {

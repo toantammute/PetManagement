@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -9,7 +9,8 @@ import {
     StatusBar,
     Dimensions,
     ActivityIndicator,
-    FlatList
+    SafeAreaView,
+    Platform,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -21,72 +22,16 @@ import Toast from 'react-native-toast-message';
 import { useQueryClient } from '@tanstack/react-query';
 import { addToCart } from '../services/cartService';
 
-interface ProductDetails {
-    id: string;
-    name: string;
-    price: number;
-    originalPrice?: number;
-    discount?: number;
-    rating: number;
-    reviewCount: number;
-    images: string[];
-    description: string;
-    specifications: { label: string; value: string }[];
-    inStock: boolean;
-    category: string;
-}
-
 const ProductDetailScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { productId } = route.params as { productId: string };
     const queryClient = useQueryClient();
-    const { data: product_detail, isLoading, isError, error } = useProductById(productId);
+    const { data: product, isLoading, isError, error } = useProductById(productId);
     const { data: cartItems } = useCart();
-    const [product, setProduct] = useState<ProductDetails | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [isFavorite, setIsFavorite] = useState(false);
-    const [selectedTab, setSelectedTab] = useState('description');
     const [isAddingToCart, setIsAddingToCart] = useState(false);
-
-    useEffect(() => {
-        // Mô phỏng việc tải dữ liệu sản phẩm từ API
-        setTimeout(() => {
-            const productData: ProductDetails = {
-                id: productId,
-                name: 'Thức ăn cho chó Royal Canin Mini Adult 2kg',
-                price: 350000,
-                originalPrice: 420000,
-                discount: 17,
-                rating: 4.7,
-                reviewCount: 126,
-                images: [
-                    'https://example.com/royal-canin-1.jpg',
-                    'https://example.com/royal-canin-2.jpg',
-                    'https://example.com/royal-canin-3.jpg',
-                ],
-                description: 'Royal Canin Mini Adult là thức ăn hạt khô cao cấp dành riêng cho chó trưởng thành thuộc giống chó nhỏ (2-10kg) từ 10 tháng đến 8 tuổi. Được chế biến với công thức đặc biệt giúp duy trì cân nặng lý tưởng, hỗ trợ sức khỏe răng miệng, và cung cấp đầy đủ chất dinh dưỡng cần thiết cho chó của bạn.',
-                specifications: [
-                    { label: 'Thương hiệu', value: 'Royal Canin' },
-                    { label: 'Xuất xứ', value: 'Pháp' },
-                    { label: 'Trọng lượng', value: '2kg' },
-                    { label: 'Loại thức ăn', value: 'Hạt khô' },
-                    { label: 'Đối tượng', value: 'Chó trưởng thành' },
-                    { label: 'Độ tuổi', value: '10 tháng - 8 tuổi' },
-                ],
-                inStock: true,
-                category: 'food',
-            };
-            setProduct(productData);
-            setLoading(false);
-        }, 1500);
-    }, [productId]);
-
-    const handleImageChange = (index: number) => {
-        setCurrentImageIndex(index);
-    };
 
     const decreaseQuantity = () => {
         if (quantity > 1) {
@@ -95,7 +40,7 @@ const ProductDetailScreen = () => {
     };
 
     const increaseQuantity = () => {
-        if (product_detail && quantity < product_detail.stock) {
+        if (product && quantity < product.stock) {
             setQuantity(quantity + 1);
         } else {
             Toast.show({
@@ -110,12 +55,14 @@ const ProductDetailScreen = () => {
         setIsFavorite(!isFavorite);
         Toast.show({
             type: 'success',
-            text1: 'Thông báo',
-            text2: 'Đã thêm sản phẩm vào danh sách yêu thích'
+            text1: 'Notification',
+            text2: 'Product added to favorites'
         });
     };
 
     const handleAddToCart = async () => {
+        if (!product) return;
+
         try {
             setIsAddingToCart(true);
             await addToCart(productId, quantity);
@@ -147,131 +94,172 @@ const ProductDetailScreen = () => {
         navigation.navigate('Cart' as never);
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={COLORS.background.mint} />
-                <Text style={styles.loadingText}>Đang tải thông tin sản phẩm...</Text>
+                <Text style={styles.loadingText}>Loading product information...</Text>
             </View>
         );
     }
 
-    if (!product_detail) {
+    if (isError || !product) {
         return (
             <View style={styles.errorContainer}>
                 <Icon name="error-outline" size={80} color="#FF5252" />
-                <Text style={styles.errorText}>Không thể tải thông tin sản phẩm</Text>
+                <Text style={styles.errorText}>Unable to load product information</Text>
                 <TouchableOpacity
                     style={styles.backToShopButton}
                     onPress={() => navigation.goBack()}
                 >
-                    <Text style={styles.backToShopText}>Quay lại cửa hàng</Text>
+                    <Text style={styles.backToShopText}>Back to Shop</Text>
                 </TouchableOpacity>
             </View>
         );
     }
 
     return (
+        <>
+        <StatusBar
+                barStyle="dark-content"
+                backgroundColor={COLORS.background.gray}
+            />
+            <SafeAreaView style={[
+                styles.container,
+                Platform.OS === 'android' && styles.androidSafeArea
+            ]}>
         <View style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+                <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Icon name="arrow-back" size={24} color="#333" />
-                </TouchableOpacity>
-
-                <Text style={styles.headerTitle}>Chi tiết sản phẩm</Text>
-
-                <View style={styles.headerRight}>
+                {/* Header */}
+                <View style={styles.header}>
                     <TouchableOpacity
-                        style={styles.favoriteButton}
-                        onPress={toggleFavorite}
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
                     >
-                        <Icon
-                            name={isFavorite ? "favorite" : "favorite-border"}
-                            size={24}
-                            color={isFavorite ? "#FF5252" : "#333"}
-                        />
+                        <Icon name="arrow-back" size={24} color="#333" />
                     </TouchableOpacity>
 
+                    <Text style={styles.headerTitle}>Product Detail</Text>
+
+                    <View style={styles.headerRight}>
+                        <TouchableOpacity
+                            style={styles.favoriteButton}
+                            onPress={toggleFavorite}
+                        >
+                            <Icon
+                                name={isFavorite ? "favorite" : "favorite-border"}
+                                size={24}
+                                color={isFavorite ? "#FF5252" : "#333"}
+                            />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.cartButton}
+                            onPress={navigateToCart}
+                        >
+                            <Icon name="shopping-cart" size={24} color="#333" />
+                            {cartItems && cartItems.length > 0 && (
+                                <View style={styles.cartBadge}>
+                                    <Text style={styles.cartBadgeText}>{cartItems.length}</Text>
+                                </View>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.scrollContent}
+                >
+                    {/* Main Image */}
+                    <View style={styles.mainImageContainer}>
+                        <Image
+                            source={{
+                                uri: product.data_image
+                                    ? `data:image/jpeg;base64,${product.data_image}`
+                                    : 'https://via.placeholder.com/150'
+                            }}
+                            style={styles.mainImage}
+                            resizeMode="contain"
+                            defaultSource={require('../assets/images/bus.png')}
+                        />
+                    </View>
+
+                    {/* Product Info */}
+                    <View style={styles.productInfoContainer}>
+                        <Text style={styles.productName}>{product.name}</Text>
+
+                        <View style={styles.priceContainer}>
+                            <Text style={styles.price}>{product.price.toLocaleString()}đ</Text>
+                        </View>
+
+                        {product.description && (
+                            <Text style={styles.description}>{product.description}</Text>
+                        )}
+                    </View>
+
+                    {/* Quantity Selector */}
+                    <View style={styles.quantityContainer}>
+                        <Text style={styles.quantityLabel}>Quantity:</Text>
+                        <View style={styles.quantitySelector}>
+                            <TouchableOpacity
+                                style={[styles.quantityButton, quantity <= 1 && styles.quantityButtonDisabled]}
+                                onPress={decreaseQuantity}
+                                disabled={quantity <= 1}
+                            >
+                                <Icon name="remove" size={20} color={quantity <= 1 ? "#BDBDBD" : "#333"} />
+                            </TouchableOpacity>
+                            <Text style={styles.quantityValue}>{quantity}</Text>
+                            <TouchableOpacity
+                                style={[styles.quantityButton, quantity >= product.stock && styles.quantityButtonDisabled]}
+                                onPress={increaseQuantity}
+                                disabled={quantity >= product.stock}
+                            >
+                                <Icon name="add" size={20} color={quantity >= product.stock ? "#BDBDBD" : "#333"} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </ScrollView>
+
+                {/* Bottom Actions */}
+                <View style={styles.bottomActions}>
                     <TouchableOpacity
-                        style={styles.cartButton}
-                        onPress={navigateToCart}
+                        style={styles.addToCartButton}
+                        onPress={handleAddToCart}
+                        disabled={isAddingToCart || product.stock <= 0}
                     >
-                        <Icon name="shopping-cart" size={24} color="#333" />
-                        {cartItems && cartItems.length > 0 && (
-                            <View style={styles.cartBadge}>
-                                <Text style={styles.cartBadgeText}>{cartItems.length}</Text>
-                            </View>
+                        {isAddingToCart ? (
+                            <ActivityIndicator size="small" color="#FFFFFF" />
+                        ) : (
+                            <>
+                                <Icon name="add-shopping-cart" size={24} color="#FFFFFF" />
+                                <Text style={styles.addToCartText}>
+                                    {product.stock <= 0 ? 'Out of Stock' : 'Add to cart'}
+                                </Text>
+                            </>
                         )}
                     </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.buyNowButton, product.stock <= 0 && styles.buttonDisabled]}
+                        onPress={() => {
+                            if (product.stock > 0) {
+                                handleAddToCart();
+                                navigateToCart();
+                            }
+                        }}
+                        disabled={product.stock <= 0}
+                    >
+                        <Text style={styles.buyNowText}>Buy now</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
+            
+        </SafeAreaView>
+            
+        </>
 
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.scrollContent}
-            >
-                {/* Main Image */}
-                <View style={styles.mainImageContainer}>
-                    <Image
-                        source={{ uri: product_detail.data_image ? `data:image/jpeg;base64,${product_detail.data_image}` : 'https://via.placeholder.com/150' }}
-                        style={styles.mainImage}
-                        resizeMode="contain"
-                        defaultSource={require('../assets/images/bus.png')}
-                    />
-                </View>
-
-                {/* Product Info */}
-                <View style={styles.productInfoContainer}>
-                    <Text style={styles.productName}>{product_detail.name}</Text>
-
-                    <View style={styles.priceContainer}>
-                        <Text style={styles.price}>{product_detail.price.toLocaleString()}đ</Text>
-                    </View>
-                </View>
-
-                {/* Quantity Selector */}
-                <View style={styles.quantityContainer}>
-                    <Text style={styles.quantityLabel}>Số lượng:</Text>
-                    <View style={styles.quantitySelector}>
-                        <TouchableOpacity
-                            style={[styles.quantityButton, quantity <= 1 && styles.quantityButtonDisabled]}
-                            onPress={decreaseQuantity}
-                            disabled={quantity <= 1}
-                        >
-                            <Icon name="remove" size={20} color={quantity <= 1 ? "#BDBDBD" : "#333"} />
-                        </TouchableOpacity>
-                        <Text style={styles.quantityValue}>{quantity}</Text>
-                        <TouchableOpacity
-                            style={styles.quantityButton}
-                            onPress={increaseQuantity}
-                        >
-                            <Icon name="add" size={20} color="#333" />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </ScrollView>
-
-            {/* Bottom Actions */}
-            <View style={styles.bottomActions}>
-                <TouchableOpacity style={styles.addToCartButton} onPress={handleAddToCart} disabled={isAddingToCart}>
-                    <Icon name="add-shopping-cart" size={24} color="#FFFFFF" />
-                    <Text style={styles.addToCartText}>Thêm vào giỏ hàng</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.buyNowButton} onPress={() => {
-                    handleAddToCart();
-                    navigateToCart();
-                }}>
-                    <Text style={styles.buyNowText}>Mua ngay</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
     );
 };
 
@@ -281,6 +269,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#FFFFFF',
+    },
+    androidSafeArea: {
+        paddingTop: StatusBar.currentHeight,
     },
     loadingContainer: {
         flex: 1,
@@ -398,6 +389,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: COLORS.background.mint,
     },
+    description: {
+        fontSize: 14,
+        color: '#666666',
+        marginTop: 10,
+        lineHeight: 20,
+    },
     quantityContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -472,6 +469,9 @@ const styles = StyleSheet.create({
     buyNowText: {
         color: '#FFFFFF',
         fontWeight: 'bold',
+    },
+    buttonDisabled: {
+        opacity: 0.5,
     },
 });
 

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, StatusBar, SafeAreaView, Platform, TouchableOpacity, ActivityIndicator, Modal, Image as RNImage, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, SafeAreaView, Platform, TouchableOpacity, ActivityIndicator, Modal, Image as RNImage, Alert, ScrollView} from 'react-native';
 import { COLORS } from '../theme/color';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Feather from 'react-native-vector-icons/Feather';
@@ -133,13 +133,41 @@ const PetDetail = () => {
 
             const response = await launchImageLibrary(options);
             if (response.didCancel) {
+                setShowOptions(false);
             } else if (response.assets && response.assets[0]) {
                 const selectedImage = response.assets[0];
-                setImage({
+                const imageFile = {
                     uri: selectedImage.uri || '',
                     type: selectedImage.type || 'image/jpeg',
                     name: selectedImage.fileName || 'image.jpg',
-                });
+                };
+                
+                try {
+                    updatePetAvatar({ image: imageFile, id: petId }, {
+                        onSuccess: () => {
+                            Toast.show({
+                                type: 'success',
+                                text1: 'Success',
+                                text2: 'Pet avatar has been updated successfully',
+                            });
+                        },
+                        onError: (error: any) => {
+                            console.error('Error updating pet avatar:', error);
+                            Toast.show({
+                                type: 'error',
+                                text1: 'Error',
+                                text2: error.response?.data?.message || 'Failed to update pet avatar',
+                            });
+                        }
+                    });
+                } catch (error: any) {
+                    console.error('Error updating pet avatar:', error);
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Error',
+                        text2: error.response?.data?.message || 'Failed to update pet avatar',
+                    });
+                }
             }
         } catch (error) {
             console.log('Error picking image:', error);
@@ -152,7 +180,7 @@ const PetDetail = () => {
             setLoading(false);
             setShowOptions(false);
         }
-    }, [loading]);
+    }, [loading, petId, updatePetAvatar]);
 
     const takePhoto = useCallback(async () => {
         if (loading) return;
@@ -181,14 +209,41 @@ const PetDetail = () => {
 
             const response = await launchCamera(options);
             if (response.didCancel) {
-                console.log('User canceled photo capture');
+                setShowOptions(false);
             } else if (response.assets && response.assets[0]) {
                 const selectedImage = response.assets[0];
-                setImage({
+                const imageFile = {
                     uri: selectedImage.uri || '',
                     type: selectedImage.type || 'image/jpeg',
                     name: selectedImage.fileName || 'image.jpg',
-                });
+                };
+                
+                try {
+                    updatePetAvatar({ image: imageFile, id: petId }, {
+                        onSuccess: () => {
+                            Toast.show({
+                                type: 'success',
+                                text1: 'Success',
+                                text2: 'Pet avatar has been updated successfully',
+                            });
+                        },
+                        onError: (error: any) => {
+                            console.error('Error updating pet avatar:', error);
+                            Toast.show({
+                                type: 'error',
+                                text1: 'Error',
+                                text2: error.response?.data?.message || 'Failed to update pet avatar',
+                            });
+                        }
+                    });
+                } catch (error: any) {
+                    console.error('Error updating pet avatar:', error);
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Error',
+                        text2: error.response?.data?.message || 'Failed to update pet avatar',
+                    });
+                }
             }
         } catch (error) {
             console.log('Error capturing photo:', error);
@@ -201,7 +256,7 @@ const PetDetail = () => {
             setLoading(false);
             setShowOptions(false);
         }
-    }, [loading]);
+    }, [loading, petId, updatePetAvatar]);
 
     const handleThreeDotPress = () => {
         setShowOptionsModal(true);
@@ -308,7 +363,11 @@ const PetDetail = () => {
                 return (
                     <View style={styles.tabContentContainer}>
                         <Text style={styles.contentTitleLarge}>Detailed Information</Text>
-                        <View style={styles.overviewScrollView}>
+                        <ScrollView 
+                            style={styles.overviewScrollView}
+                            showsVerticalScrollIndicator={false}
+                            contentContainerStyle={styles.overviewScrollContent}
+                        >
                             {/* Basic Information */}
                             <View style={[styles.vaccinationItem, { borderLeftColor: '#4ECDC4' }]}>
                                 <View style={styles.vaccinationHeader}>
@@ -395,7 +454,7 @@ const PetDetail = () => {
                                     <Text style={styles.infoValue}>{pet?.healthnotes || 'No notes'}</Text>
                                 </View>
                             </View>
-                        </View>
+                        </ScrollView>
                     </View>
                 );
             case 'Vaccination':
@@ -689,6 +748,7 @@ const styles = StyleSheet.create({
     },
 
     tabContentContainer: {
+        flex: 1,
         backgroundColor: COLORS.background.white,
         padding: 15,
         borderRadius: 10,
@@ -1155,7 +1215,12 @@ const styles = StyleSheet.create({
     },
 
     overviewScrollView: {
-        // padding: 5,
+        flex: 1,
+        width: '100%',
+    },
+
+    overviewScrollContent: {
+        paddingBottom: 20,
     },
 
     overviewSection: {

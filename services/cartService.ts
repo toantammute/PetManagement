@@ -1,7 +1,8 @@
 import axios from 'axios';
-import { API } from "@env";
-import { Cart } from '../models/models';
+import { API_URL } from "@env";
+import { Cart, QRRequest } from '../models/models';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+console.log('Cart API_URL', API_URL);
 
 export const getCart = async (): Promise<Cart[]> => {
     const accessToken = await AsyncStorage.getItem('accessToken');
@@ -11,10 +12,10 @@ export const getCart = async (): Promise<Cart[]> => {
     console.log('accessToken', accessToken);
     
     console.log('get to cart request:', {
-        url: `${API}/cart`
+        url: `${API_URL}/cart`
     });
             
-    const response = await axios.get(`${API}/cart`, {
+    const response = await axios.get(`${API_URL}/cart`, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -42,9 +43,9 @@ export const addToCart = async (product_id: string, quantity: number) => {
     console.log('add to cart request:', {
         product_id: product_id,
         quantity: quantity,
-        url: `${API}/cart`
+        url: `${API_URL}/cart`
     });
-    const response = await axios.post(`${API}/cart`, {
+    const response = await axios.post(`${API_URL}/cart`, {
         product_id: product_id,
         quantity: quantity
     }, {
@@ -64,9 +65,9 @@ export const removeFromCart = async (product_id: string) => {
     }
     console.log('remove from cart request:', {
         product_id: product_id,
-        url: `${API}/cart/${product_id}`
+        url: `${API_URL}/cart/${product_id}`
     });
-    const response = await axios.delete(`${API}/cart/product/${product_id}`, {
+    const response = await axios.delete(`${API_URL}/cart/product/${product_id}`, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -76,9 +77,32 @@ export const removeFromCart = async (product_id: string) => {
     return response.data;
 }
 
+// export const createOrder = async () => {
+//     console.log('create order request:', {
+//         url: `${API_URL}/order/`
+//     });
+//     const accessToken = await AsyncStorage.getItem('accessToken');
+//     if (!accessToken) {
+//         throw new Error('No access token found');
+//     }
+//     console.log('accessToken trong cart', accessToken);
+//     try {
+//         const response = await axios.post(`${API_URL}/order/`, {
+//             headers: {
+//             'Authorization': `Bearer ${accessToken}`,
+//             'Content-Type': 'application/json',
+//             'Accept': 'application/json',
+//             }
+//         });
+//         return response.data;
+//     } catch (error: any) {
+//         throw error;
+//     }
+// }
+
 export const createOrder = async () => {
     console.log('create order request:', {
-        url: `${API}/order/`
+        url: `${API_URL}/order/`
     });
     const accessToken = await AsyncStorage.getItem('accessToken');
     if (!accessToken) {
@@ -86,14 +110,18 @@ export const createOrder = async () => {
     }
     console.log('accessToken trong cart', accessToken);
     try {
-        const response = await axios.post(`${API}/order/`, {
-            headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
+        const response = await axios.post(
+            `${API_URL}/order/`, 
+            {}, // empty body since the endpoint doesn't require any data
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                }
             }
-        });
-        return response.data;
+        );
+        return response.data.data;
     } catch (error: any) {
         throw error;
     }
@@ -104,7 +132,7 @@ export const getOrdersById = async (order_id: string) => {
     if (!accessToken) {
         throw new Error('No access token found');
     }
-    const response = await axios.get(`${API}/order/${order_id}`, {
+    const response = await axios.get(`${API_URL}/order/${order_id}`, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -120,7 +148,7 @@ export const getOrdersByUser = async () => {
     if (!accessToken) {
         throw new Error('No access token found');
     }
-    const response = await axios.get(`${API}/order`, {
+    const response = await axios.get(`${API_URL}/order`, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -138,7 +166,7 @@ export const getOrdersByUser = async () => {
 //             throw new Error('No access token found');
 //         }
         
-//         const response = await axios.put(`${API}/cart/${cartId}`, {
+//         const response = await axios.put(`${API_URL}/cart/${cartId}`, {
 //             quantity: quantity
 //         }, {
 //             headers: {
@@ -162,7 +190,7 @@ export const getOrderHistory = async () => {
             throw new Error('No access token found');
         }
         
-        const response = await axios.get(`${API}/order-history`, {
+        const response = await axios.get(`${API_URL}/order-history`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
@@ -174,3 +202,28 @@ export const getOrderHistory = async () => {
         throw error;
     }
 }
+
+export const generateQRCode = async (qrData: QRRequest) => {
+    try {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      if (!accessToken) {
+        throw new Error('No access token found');
+      }
+  
+      const response = await axios.post(
+        `${API_URL}/payment/generate-qr`,
+        qrData,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          }
+        }
+      );
+  
+      return response.data;
+    } catch (error: any) {
+      throw error;
+    }
+  };

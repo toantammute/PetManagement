@@ -7,13 +7,16 @@ import {
     FlatList,
     Image,
     StatusBar,
-    ActivityIndicator
+    ActivityIndicator,
+    SafeAreaView,
+    Platform
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useGetOrdersByUser } from '../hook/useCart';
 import { OrderDetail, Order } from '../models/models';
 import { COLORS } from '../theme/color';
+import Header from '../component/header';
 
 const OrderScreen = () => {
     const { data: orders, isLoading, isError, error } = useGetOrdersByUser();
@@ -34,7 +37,7 @@ const OrderScreen = () => {
 
     const OrderCard = ({ order }: { order: Order }) => {
         return (
-            <TouchableOpacity 
+            <TouchableOpacity
                 style={styles.orderCard}
                 onPress={() => navigation.navigate('OrderDetail', { orderId: order.order_id })}
             >
@@ -80,37 +83,37 @@ const OrderScreen = () => {
     }
 
     return (
-        <View style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-            
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity 
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Icon name="arrow-back" size={24} color="#333" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>My Orders</Text>
-                <View style={styles.headerRight} />
-            </View>
-
-            {orders && orders.length > 0 ? (
-                <FlatList
-                    data={orders}
-                    renderItem={({ item }) => <OrderCard order={item as unknown as Order} />}
-                    keyExtractor={item => item.id}
-                    contentContainerStyle={styles.orderList}
-                    showsVerticalScrollIndicator={false}
+        <>
+            <StatusBar
+                barStyle="dark-content"
+                backgroundColor={COLORS.background.gray}
+            />
+            <SafeAreaView style={[
+                styles.container,
+                Platform.OS === 'android' && styles.androidSafeArea
+            ]}>
+                <Header
+                    title="My Orders"
+                    variant="default"
                 />
-            ) : (
-                <View style={styles.emptyContainer}>
-                    <Icon name="receipt" size={80} color="#CCCCCC" />
-                    <Text style={styles.emptyText}>No orders yet</Text>
-                    <Text style={styles.emptySubText}>Your order history will appear here</Text>
-                </View>
-            )}
-        </View>
+
+                {orders && orders.length > 0 ? (
+                    <FlatList
+                        data={orders}
+                        renderItem={({ item }) => <OrderCard order={item as unknown as Order} />}
+                        keyExtractor={item => item.id}
+                        contentContainerStyle={styles.orderList}
+                        showsVerticalScrollIndicator={false}
+                    />
+                ) : (
+                    <View style={styles.emptyContainer}>
+                        <Icon name="receipt" size={80} color="#CCCCCC" />
+                        <Text style={styles.emptyText}>No orders yet</Text>
+                        <Text style={styles.emptySubText}>Your order history will appear here</Text>
+                    </View>
+                )}
+            </SafeAreaView>
+        </>
     );
 };
 
@@ -119,26 +122,8 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FFFFFF',
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 15,
-        paddingVertical: 15,
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 1,
-        borderBottomColor: '#EEEEEE',
-    },
-    backButton: {
-        padding: 5,
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333333',
-    },
-    headerRight: {
-        width: 34,
+    androidSafeArea: {
+        paddingTop: StatusBar.currentHeight,
     },
     orderList: {
         padding: 15,

@@ -5,9 +5,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Image } from "../models/models";
 import { Platform } from 'react-native';
+console.log('Profile API', API_URL);
 
 export const getUserDetails = async () => {
     const accessToken = await AsyncStorage.getItem('accessToken');
+    console.log('accessToken', accessToken);
     if (!accessToken) {
         throw new Error('No access token found');
     }
@@ -18,6 +20,7 @@ export const getUserDetails = async () => {
                 Authorization: `Bearer ${accessToken}`,
             },
         });
+        console.log('User details:', response.data);
 
         return response.data;
     }
@@ -83,7 +86,7 @@ export const updateUserAvatar = async (image: Image) => {
             },
         });
 
-        return response.data;
+        return response.data.data;
     }
     catch (error) {
         console.error('Error updating user avatar:', error);

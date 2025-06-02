@@ -3,7 +3,6 @@ import { View, StyleSheet, ScrollView, TouchableOpacity, Text, Platform, StatusB
 import { COLORS } from '../theme/color';
 import Input from '../component/input';
 import DateInput from '../component/datepicker';
-import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
 import Header from '../component/header';
 import { useDoctors, useDoctorTimeSlots, useCreateAppointment } from '../hook/useAppointment';

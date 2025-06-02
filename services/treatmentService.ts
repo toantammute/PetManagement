@@ -1,6 +1,7 @@
 import { API_URL } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+console.log('Treatment API_URL', API_URL);
 
 export const getPatientTreatments = async (patient_id: string) => {
     try {

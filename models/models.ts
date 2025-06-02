@@ -57,11 +57,23 @@ export interface Product {
     data_image: string;
 }
 
+export interface Profile {
+    user_id: string;
+    username: string;
+    full_name: string;
+    email: string;
+    phone_number: string;
+    address: string;
+    role: string;
+    data_image: string;
+}
+
 export interface ProductDetail {
     product_id: string;
     name: string;
     price: number;
     stock: number;
+    description: string;
     category: string;
     data_image: string;
 }
@@ -172,6 +184,31 @@ export interface OrderDetail {
     order_date: string;
     shipping_address: string;
     cart_items: Cart[];
+}
+
+export interface QRRequest {
+    amount: number;
+    accountName: string;
+    accountNo: string;
+    acqId: string;
+    template: string;
+    bank: string;
+    addInfo: string;
+    format: string;
+    order_id?: number;
+    test_order_id?: number;
+    medicine?: boolean;
+}
+
+export interface QRResponse {
+    code: string;
+    desc: string;
+    data: {
+      acpId: number;
+      accountName: string;
+      qrCode: string;
+      qrDataURL: string;
+    };
 }
 
 

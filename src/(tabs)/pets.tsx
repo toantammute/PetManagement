@@ -20,6 +20,10 @@ import { useFocusEffect } from '@react-navigation/native';
 // Define the type for the navigation stack
 type RootStackParamList = {
   BreedDetection: undefined;
+  AddDiary: undefined;
+  AddAppointment: undefined;
+  AddPet: undefined;
+  AddSchedule: undefined;
   [key: string]: undefined | object;
 };
 
@@ -39,6 +43,7 @@ const Pets = () => {
     // Set initial active tab based on navigation params
     const [activeTab, setActiveTab] = useState<string>(params?.initialTab || 'PROFILE');
     const [selectedAvatars, setSelectedAvatars] = useState<string[]>(['all']);
+    const [refreshing, setRefreshing] = useState(false);
 
     // Use useFocusEffect to update the tab when screen comes into focus
     useFocusEffect(
@@ -94,6 +99,42 @@ const Pets = () => {
 
     const { pets: filteredPets, diaries: filteredDiaries, schedules: filteredSchedules, appointments: filteredAppointments } = getFilteredData();
 
+    // Add refetch functions for each data type
+    const { refetch: refetchPets } = usePets();
+    const { refetch: refetchDiaries } = useDiarybyUser();
+    const { refetch: refetchSchedules } = useSchedulebyUser();
+    const { refetch: refetchAppointments } = useAppointments();
+
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true);
+        try {
+            // Refetch all data based on active tab
+            switch (activeTab) {
+                case 'PROFILE':
+                    await refetchPets();
+                    break;
+                case 'DIARY':
+                    await refetchDiaries();
+                    break;
+                case 'SCHEDULE':
+                    await refetchSchedules();
+                    break;
+                case 'APPOINTMENT':
+                    await refetchAppointments();
+                    break;
+            }
+        } catch (error) {
+            console.error('Error refreshing data:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to refresh data'
+            });
+        } finally {
+            setRefreshing(false);
+        }
+    }, [activeTab, refetchPets, refetchDiaries, refetchSchedules, refetchAppointments]);
+
     const handleToggleSchedule = (scheduleId: number, isActive: boolean) => {
         const scheduleToUpdate = allSchedules?.find(s => s.id === scheduleId.toString());
         if (scheduleToUpdate && scheduleToUpdate.id) {
@@ -110,6 +151,15 @@ const Pets = () => {
     // };
 
     const renderContent = () => {
+        const refreshControl = (
+            <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[COLORS.background.mint]}
+                tintColor={COLORS.background.mint}
+            />
+        );
+
         switch (activeTab) {
             case 'PROFILE':
                 return (
@@ -125,6 +175,7 @@ const Pets = () => {
                                 style={styles.scrollView}
                                 contentContainerStyle={styles.scrollContent}
                                 showsVerticalScrollIndicator={false}
+                                refreshControl={refreshControl}
                             >
                                 {filteredPets.map((pet) => (
                                     <PetCard
@@ -136,8 +187,15 @@ const Pets = () => {
                         ) : (
                             <View style={styles.emptyContainer}>
                                 <Icon name="paw" size={50} color={COLORS.background.mint} style={styles.emptyIcon} />
-                                <Text style={styles.emptyText}>You haven't added any pets yet</Text>
-                                <Text style={styles.emptySubText}>Add your first pet to start tracking their health and care</Text>
+                                <Text style={styles.emptyText}>No data</Text>
+                                <Text style={styles.emptySubText}>You haven't added any pets yet</Text>
+                                <TouchableOpacity 
+                                    style={styles.addButton}
+                                    onPress={() => navigation.navigate('AddPet')}
+                                >
+                                    <Icon name="plus" size={20} color="#fff" />
+                                    <Text style={styles.addButtonText}>Add Pet</Text>
+                                </TouchableOpacity>
                             </View>
                         )}
                     </View>
@@ -151,14 +209,26 @@ const Pets = () => {
                             <View style={styles.errorContainer}>
                                 <Text style={styles.errorText}>Error: {diaryError.message}</Text>
                             </View>
-                        ) : filteredDiaries && filteredDiaries.length > 0 ? (
-                            <ScrollView style={styles.scrollView}>
+                        ) : !filteredDiaries || filteredDiaries.length === 0 ? (
+                            <View style={styles.emptyContainer}>
+                                <Icon name="book-outline" size={50} color={COLORS.background.mint} style={styles.emptyIcon} />
+                                <Text style={styles.emptyText}>No data</Text>
+                                <Text style={styles.emptySubText}>No diary yet</Text>
+                                <TouchableOpacity 
+                                    style={styles.addButton}
+                                    onPress={() => navigation.navigate('AddDiary')}
+                                >
+                                    <Icon name="plus" size={20} color="#fff" />
+                                    <Text style={styles.addButtonText}>Add Diary</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <ScrollView 
+                                style={styles.scrollView}
+                                refreshControl={refreshControl}
+                            >
                                 <DiaryList diaries={filteredDiaries} />
                             </ScrollView>
-                        ) : (
-                            <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>No diary entries found</Text>
-                            </View>
                         )}
                     </View>
                 );
@@ -171,11 +241,25 @@ const Pets = () => {
                             <View style={styles.errorContainer}>
                                 <Text style={styles.errorText}>Error: {scheduleError.message}</Text>
                             </View>
+                        ) : !allSchedules || allSchedules.length === 0 ? (
+                            <View style={styles.emptyContainer}>
+                                <Icon name="calendar-clock" size={50} color={COLORS.background.mint} style={styles.emptyIcon} />
+                                <Text style={styles.emptyText}>No data</Text>
+                                <Text style={styles.emptySubText}>No schedules yet</Text>
+                                <TouchableOpacity 
+                                    style={styles.addButton}
+                                    onPress={() => navigation.navigate('AddSchedule')}
+                                >
+                                    <Icon name="plus" size={20} color="#fff" />
+                                    <Text style={styles.addButtonText}>Add Schedule</Text>
+                                </TouchableOpacity>
+                            </View>
                         ) : filteredSchedules && filteredSchedules.length > 0 ? (
                             <ScrollView 
                                 style={styles.scrollView}
                                 contentContainerStyle={styles.scrollContent}
                                 showsVerticalScrollIndicator={false}
+                                refreshControl={refreshControl}
                             >
                                 {filteredSchedules.map((schedule) => {
                                     const pet = pets?.find(p => p.petid?.toString() === schedule.pet_id?.toString());
@@ -191,7 +275,16 @@ const Pets = () => {
                             </ScrollView>
                         ) : (
                             <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>No schedules found</Text>
+                                <Icon name="calendar-clock" size={50} color={COLORS.background.mint} style={styles.emptyIcon} />
+                                <Text style={styles.emptyText}>No data</Text>
+                                <Text style={styles.emptySubText}>No schedules for selected pets</Text>
+                                <TouchableOpacity 
+                                    style={styles.addButton}
+                                    onPress={() => navigation.navigate('AddSchedule')}
+                                >
+                                    <Icon name="plus" size={20} color="#fff" />
+                                    <Text style={styles.addButtonText}>Add Schedule</Text>
+                                </TouchableOpacity>
                             </View>
                         )}
                     </View>
@@ -210,6 +303,7 @@ const Pets = () => {
                                 style={styles.scrollView}
                                 contentContainerStyle={styles.scrollContent}
                                 showsVerticalScrollIndicator={false}
+                                refreshControl={refreshControl}
                             >
                                 {filteredAppointments.map((appointment) => (
                                     <AppointmentCard
@@ -220,7 +314,16 @@ const Pets = () => {
                             </ScrollView>
                         ) : (
                             <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>No appointments found</Text>
+                                <Icon name="calendar-check" size={50} color={COLORS.background.mint} style={styles.emptyIcon} />
+                                <Text style={styles.emptyText}>No data</Text>
+                                <Text style={styles.emptySubText}>No appointments found</Text>
+                                <TouchableOpacity 
+                                    style={styles.addButton}
+                                    onPress={() => navigation.navigate('AddAppointment')}
+                                >
+                                    <Icon name="plus" size={20} color="#fff" />
+                                    <Text style={styles.addButtonText}>Add Appointment</Text>
+                                </TouchableOpacity>
                             </View>
                         )}
                     </View>
@@ -361,6 +464,27 @@ const styles = StyleSheet.create({
         color: '#fff',
         marginLeft: 8,
         fontWeight: 'bold',
+    },
+    addButton: {
+        backgroundColor: COLORS.background.mint,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderRadius: 25,
+        marginTop: 20,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    addButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+        marginLeft: 8,
     },
 })
 

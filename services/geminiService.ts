@@ -1,6 +1,7 @@
 import { API_URL } from '@env';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+console.log('Gemini API', API_URL);
 
 // Define the response shape
 interface ChartData {

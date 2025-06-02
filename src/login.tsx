@@ -4,7 +4,7 @@ import Input from '../component/input';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '@env';
+import { API } from '@env';
 import Toast from 'react-native-toast-message';
 import { COLORS } from '../theme/color';
 
@@ -38,7 +38,7 @@ const Login = () => {
         }
 
         try {
-            console.log('Starting login with:', { username, API_URL });
+            console.log('Starting login with:', { username, API});
             await login(username, password);
             console.log('Login successful');
         } catch (error: any) {

@@ -1,12 +1,13 @@
 import axios from 'axios';
-import { API} from "@env";
+import { API_URL} from "@env";
 import { Diary } from '../models/models';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+console.log('Diary API_URL', API_URL);
 
 export const getDiarybyUser = async (): Promise<Diary[]> => {
     console.log('getDiarybyUser');
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.get(`${API}/pet/logs`,{
+    const response = await axios.get(`${API_URL}/pet/logs`,{
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -14,12 +15,15 @@ export const getDiarybyUser = async (): Promise<Diary[]> => {
         }
     });
     console.log('response.data.rows', response.data.rows);
+    if(response.data.rows === null){
+        return [];
+    }
     return response.data.rows;
 }
 
 export const createDiary = async(data:any) => {
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.post(`${API}/pet/logs`, data, {
+    const response = await axios.post(`${API_URL}/pet/logs`, data, {
         headers: {
             'Authorization': `Bearer ${accessToken}`
         }
@@ -29,7 +33,7 @@ export const createDiary = async(data:any) => {
 
 export const deleteDiary = async(id: string) => {
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.delete(`${API}/pet/logs/${id}`, {
+    const response = await axios.delete(`${API_URL}/pet/logs/${id}`, {
         headers: {
             'Authorization': `Bearer ${accessToken}`
         }
@@ -39,7 +43,7 @@ export const deleteDiary = async(id: string) => {
 
 export const updateDiary = async(id: string, data: any) => {
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.put(`${API}/pet/logs/${id}`, data, {
+    const response = await axios.put(`${API_URL}/pet/logs/${id}`, data, {
         headers: {
             'Authorization': `Bearer ${accessToken}`
         }
@@ -49,7 +53,7 @@ export const updateDiary = async(id: string, data: any) => {
 
 export const getDiaryDetail = async (id: string): Promise<Diary> => {
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.get(`${API}/pet/log/${id}/details`, {
+    const response = await axios.get(`${API_URL}/pet/log/${id}/details`, {
         headers: {
             'Authorization': `Bearer ${accessToken}`
         }

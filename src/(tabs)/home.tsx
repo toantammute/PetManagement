@@ -89,7 +89,7 @@ const Home = () => {
         .filter(appointment => {
           const today = new Date();
           const appointmentDate = new Date(appointment.date);
-          return appointmentDate >= today && appointment.state !== 'CANCELLED';
+          return appointmentDate >= today && (appointment.state == 'Scheduled' || appointment.state == 'Confirmed');
         })
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
         .slice(0, 2)
@@ -263,9 +263,9 @@ const Home = () => {
                         ]}>
                           <Text style={[
                             styles.statusText,
-                            { color: appointment.state === 'CONFIRMED' ? '#2E7D32' : '#E65100' }
+                            { color: appointment.state === 'Confirmed' ? '#2E7D32' : '#E65100' }
                           ]}>
-                            {appointment.state === 'CONFIRMED' ? 'Đã xác nhận' : 'Chờ xác nhận'}
+                            {appointment.state === 'Confirmed' ? 'Confirmed' : 'Scheduled'}
                           </Text>
                         </View>
                       </View>
@@ -331,12 +331,12 @@ const Home = () => {
           ) : (
             <View style={styles.emptyState}>
               <Icon name="book" size={40} color={COLORS.text.textDisable} />
-              <Text style={styles.emptyStateText}>Chưa có bản ghi nhật ký nào</Text>
+              <Text style={styles.emptyStateText}>No diary yet</Text>
               <TouchableOpacity 
                 style={styles.addButton}
                 onPress={() => navigation.navigate('AddLog')}
               >
-                <Text style={styles.addButtonText}>Thêm nhật ký</Text>
+                <Text style={styles.addButtonText}>Add diary</Text>
               </TouchableOpacity>
             </View>
           )}

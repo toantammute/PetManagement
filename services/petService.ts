@@ -1,22 +1,25 @@
 import axios from "axios";
 
-import { API } from "@env";
+import { API_URL } from "@env";
 import { Pet, Image } from "../models/models";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-
+console.log('Pet API_URL', API_URL);
 
 export const getPets = async (): Promise<Pet[]> => {
     console.log('getPets');
     const accessToken = await AsyncStorage.getItem('accessToken');
     // const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.get(`${API}/pet/`, {
+    const response = await axios.get(`${API_URL}/pet/`, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'Authorization': `Bearer ${accessToken}`
         }
     });
+    console.log('response', response);
+    if (response.data === null) {
+        return [];
+    }
     console.log('response.data of pets', response.data);
     return response.data;
 }
@@ -24,7 +27,7 @@ export const getPets = async (): Promise<Pet[]> => {
 export const getPetById = async (id: string): Promise<Pet> => {
     const accessToken = await AsyncStorage.getItem('accessToken');
     // const access_token = await AsyncStorage.getItem('access_token');
-    const response = await axios.get(`${API}/pet/${id}`, {
+    const response = await axios.get(`${API_URL}/pet/${id}`, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -56,7 +59,7 @@ export const createPet = async (pet: Pet, image: Image): Promise<Pet> => {
     });
 
     try {
-        const response = await axios.post(`${API}/pet/create`, formData, {
+        const response = await axios.post(`${API_URL}/pet/create`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'Accept': 'application/json',
@@ -75,7 +78,7 @@ export const deletePet = async (id: string): Promise<Pet> => {
     console.log('deletePet', id);
     const accessToken = await AsyncStorage.getItem('accessToken');
     try {
-        const response = await axios.delete(`${API}/pet/${id}`, {
+        const response = await axios.delete(`${API_URL}/pet/${id}`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`
             }
@@ -104,7 +107,7 @@ export const updatePet = async (pet: Pet, id: string): Promise<Pet> => {
     };
 
     try {
-        const response = await axios.put(`${API}/pet/${id}`, petData, {
+        const response = await axios.put(`${API_URL}/pet/${id}`, petData, {
             headers: {
                 'Accept': 'application/json',
                 'Authorization': `Bearer ${accessToken}`
@@ -120,6 +123,7 @@ export const updatePet = async (pet: Pet, id: string): Promise<Pet> => {
 
 
 export const updatePetAvatar = async (petId: string, image: Image): Promise<Pet> => {
+    console.log('updatePetAvatar', petId, image);
     const accessToken = await AsyncStorage.getItem('accessToken');
     const formData = new FormData();
     formData.append('image', {
@@ -129,13 +133,14 @@ export const updatePetAvatar = async (petId: string, image: Image): Promise<Pet>
     });
 
     try {
-        const response = await axios.put(`${API}/pet/${petId}/avatar`, formData, {
+        const response = await axios.put(`${API_URL}/pet/${petId}/avatar`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'Accept': 'application/json',
                 'Authorization': `Bearer ${accessToken}`
             }
         });
+        console.log('Response from server:', response.data);
         return response.data;
     } catch (error: any) {
         console.error('Error updating pet avatar:', error.response?.data || error.message);
@@ -145,7 +150,7 @@ export const updatePetAvatar = async (petId: string, image: Image): Promise<Pet>
 
 export const petWeightHistory = async (petId: string)=>{
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.get(`${API}/pet/${petId}/weights`, {
+    const response = await axios.get(`${API_URL}/pet/${petId}/weights`, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',

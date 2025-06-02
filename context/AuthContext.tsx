@@ -1,11 +1,10 @@
-import { API } from "@env";
+import { API_URL } from "@env";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { User, Image } from "../models/models";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
 import messaging from "@react-native-firebase/messaging";
-import { useNavigation } from "@react-navigation/native";
 
 interface AuthContextType {
     user: User | null;
@@ -43,9 +42,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const deviceToken = await messaging().getToken();
         try {
             setIsLoading(true);
-            console.log("Attempting login with API URL:", API);
+            console.log("Login with API_URL URL:", API_URL);
+            console.log("Device Token:", deviceToken);
+            console.log("Username:", username);
+            console.log("Password:", password);
 
-            const response = await axios.post(`${API}/user/login`, {
+            const response = await axios.post(`${API_URL}/user/login`, {
                 username,
                 password,
                 token: deviceToken.toString(),
@@ -89,8 +91,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const changePassword = async (password: string, old_password: string) => {
+        console.log("Change password password: ", password); 
+        // const accessToken = await AsyncStorage.getItem('accessToken');
+        console.log('Access token: ', accessToken);
+        console.log("Change password accessToken: ", accessToken);
         try {
-            const response = await axios.put(`${API}/user/change-password`, {
+            const response = await axios.put(`${API_URL}/user/change-password`, {
                 password,
                 old_password
             },{
@@ -113,7 +119,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const deviceToken = await messaging().getToken();
             console.log("Device Token:", deviceToken);
             console.log("Access Token:", accessToken);
-            const response = await axios.post(`${API}/user/logout`, {
+            const response = await axios.post(`${API_URL}/user/logout`, {
                 "token": deviceToken.toString(),
             }, {
                 headers: {
@@ -159,7 +165,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             //formData.append('role', 'user');
             console.log("Register formData: ", formData);
 
-            const response = await axios.post(`${API}/user/create`, formData, {
+            const response = await axios.post(`${API_URL}/user/create`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Accept': 'application/json',
@@ -181,7 +187,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
     const forgotPassword = async (email: string) => {
         try {
-            const response = await axios.put(`${API}/user/reset-password`, {
+            const response = await axios.put(`${API_URL}/user/reset-password`, {
                 email
             });
             console.log("Forgot password response: ", response.data);
@@ -195,7 +201,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             console.log("Verify email username: ", username);
             console.log("Verify email secretCode: ", secretCode);
-            const response = await axios.post(`${API}/user/verify_email`,
+            const response = await axios.post(`${API_URL}/user/verify_email`,
                 {
                     username,
                     secret_code: secretCode
@@ -245,7 +251,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     const resendOTP = async (username: string) => {
         try {
-            const response = await axios.post(`${API}/user/resend_otp/${username}`, {
+            const response = await axios.post(`${API_URL}/user/resend_otp/${username}`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',

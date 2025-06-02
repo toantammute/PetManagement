@@ -31,6 +31,7 @@ import Pets from './src/(tabs)/pets';
 import AddVaccination from './src/addVaccination';
 import PetWeights from './src/petWeights';
 import ClinicServicesScreen from './src/clinicServices';
+import QRPayment from './src/qrPayment';
 // import PetDetail from './src/(tabs)/pets';
 // import AddPet from './src/addPet';
 
@@ -67,7 +68,9 @@ const AppNavigator = () => {
                         <Stack.Screen name="Pets" component={Pets} />
                         <Stack.Screen name="AddVaccination" component={AddVaccination} />
                         <Stack.Screen name="PetWeights" component={PetWeights} />
+                        <Stack.Screen name="QRPayment" component={QRPayment}/>
                         <Stack.Screen name="ClinicServices" component={ClinicServicesScreen} />
+                        
                     </>
                 ) : (
                     <>

@@ -16,6 +16,9 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
 import Header from '../component/header';
 import { COLORS } from '../theme/color';
+import { useAuth } from '../context/AuthContext';
+
+
 
 const ResetPassword = () => {
     const [oldPassword, setOldPassword] = useState('');
@@ -27,6 +30,8 @@ const ResetPassword = () => {
     const [loading, setLoading] = useState(false);
     
     const navigation = useNavigation();
+
+    const {changePassword} = useAuth();
 
     const handleResetPassword = async () => {
         if (!oldPassword) {
@@ -72,6 +77,7 @@ const ResetPassword = () => {
         setLoading(true);
         
         try {
+            await changePassword(newPassword, oldPassword);
             // Simulate API call
             setTimeout(() => {
                 Toast.show({

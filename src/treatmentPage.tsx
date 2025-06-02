@@ -122,7 +122,7 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
   };
 
   const renderTreatmentsList = () => (
-    <ScrollView style={styles.container}>      
+    <View style={styles.container}>      
       <View style={styles.treatmentsContainer}>
         {treatments.map((treatment: Treatment) => (
           <TouchableOpacity
@@ -159,7 +159,7 @@ const TreatmentPage = ({ petId }: TreatmentPageProps) => {
           </TouchableOpacity>
         ))}
       </View>
-    </ScrollView>
+    </View>
   );
 
   const renderTreatmentDetail = () => (
@@ -382,8 +382,7 @@ const windowWidth = Dimensions.get('window').width;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background.gray,
-    padding: 16,
+    backgroundColor: COLORS.background.white,
   },
   detailContainer: {
     flex: 1,
@@ -531,14 +530,15 @@ const styles = StyleSheet.create({
     borderLeftColor: COLORS.button.choose,
   },
   phaseHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
     marginBottom: 12,
+    gap: 8,
   },
   phaseHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    width: '100%',
   },
   phaseName: {
     fontSize: 17,
@@ -558,6 +558,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     color: COLORS.text.status,
+    alignSelf: 'flex-start',
   },
   phaseDates: {
     flexDirection: 'row',
@@ -690,6 +691,8 @@ const styles = StyleSheet.create({
   },
   treatmentsContainer: {
     flex: 1,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
   },
   treatmentCardLarge: {
     backgroundColor: COLORS.background.white,

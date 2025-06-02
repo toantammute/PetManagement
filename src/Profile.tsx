@@ -1,12 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, StatusBar, SafeAreaView, Platform, TouchableOpacity, ActivityIndicator, Modal, Image as RNImage, ScrollView } from 'react-native';
 import { COLORS } from '../theme/color';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import Avatar from '../component/avabtn';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import Header from '../component/header';
 import { launchImageLibrary, launchCamera, MediaType, CameraType, PhotoQuality } from "react-native-image-picker";
 import { PermissionsAndroid } from 'react-native';

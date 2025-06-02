@@ -1,6 +1,7 @@
 import { API_URL } from '@env';
 import axios from 'axios';
 import { Platform } from 'react-native';
+console.log('Roboflow API', API_URL);
 
 // Use the provided API URL from .env or default to calculated fallback based on platform
 const getApiUrl = () => {
@@ -8,7 +9,7 @@ const getApiUrl = () => {
   if (API_URL) return API_URL;
   
   // Platform-specific fallbacks if .env value is not available
-  return Platform.OS === 'android' ? 'http://10.0.2.2:8088/api/v1' : 'http://localhost:8088/api/v1';
+  return Platform.OS === 'android' ? 'http://10.0.2.2:8088/api/v1' : 'http://API_URLhost:8088/api/v1';
 };
 
 // Updated interface to match the actual API response format

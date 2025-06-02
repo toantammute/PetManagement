@@ -7,13 +7,16 @@ import {
     Image,
     StatusBar,
     ActivityIndicator,
-    ScrollView
+    ScrollView,
+    SafeAreaView,
+    Platform
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useGetOrdersById } from '../hook/useCart';
 import { useProductById } from '../hook/useProduct';
 import { COLORS } from '../theme/color';
+import Header from '../component/header';
 
 const OrderDetailScreen = () => {
     const navigation = useNavigation<any>();
@@ -24,6 +27,10 @@ const OrderDetailScreen = () => {
     const handlePayment = () => {
         // TODO: Handle payment
         console.log('Processing payment for order:', orderId);
+    };
+
+    const handlePayNow = () => {
+        navigation.navigate('QRPayment', { orderDetail: orderDetail });
     };
 
     const formatDate = (dateString: string) => {
@@ -79,20 +86,21 @@ const OrderDetailScreen = () => {
     };
 
     return (
-        <View style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+        <>
+        <StatusBar
+                barStyle="dark-content"
+                backgroundColor={COLORS.background.gray}
+            />
+            <SafeAreaView style={[
+                styles.container,
+                Platform.OS === 'android' && styles.androidSafeArea
+            ]}>
+                <View style={styles.container}>
             
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity 
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Icon name="arrow-back" size={24} color="#333" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Order Details</Text>
-                <View style={styles.headerRight} />
-            </View>
+            <Header
+                title="Order Details"
+                variant="default"
+            />
 
             <ScrollView style={styles.content}>
                 {/* Order Information */}
@@ -149,13 +157,16 @@ const OrderDetailScreen = () => {
                 <View style={styles.paymentContainer}>
                     <TouchableOpacity 
                         style={styles.paymentButton}
-                        onPress={handlePayment}
+                        onPress={handlePayNow}
                     >
                         <Text style={styles.paymentButtonText}>Pay Now</Text>
                     </TouchableOpacity>
                 </View>
             )}
         </View>
+            </SafeAreaView>
+        </>
+        
     );
 };
 
@@ -164,26 +175,8 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FFFFFF',
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 15,
-        paddingVertical: 15,
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 1,
-        borderBottomColor: '#EEEEEE',
-    },
-    backButton: {
-        padding: 5,
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333333',
-    },
-    headerRight: {
-        width: 34,
+    androidSafeArea: {
+        paddingTop: StatusBar.currentHeight,
     },
     content: {
         flex: 1,

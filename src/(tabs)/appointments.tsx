@@ -40,26 +40,28 @@ const Appointments = () => {
             // Convert appointment time to minutes for comparison
             const [hours, minutes] = appointment.time_slot.start_time.split(':').map(Number);
             const appointmentTime = hours * 60 + minutes;
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+
+            // Kiểm tra thời gian của appointment so với hiện tại
+            const isFutureAppointment = appointmentDay > today || 
+                (appointmentDay.getTime() === today.getTime() && appointmentTime > currentTime);
+
+            // Kiểm tra trạng thái của appointment
+            const isScheduledOrConfirmed = appointment.state === 'Scheduled' || appointment.state === 'Confirmed';
 
             switch (activeTab) {
                 case 'UPCOMING':
-                    if (appointment.state === 'CANCELLED') return false;
-                    // Nếu là ngày hôm nay, kiểm tra thời gian
-                    if (appointmentDay.getTime() === today.getTime()) {
-                        return appointmentTime > currentTime;
-                    }
-                    // Nếu là ngày trong tương lai
-                    return appointmentDay > today;
+                    // Chỉ hiển thị các appointment trong tương lai và có trạng thái SCHEDULED hoặc CONFIRMED
+                    return isFutureAppointment && isScheduledOrConfirmed;
+
                 case 'PAST':
-                    if (appointment.state === 'CANCELLED') return false;
-                    // Nếu là ngày hôm nay, kiểm tra thời gian
-                    if (appointmentDay.getTime() === today.getTime()) {
-                        return appointmentTime <= currentTime;
-                    }
-                    // Nếu là ngày trong quá khứ
-                    return appointmentDay < today;
+                    // Hiển thị các appointment trong quá khứ HOẶC
+                    // Các appointment trong tương lai nhưng không phải SCHEDULED hoặc CONFIRMED
+                    return !isFutureAppointment || (isFutureAppointment && !isScheduledOrConfirmed);
+
                 case 'CANCELLED':
                     return appointment.state === 'CANCELLED';
+
                 default:
                     return false;
             }
@@ -95,16 +97,16 @@ const Appointments = () => {
         
         switch (activeTab) {
             case 'UPCOMING':
-                message = 'Không có cuộc hẹn sắp tới';
-                subMessage = 'Bạn chưa có cuộc hẹn nào sắp tới. Hãy đặt lịch để chăm sóc thú cưng của bạn.';
+                message = 'No upcoming appointments';
+                subMessage = 'You don\'t have any upcoming appointments. Schedule one to take care of your pet.';
                 break;
             case 'PAST':
-                message = 'Không có cuộc hẹn đã qua';
-                subMessage = 'Bạn chưa có cuộc hẹn nào đã hoàn thành.';
+                message = 'No past appointments';
+                subMessage = 'You don\'t have any completed appointments.';
                 break;
             case 'CANCELLED':
-                message = 'Không có cuộc hẹn đã hủy';
-                subMessage = 'Bạn chưa có cuộc hẹn nào bị hủy.';
+                message = 'No cancelled appointments';
+                subMessage = 'You don\'t have any cancelled appointments.';
                 break;
         }
         
@@ -118,7 +120,7 @@ const Appointments = () => {
                 {activeTab === 'UPCOMING' && (
                     <TouchableOpacity style={styles.addButton} onPress={handleAddAppointment}>
                         <Feather name="plus" size={20} color="#FFF" />
-                        <Text style={styles.addButtonText}>Đặt lịch hẹn</Text>
+                        <Text style={styles.addButtonText}>Schedule Appointment</Text>
                     </TouchableOpacity>
                 )}
             </View>
@@ -130,7 +132,7 @@ const Appointments = () => {
             return (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={COLORS.button.choose} />
-                    <Text style={styles.loadingText}>Đang tải cuộc hẹn...</Text>
+                    <Text style={styles.loadingText}>Loading appointments...</Text>
                 </View>
             );
         }
@@ -139,11 +141,11 @@ const Appointments = () => {
             return (
                 <View style={styles.errorContainer}>
                     <Feather name="alert-triangle" size={50} color="#FF3B30" />
-                    <Text style={styles.errorTitle}>Đã xảy ra lỗi</Text>
+                    <Text style={styles.errorTitle}>An error occurred</Text>
                     <Text style={styles.errorMessage}>{error.message}</Text>
                     <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
                         <Feather name="refresh-cw" size={16} color="#FFF" />
-                        <Text style={styles.retryText}>Thử lại</Text>
+                        <Text style={styles.retryText}>Try Again</Text>
                     </TouchableOpacity>
                 </View>
             );

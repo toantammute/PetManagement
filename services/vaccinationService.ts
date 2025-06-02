@@ -1,7 +1,8 @@
 import axios from 'axios';
-import { API, PUSH_NOTI } from '@env';
+import { API_URL, PUSH_NOTI } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Vaccination } from '../models/models';
+console.log('Vaccination API_URL', API_URL);
 
 const generateCronExpression = (date: Date) => {
     console.log("generateCronExpression");
@@ -13,7 +14,7 @@ const generateCronExpression = (date: Date) => {
 export const scheduleVaccination = async (vaccination: Vaccination, user_id: string) => {
     console.log("schedule vaccination");
     console.log("vaccination", vaccination);
-    console.log("api push notification", `${PUSH_NOTI}/scheduleVaccine`);
+    console.log("API_URL push notification", `${PUSH_NOTI}/scheduleVaccine`);
     try {
         const reminderDate = new Date(vaccination.next_due_date);
         reminderDate.setDate(reminderDate.getDate() - 1); // Trừ đi 1 ngày
@@ -39,7 +40,7 @@ export const scheduleVaccination = async (vaccination: Vaccination, user_id: str
 
 export const getVaccinationsbyPetId = async (petId: string): Promise<Vaccination[]> => {
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.get(`${API}/vaccinations/pet/${petId}`, {
+    const response = await axios.get(`${API_URL}/vaccinations/pet/${petId}`, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -58,7 +59,7 @@ export const createVaccination = async (data: any) => {
     const user_id = JSON.parse(user).user_id;
     console.log("vaccination data: ", data);
 
-    const response = await axios.post(`${API}/vaccination/create`, data, {
+    const response = await axios.post(`${API_URL}/vaccination/create`, data, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',

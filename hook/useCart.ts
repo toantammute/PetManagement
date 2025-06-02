@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { addToCart, getCart, getOrderHistory, removeFromCart, createOrder, getOrdersByUser,getOrdersById} from '../services/cartService';
-import { Cart, Order, OrderDetail} from '../models/models';
+import { addToCart, getCart, getOrderHistory, removeFromCart, createOrder, getOrdersByUser, getOrdersById, generateQRCode } from '../services/cartService';
+import { Cart, Order, OrderDetail, QRRequest, QRResponse } from '../models/models';
 import { use } from 'react';
 
 
@@ -81,4 +81,15 @@ export const useOrderHistory = () => {
         }
     });
 }
+
+export const useGenerateQR = () => {
+    return useMutation<QRResponse, Error, QRRequest>({
+        mutationFn: (qrData: QRRequest) => generateQRCode(qrData),
+        onError: (error) => {
+            console.error('Failed to generate QR code:', error);
+        }
+    });
+};
+
+
 

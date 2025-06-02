@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { API, PUSH_NOTI } from "@env";
+import { API_URL, PUSH_NOTI } from "@env";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Schedule } from '../models/models';
+console.log('Schedule API_URL', API_URL);
 
-// Thêm hàm gọi API lên lịch thông báo
+// Thêm hàm gọi API_URL lên lịch thông báo
 export const scheduleNotification = async (schedule: Schedule, user_id: string) => {
     console.log("schedule notification");
     console.log("schedule", schedule);
-    console.log("api push notification", `${PUSH_NOTI}/scheduleNotification`);
+    console.log("API_URL push notification", `${PUSH_NOTI}/scheduleNotification`);
     try {
 
         const title = schedule.title;
@@ -87,19 +88,24 @@ const generateCronExpression = (schedule: Schedule) => {
 
 export const getSchedulebyUser = async (): Promise<Schedule[]> => {
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.get(`${API}/schedules`, {
+    const response = await axios.get(`${API_URL}/schedules`, {
         headers: {
             'Authorization': `Bearer ${accessToken}`
         }
     })
-    const allSchedules = response.data.data.flatMap((pet: any) => pet.schedules);
+    
+    if (!response.data.data) {
+        return [];
+    }
+    
+    const allSchedules = response.data.data.flatMap((pet: any) => pet.schedules || []);
     return allSchedules;
 }
 
 export const createSchedule = async (schedule: Schedule) => {
     console.log(schedule);
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.post(`${API}/schedules`, schedule, {
+    const response = await axios.post(`${API_URL}/schedules`, schedule, {
         headers: {
             'Authorization': `Bearer ${accessToken}`
         }
@@ -136,7 +142,7 @@ export const createSchedule = async (schedule: Schedule) => {
 
 export const updateSchedule = async (schedule: Schedule & { id: string }) => {
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.put(`${API}/schedules/${schedule.id}`, schedule, {
+    const response = await axios.put(`${API_URL}/schedules/${schedule.id}`, schedule, {
         headers: {
             'Authorization': `Bearer ${accessToken}`
         }
@@ -176,7 +182,7 @@ export const deleteSchedule = async (schedule_id: string) => {
         throw new Error('Không tìm thấy thông tin người dùng');
     }
     const user_id = JSON.parse(user).user_id;
-    const response = await axios.delete(`${API}/schedules/${schedule_id}`, {
+    const response = await axios.delete(`${API_URL}/schedules/${schedule_id}`, {
         headers: {
             'Authorization': `Bearer ${accessToken}`
         }
@@ -199,7 +205,7 @@ export const toggleSchedule = async (schedule_id: string, is_active: boolean) =>
     const user_id = JSON.parse(user).user_id;
 
     const response = await axios.put(
-        `${API}/schedules/${schedule_id}/activate`,
+        `${API_URL}/schedules/${schedule_id}/activate`,
         { is_active },
         {
             headers: {

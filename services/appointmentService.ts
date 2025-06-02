@@ -1,12 +1,13 @@
 import axios from "axios";
-import { API} from "@env";
+import { API_URL} from "@env";
 import { Appointment, Doctor, TimeSlot } from "../models/models";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+console.log('Appointment API_URL', API_URL);
 
 
 export const getAppointments = async (): Promise<Appointment[]> => {
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.get(`${API}/appointment/user`, {
+    const response = await axios.get(`${API_URL}/appointment/user`, {
         headers: {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
@@ -19,7 +20,7 @@ export const getAppointments = async (): Promise<Appointment[]> => {
 
 export const getDoctors = async (): Promise<Doctor[]> => {
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.get(`${API}/doctors`, {
+    const response = await axios.get(`${API_URL}/doctors`, {
         headers: {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
@@ -31,7 +32,7 @@ export const getDoctors = async (): Promise<Doctor[]> => {
 
 export const getDoctorTimeSlots = async (doctorId: string, date: string): Promise<TimeSlot[]> => {
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.get(`${API}/doctor/${doctorId}/time-slot`, {
+    const response = await axios.get(`${API_URL}/doctor/${doctorId}/time-slot`, {
         headers: {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
@@ -56,7 +57,7 @@ interface AppointmentCreate {
 
 export const createAppointment = async (appointment: AppointmentCreate): Promise<Appointment> => {
     const accessToken = await AsyncStorage.getItem('accessToken');
-    const response = await axios.post(`${API}/appointment`, appointment, {
+    const response = await axios.post(`${API_URL}/appointment`, appointment, {
         headers: {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
@@ -67,12 +68,12 @@ export const createAppointment = async (appointment: AppointmentCreate): Promise
 }
 
 
-// authRoute.GET("appointments/pet/:pet_id/history", appointmentApi.controller.getHistoryAppointmentsByPetID)
+// authRoute.GET("appointments/pet/:pet_id/history", appointmentAPI_URL.controller.getHistoryAppointmentsByPetID)
 
 export const getHistoryAppointmentsByPetID = async (petId: string): Promise<Appointment[]> => {
     try {
         const accessToken = await AsyncStorage.getItem('accessToken');
-        const response = await axios.get(`${API}/appointments/pet/${petId}/history`, {
+        const response = await axios.get(`${API_URL}/appointments/pet/${petId}/history`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',
